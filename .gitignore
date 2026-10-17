@@ -84,5 +84,8 @@ Desktop.ini
 *.swo
 *~
 
+# Generated deliverables
+output/
+
 # Keep source code, documentation, migrations, fixtures, dependency lockfiles,
 # docs/openapi.json, and frontend/src/api/schema.d.ts under version control.

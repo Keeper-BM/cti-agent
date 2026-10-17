@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "00000000-0000-4000-8000-000000000001",
+  "asset_id": "00000000-0000-4000-8000-000000000002",
+  "collected_at": "2026-10-10T00:00:00Z",
+  "ingested_at": "2026-10-10T00:00:00Z",
+  "collection_method": "JSON",
+  "collection_status": "COMPLETE",
+  "os": {
+    "id": "ubuntu",
+    "version_id": "24.04",
+    "codename": "noble",
+    "architecture": "amd64"
+  },
+  "packages": [
+    {
+      "binary_name": "example-fixture-package",
+      "binary_version": "1:1.0-0ubuntu1~fixture",
+      "source_name": "example-fixture-source",
+      "source_version": "1:1.0-0ubuntu1~fixture",
+      "architecture": "amd64",
+      "install_status": "install ok installed",
+      "origin_status": "UNKNOWN",
+      "package_id": "00000000-0000-4000-8000-00000000000b"
+    }
+  ],
+  "coverage": {
+    "package_list_complete": true,
+    "missing_fields": []
+  },
+  "errors": [],
+  "collector_version": "synthetic-fixture-only"
+}

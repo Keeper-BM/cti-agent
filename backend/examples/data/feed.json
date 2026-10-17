@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "feed_snapshot_id": "00000000-0000-4000-8000-000000000003",
+  "captured_at": "2026-10-10T00:00:00Z",
+  "normalizer_version": "synthetic-fixture-only",
+  "is_synthetic": true,
+  "advisories": [
+    {
+      "advisory_id": "SYNTHETIC-ADVISORY-001",
+      "cve_id": "CVE-2099-0001",
+      "rules": [
+        {
+          "rule_id": "00000000-0000-4000-8000-000000000015",
+          "package_name": "example-fixture-package",
+          "package_kind": "BINARY",
+          "os_id": "ubuntu",
+          "release": "24.04",
+          "architecture": "amd64",
+          "status": "FIX_RELEASED",
+          "fixed_version": "1:1.1-0ubuntu1~fixture",
+          "version_scheme": "DEBIAN",
+          "limitations": ["가상 조건이며 실제 패키지에 적용할 수 없습니다."]
+        },
+        {
+          "rule_id": "00000000-0000-4000-8000-000000000016",
+          "package_name": "example-fixture-utils",
+          "package_kind": "BINARY",
+          "os_id": "ubuntu",
+          "release": "24.04",
+          "architecture": "amd64",
+          "status": "FIX_RELEASED",
+          "fixed_version": "1:1.1-0ubuntu1~fixture",
+          "version_scheme": "DEBIAN",
+          "limitations": ["가상 조건이며 실제 패키지에 적용할 수 없습니다."]
+        }
+      ],
+      "evidence_refs": [
+        {
+          "document_version_id": "00000000-0000-4000-8000-00000000001f",
+          "source": "SYNTHETIC_FIXTURE",
+          "title": "가상 패키지 수정 공지 (시험 전용)",
+          "url": "https://security.example.invalid/fixture/CVE-2099-0001",
+          "excerpt": "가상 시험 조건: 두 패키지의 수정 버전은 1:1.1-0ubuntu1~fixture입니다. 실제 공지가 아닙니다."
+        }
+      ]
+    }
+  ]
+}

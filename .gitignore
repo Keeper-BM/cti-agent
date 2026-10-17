@@ -1,0 +1,88 @@
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+secrets/
+.ssh/
+known_hosts
+id_rsa
+id_ecdsa
+id_ed25519
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python environments, caches, and build artifacts
+.venv/
+venv/
+.tools/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.tox/
+.nox/
+.eggs/
+*.egg-info/
+build/
+dist/
+
+# JavaScript dependencies and caches
+node_modules/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# Test and coverage output
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+coverage/
+playwright-report/
+test-results/
+
+# Local runtime data, reference archives, and logs
+.data/
+.cache/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.sqlite3-journal
+*.log
+
+# Virtual machines and model weights
+*.qcow2
+*.vdi
+*.vmdk
+*.ova
+*.ovf
+*.iso
+*.gguf
+*.safetensors
+
+# Operating system and editor files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Keep source code, documentation, migrations, fixtures, dependency lockfiles,
+# docs/openapi.json, and frontend/src/api/schema.d.ts under version control.

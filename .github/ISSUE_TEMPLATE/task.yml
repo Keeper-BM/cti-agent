@@ -1,0 +1,43 @@
+name: 기능 및 개선
+description: 기능 요구사항, 구현 범위, 완료 조건을 기록합니다.
+title: "[feature] 변경 요약"
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: 관련 구성 요소
+      options:
+        - 자산 및 환경 수집
+        - 공식 보안 자료
+        - 취약점 판정
+        - 검색 및 질의응답
+        - 보고서
+        - 웹 및 공통 API
+        - 데이터베이스 및 실행 환경
+        - 테스트 및 문서
+    validations:
+      required: true
+  - type: textarea
+    id: requirement
+    attributes:
+      label: 요구사항
+      description: 해결할 문제와 기대 동작을 기술합니다.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 구현 범위 및 완료 조건
+      description: 입력, 출력, 오류 처리와 검증 가능한 완료 조건을 기술합니다.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 기술적 선행 조건
+      description: 필요한 API, 데이터 계약, 실행 환경과 관련 이슈를 기록합니다.
+  - type: textarea
+    id: validation
+    attributes:
+      label: 검증 방법
+      description: 시험 시나리오와 기대 결과를 기록합니다.

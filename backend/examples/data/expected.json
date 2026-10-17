@@ -1,0 +1,80 @@
+{
+  "expected_findings": [
+    {
+      "schema_version": "1.0",
+      "finding_id": "00000000-0000-4000-8000-000000000029",
+      "analysis_id": "00000000-0000-4000-8000-000000000004",
+      "asset_id": "00000000-0000-4000-8000-000000000002",
+      "inventory_id": "00000000-0000-4000-8000-000000000001",
+      "package_ref": "00000000-0000-4000-8000-00000000000b",
+      "installed_version": "1:1.0-0ubuntu1~fixture",
+      "comparison_basis": "BINARY",
+      "matched_rule_id": "00000000-0000-4000-8000-000000000015",
+      "cve_id": "CVE-2099-0001",
+      "processing_status": "EVALUATED",
+      "verdict": "AFFECTED",
+      "reason_codes": ["MATCHED_AFFECTED_CONDITION"],
+      "fixed_version": "1:1.1-0ubuntu1~fixture",
+      "evidence_refs": [
+        {
+          "document_version_id": "00000000-0000-4000-8000-00000000001f",
+          "source": "SYNTHETIC_FIXTURE",
+          "title": "가상 패키지 수정 공지 (시험 전용)",
+          "url": "https://security.example.invalid/fixture/CVE-2099-0001",
+          "excerpt": "가상 시험 조건: 두 패키지의 수정 버전은 1:1.1-0ubuntu1~fixture입니다. 실제 공지가 아닙니다."
+        }
+      ],
+      "evaluated_at": "2026-10-10T00:00:00Z",
+      "ruleset_version": "expected-fixture-only",
+      "feed_snapshot_id": "00000000-0000-4000-8000-000000000003",
+      "limitations": ["고정된 기대 결과입니다. 실제 버전 비교나 취약점 판정을 수행하지 않았습니다."]
+    },
+    {
+      "schema_version": "1.0",
+      "finding_id": "00000000-0000-4000-8000-00000000002a",
+      "analysis_id": "00000000-0000-4000-8000-000000000004",
+      "asset_id": "00000000-0000-4000-8000-000000000002",
+      "inventory_id": "00000000-0000-4000-8000-000000000001",
+      "package_ref": "00000000-0000-4000-8000-00000000000c",
+      "installed_version": "1:1.1-0ubuntu1~fixture",
+      "comparison_basis": "BINARY",
+      "matched_rule_id": "00000000-0000-4000-8000-000000000016",
+      "cve_id": "CVE-2099-0001",
+      "processing_status": "EVALUATED",
+      "verdict": "FIXED",
+      "reason_codes": ["FIX_CONFIRMED"],
+      "fixed_version": "1:1.1-0ubuntu1~fixture",
+      "evidence_refs": [
+        {
+          "document_version_id": "00000000-0000-4000-8000-00000000001f",
+          "source": "SYNTHETIC_FIXTURE",
+          "title": "가상 패키지 수정 공지 (시험 전용)",
+          "url": "https://security.example.invalid/fixture/CVE-2099-0001",
+          "excerpt": "가상 시험 조건: 두 패키지의 수정 버전은 1:1.1-0ubuntu1~fixture입니다. 실제 공지가 아닙니다."
+        }
+      ],
+      "evaluated_at": "2026-10-10T00:00:00Z",
+      "ruleset_version": "expected-fixture-only",
+      "feed_snapshot_id": "00000000-0000-4000-8000-000000000003",
+      "limitations": ["고정된 기대 결과입니다. 실제 버전 비교나 취약점 판정을 수행하지 않았습니다."]
+    }
+  ],
+  "expected_answer": {
+    "schema_version": "1.0",
+    "requested_asset_ids": ["00000000-0000-4000-8000-000000000002"],
+    "analysis_ids": ["00000000-0000-4000-8000-000000000004"],
+    "answer": "가상 시험 결과에서 example-fixture-package는 영향 있음, example-fixture-utils는 수정됨으로 표시합니다. 같은 CVE라도 대상 패키지와 설치 버전을 구분합니다. 이 설명은 고정된 예제이며 LLM 출력이 아닙니다.",
+    "citations": [
+      {
+        "document_version_id": "00000000-0000-4000-8000-00000000001f",
+        "source": "SYNTHETIC_FIXTURE",
+        "title": "가상 패키지 수정 공지 (시험 전용)",
+        "url": "https://security.example.invalid/fixture/CVE-2099-0001",
+        "excerpt": "가상 시험 조건: 두 패키지의 수정 버전은 1:1.1-0ubuntu1~fixture입니다. 실제 공지가 아닙니다."
+      }
+    ],
+    "warnings": [
+      "가상 CVE, 패키지, 공지 및 고정 결과를 사용합니다. 실제 자산의 보안 상태를 설명하지 않습니다."
+    ]
+  }
+}

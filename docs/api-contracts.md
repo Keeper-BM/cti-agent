@@ -80,9 +80,7 @@ Authorization: Bearer <DEV_API_TOKEN>
 | POST                  | `/sources/{source_id}/sync`                        | 공식 자료 갱신 요청 위치                                        |
 | POST                  | `/analyses`                                        | `inventory_id`, `feed_snapshot_id`                              |
 | GET                   | `/findings`                                        | 자산·판정 필터, 페이지 조회; `FindingList` 응답 스키마          |
-| GET                   | `/findings/{finding_id}`                           | `FeedSnapshot`                                                  | 고정된 자료 기준본, 정규화 공지·패키지 규칙·근거, 가상 여부 | 정규화 → 판정 |
-| `FeedSnapshot`        | 자료 기준본·정규화 공지·패키지 규칙·근거·가상 여부 | 정규화 → 판정                                                   |
-| `Finding` 응답 스키마 |
+| GET                   | `/findings/{finding_id}`                           | 판정 상세와 근거 조회 위치                                      |
 | POST                  | `/questions`                                       | `requested_asset_ids` 1~20개, 공백 제거 후 `question` 1~2,000자 |
 | POST                  | `/reports`                                         | `analysis_ids` 1~20개                                           |
 | GET                   | `/reports/{report_id}`                             | 보고서 조회 위치                                                |

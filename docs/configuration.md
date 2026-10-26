@@ -2,6 +2,8 @@
 
 모든 초기화·실행 명령은 저장소 루트를 기준으로 합니다. 기본 설정 예시는 `.env.example`이며 다음 명령으로 로컬 설정을 생성합니다.
 
+필요 환경은 Python 3.12, uv, Node.js 24와 npm입니다. 프로젝트의 Python 버전 범위는 `pyproject.toml`에서 `>=3.12,<3.13`으로 고정되어 있습니다.
+
 ```bash
 python3 scripts/init_env.py
 ```

@@ -47,7 +47,7 @@ Ubuntu 서버의 설치 패키지 상태와 공식 보안 자료를 연결해 �
 | 공식 보안 자료 | 설계 단계 | `FeedNormalizer` 인터페이스만 정의 |
 | 취약점 판정 | 설계 단계 | `AssessmentEngine`과 판정 계약만 정의 |
 | 근거 검색·AI 설명 | 설계 단계 | `Retriever`, `ExplanationProvider`만 정의 |
-| 질의응답·보고서 | 화면/API 틀 | 현재 `501 FEATURE_NOT_IMPLEMENTED` 반환 |
+| 취약점 인사이트·보고서 | 화면/API 틀 | 현재 `501 FEATURE_NOT_IMPLEMENTED` 반환 |
 
 현재 자산 주소를 등록해도 SSH 접속이나 실제 취약점 분석은 실행되지 않습니다. 시험 예제의 CVE, 패키지, 공지와 URL은 모두 가상 데이터입니다.
 
@@ -76,7 +76,7 @@ flowchart TB
         N --> A
         A --> F["Finding 저장<br/>AFFECTED · FIXED · NEEDS_REVIEW"]
         F --> R[근거 검색 / RAG]
-        F --> L["로컬 LLM · GPU<br/>설명 · 질의응답"]
+        F --> L["로컬 LLM · GPU<br/>설명 · 취약점 인사이트"]
         R --> L
         F --> P[Markdown 대응 보고서]
         L --> P
@@ -138,11 +138,11 @@ flowchart LR
     G --> J[공식 근거·수정 버전]
     H --> J
     I --> J
-    J --> K[근거 기반 AI 설명]
+    J --> K[취약점 인사이트]
     J --> L[대응 보고서]
 ```
 
-판정은 규칙 기반으로 처리해 결과를 재현하고, GPU는 판정 결과와 공식 근거를 바탕으로 AI 설명·질의응답을 생성하는 데 사용할 계획입니다.
+판정은 규칙 기반으로 처리해 결과를 재현하고, GPU는 판정 결과와 공식 근거를 바탕으로 AI 설명과 취약점 인사이트를 생성하는 데 사용할 계획입니다.
 
 ## 기술 구성
 
@@ -198,7 +198,7 @@ frontend/src/
 │  ├─ jobs/                   # 작업 큐
 │  ├─ examples/               # 시험 예제
 │  ├─ findings/               # 판정 화면 틀
-│  ├─ questions/              # 질의응답 화면 틀
+│  ├─ questions/              # 취약점 인사이트 화면 틀
 │  └─ reports/                # 보고서 화면 틀
 └─ shared/                    # 공통 컴포넌트와 폴링 훅
 
@@ -275,7 +275,7 @@ Authorization: Bearer <DEV_API_TOKEN>
 | GET | `/api/v1/jobs/{job_id}` | 작업 상태 조회 |
 | GET | `/api/v1/examples/assessment` | 가상 시험 예제 조회 |
 
-분석·수집·질의응답·보고서 경로는 현재 구조만 정의되어 있으며 `501 FEATURE_NOT_IMPLEMENTED`를 반환합니다.
+분석·수집·취약점 인사이트·보고서 경로는 현재 구조만 정의되어 있으며 `501 FEATURE_NOT_IMPLEMENTED`를 반환합니다.
 
 ## 시연 순서
 
@@ -298,7 +298,7 @@ Authorization: Bearer <DEV_API_TOKEN>
 3. Ubuntu 공식 보안 자료를 `FeedSnapshot`으로 정규화
 4. Debian 버전 규칙을 적용한 판정 엔진 구현
 5. 판정 결과와 공식 근거를 DB·화면에 연결
-6. 근거가 제공된 결과만 설명하도록 질의응답 연결
+6. 근거가 제공된 결과만 설명하도록 취약점 인사이트 연결
 7. 분석 기준본과 인용을 포함한 Markdown 보고서 생성
 
 ## 테스트

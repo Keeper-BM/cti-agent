@@ -13,8 +13,8 @@ export const routes = [
   },
   {
     id: "questions",
-    title: "AI 질의응답",
-    description: "선택한 자산의 판정 결과와 문서를 바탕으로 질문하세요.",
+    title: "취약점 인사이트",
+    description: "판정 결과와 공식 근거를 바탕으로 취약점 정보를 확인하세요.",
   },
   {
     id: "reports",

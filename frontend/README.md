@@ -1,6 +1,6 @@
 # 웹 애플리케이션
 
-React, TypeScript, Vite로 구성된 BlendedMeshup 웹 클라이언트입니다. 자산과 작업 화면은 API에 연결되어 있으며 취약점·질의응답·보고서 화면은 기능 상태를 안내하고 시험 예제 화면은 가상 입력·기대 결과와 인용을 표시합니다.
+React, TypeScript, Vite로 구성된 BlendedMeshup 웹 클라이언트입니다. 자산과 작업 화면은 API에 연결되어 있으며 취약점·취약점 인사이트·보고서 화면은 기능 상태를 안내하고 시험 예제 화면은 가상 입력·기대 결과와 인용을 표시합니다.
 
 ## 실행
 
@@ -19,7 +19,7 @@ make dev-ui
 | `#/assets`    | 자산 현황   | 목록, 등록, 활성 상태 변경, 페이지 조회     |
 | `#/jobs`      | 작업 내역   | 최근 작업 조회, Worker 연결 확인            |
 | `#/findings`  | 취약점 분석 | 미구현 안내와 결과 표시 영역                |
-| `#/questions` | AI 질의응답 | 미구현 안내와 질의·인용 표시 영역           |
+| `#/questions` | 취약점 인사이트 | 미구현 안내와 질의·인용 표시 영역       |
 | `#/example`   | 시험 예제   | 가상 패키지·기대 판정·근거·입출력 JSON 표시 |
 | `#/reports`   | 대응 보고서 | 미구현 안내와 보고서 표시 영역              |
 
@@ -37,7 +37,7 @@ make dev-ui
 | `src/features/assets/`    | 자산 요청과 화면                         |
 | `src/features/jobs/`      | 작업 요청과 화면                         |
 | `src/features/findings/`  | 판정 조회 클라이언트와 화면 구조         |
-| `src/features/questions/` | 질의 요청 클라이언트와 화면 구조         |
+| `src/features/questions/` | 취약점 인사이트 요청 클라이언트와 화면 구조 |
 | `src/features/examples/`  | 시험 예제 요청과 화면                    |
 | `src/features/reports/`   | 보고서 요청 클라이언트와 화면 구조       |
 

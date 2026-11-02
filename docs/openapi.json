@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "BlendedMeshup · Threat Intelligence API",
+    "title": "CTI Agent API",
     "description": "Ubuntu asset and vulnerability intelligence API. Development version.",
     "version": "0.1.0"
   },

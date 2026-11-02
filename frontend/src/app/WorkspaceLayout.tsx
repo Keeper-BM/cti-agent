@@ -1,11 +1,33 @@
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { ConnectionPanel } from "../shared/components/ConnectionPanel";
+import { Icon } from "../shared/components/Icon";
 import { routes } from "./navigation";
 import type { Route } from "./navigation";
 import { useSession } from "./session";
 
+const icons = {
+  assets: "assets",
+  findings: "findings",
+  questions: "insights",
+  reports: "reports",
+  jobs: "jobs",
+  example: "example",
+} as const;
+
 export function WorkspaceLayout({ route, children }: { route: Route; children: ReactNode }) {
-  const { api } = useSession();
+  const { api, disconnect } = useSession();
+  const mobileNav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = mobileNav.current;
+    const active = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !active || nav.clientWidth === 0) return;
+    const bounds = nav.getBoundingClientRect();
+    const item = active.getBoundingClientRect();
+    if (item.left < bounds.left || item.right > bounds.right) {
+      nav.scrollLeft += item.left - bounds.left - 12;
+    }
+  }, [route.id]);
   const links = routes.map((item) => (
     <a
       key={item.id}
@@ -13,58 +35,68 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
       href={`#/${item.id}`}
       aria-current={route.id === item.id ? "page" : undefined}
     >
-      {item.title}
+      <Icon name={icons[item.id]} className="nav-icon" />
+      <span className="nav-text">{item.title}</span>
       {["findings", "questions", "reports"].includes(item.id) && <small>준비 중</small>}
     </a>
   ));
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-symbol">B</span>
-          <span>
-            Blended<span className="brand-sub">THREAT INTELLIGENCE</span>
+        <a className="brand" href="#/assets" aria-label="CTI Agent 자산 현황으로 이동">
+          <img className="brand-symbol" src="/cti-mark.svg?v=2" alt="" aria-hidden="true" />
+          <span className="brand-name">
+            CTI Agent<small>THREAT INTELLIGENCE</small>
           </span>
-        </div>
-        <div className="workspace-label">
-          WORKSPACE <span>LOCAL</span>
-        </div>
-        <nav aria-label="주 메뉴">{links}</nav>
+        </a>
+        <div className="workspace-label">메뉴</div>
+        <nav className="sidebar-nav" aria-label="주 메뉴">
+          {links}
+        </nav>
         <div className="sidebar-footer">
-          <span className="tiny-dot" /> 개발 환경 <span>v0.1.0</span>
+          <span className={`status-dot ${api ? "online" : ""}`} />
+          <span>{api ? "API 연결됨" : "API 연결 대기"}</span>
+          <span className="sidebar-version">v0.1</span>
         </div>
       </aside>
       <div className="main-shell">
         <header className="topbar">
-          <span>
-            블랜디드매시업 <span className="separator">/</span> {route.title}
-          </span>
-          <span className="environment">LOCAL DEVELOPMENT</span>
+          <div className="breadcrumb">
+            <span>CTI Agent</span>
+            <span aria-hidden="true">/</span>
+            <strong>{route.title}</strong>
+          </div>
+          <div className="topbar-actions">
+            <span className="environment">개발 환경</span>
+            {api && (
+              <button className="topbar-disconnect" onClick={disconnect}>
+                연결 해제
+              </button>
+            )}
+          </div>
         </header>
-        <nav className="mobile-nav" aria-label="모바일 메뉴">
+        <nav ref={mobileNav} className="mobile-nav" aria-label="모바일 메뉴">
           {links}
         </nav>
         <main>
-          <div className="heading-row">
-            <div>
-              <h1>{route.title}</h1>
-              <p className="intro">{route.description}</p>
+          <div className="page-content">
+            <div className="heading-row">
+              <div>
+                <h1>{route.title}</h1>
+                <p className="intro">{route.description}</p>
+              </div>
+              <span className={`connection ${api ? "online" : ""}`}>
+                <i />
+                {api ? "API 연결됨" : "연결 대기"}
+              </span>
             </div>
-            <span className={`connection ${api ? "online" : ""}`}>
-              <i />
-              {api ? "API 연결됨" : "연결 대기"}
-            </span>
+            <ConnectionPanel />
+            <div key={route.id}>{children}</div>
+            <footer className="page-footer">
+              <span>CTI Agent</span>
+              <span>시각은 한국 시간 기준</span>
+            </footer>
           </div>
-          <div className="scope-note">
-            <strong>프로젝트 시작 버전</strong>
-            <span>자산 관리, 작업 큐와 시험 예제를 사용할 수 있습니다.</span>
-          </div>
-          <ConnectionPanel />
-          <div key={route.id}>{children}</div>
-          <footer className="page-footer">
-            <span>BlendedMeshup · 사이버 위협 Intelligence Agent</span>
-            <span>Ubuntu · Apache · MySQL</span>
-          </footer>
         </main>
       </div>
     </div>

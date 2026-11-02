@@ -3,23 +3,22 @@ import { useSession } from "../../app/session";
 import { Notice } from "./Notice";
 
 export function ConnectionPanel() {
-  const { api, connect, disconnect } = useSession();
+  const { api, connect } = useSession();
   const [token, setToken] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  if (api)
-    return (
-      <div className="session-row">
-        <span>모든 시각은 KST 기준입니다. 자산·작업 목록은 자동 갱신됩니다.</span>
-        <button className="text-button" onClick={disconnect}>
-          연결 해제
-        </button>
-      </div>
-    );
+  if (api) return null;
   return (
-    <section className="panel connect-panel" aria-labelledby="connect-heading">
-      <h2 id="connect-heading">개발 환경 연결</h2>
-      <p>로컬 .env 파일의 DEV_API_TOKEN을 입력하세요. 토큰은 현재 탭의 메모리에만 보관됩니다.</p>
+    <section className="connect-panel" aria-labelledby="connect-heading">
+      <div className="connect-copy">
+        <span className="connect-mark" aria-hidden="true">
+          ↗
+        </span>
+        <div>
+          <h2 id="connect-heading">서비스 연결</h2>
+          <p>.env 파일의 DEV_API_TOKEN을 입력하세요. 토큰은 새로고침하면 삭제됩니다.</p>
+        </div>
+      </div>
       <form
         className="connect-form"
         onSubmit={async (event) => {
@@ -48,10 +47,10 @@ export function ConnectionPanel() {
           value={token}
           disabled={pending}
           onChange={(event) => setToken(event.target.value)}
-          placeholder="DEV_API_TOKEN"
+          placeholder="개발용 API 토큰"
         />
         <button className="primary" disabled={pending} type="submit">
-          {pending ? "연결 중…" : "연결하기 →"}
+          {pending ? "연결 중…" : "연결하기"}
         </button>
       </form>
       <Notice error={error} />

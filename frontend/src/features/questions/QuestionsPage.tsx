@@ -5,8 +5,8 @@ export function QuestionsPage() {
   return (
     <FeaturePlaceholder
       title="취약점 인사이트"
-      description="자산별 판정 결과와 공식 근거를 바탕으로 취약점 정보를 확인할 수 있습니다."
-      columns={["선택 자산", "질문 / 답변", "인용 출처", "불확실성 안내"]}
+      description="자산의 취약점과 대응 방법에 관한 질문에 근거 자료를 바탕으로 답변하는 기능입니다."
+      columns={["대상 자산", "질문과 답변", "근거 자료", "확인이 필요한 내용"]}
     />
   );
 }

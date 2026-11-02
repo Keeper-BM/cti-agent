@@ -1,6 +1,7 @@
 // 작업 상태 조회와 Worker 연결 확인 화면.
 import { useCallback } from "react";
 import { useSession } from "../../app/session";
+import { Icon } from "../../shared/components/Icon";
 import { Notice } from "../../shared/components/Notice";
 import { formatKst } from "../../shared/format";
 import { useAction } from "../../shared/hooks/useAction";
@@ -29,7 +30,7 @@ export function JobsPage() {
         <div className="panel-heading">
           <div>
             <h2>최근 작업</h2>
-            <p>최근 20건을 표시합니다. 연결 확인은 API → DB → Worker의 처리 흐름만 검증합니다.</p>
+            <p>최근 20건을 표시합니다. 연결 확인은 작업 처리 상태만 점검합니다.</p>
           </div>
           <button
             className="secondary"
@@ -59,13 +60,23 @@ export function JobsPage() {
                     ? "작업을 불러오는 중입니다"
                     : "아직 실행한 작업이 없습니다"}
             </strong>
-            <p>Worker를 실행한 뒤 연결 확인을 요청하세요.</p>
+            <p>
+              {!api
+                ? "먼저 서비스에 연결해 주세요."
+                : query.error
+                  ? "잠시 후 다시 시도해 주세요."
+                  : query.loading
+                    ? "잠시만 기다려 주세요."
+                    : "Worker가 실행 중인 상태에서 연결 확인을 요청하세요."}
+            </p>
           </div>
         ) : (
           <ul className="job-list">
             {jobs.map((job) => (
               <li key={job.id}>
-                <div className="job-icon">↔</div>
+                <div className="job-icon">
+                  <Icon name="jobs" />
+                </div>
                 <div className="job-detail">
                   <strong>{job.kind === "SYSTEM_CHECK" ? "Worker 연결 확인" : job.kind}</strong>
                   <span className="mono">

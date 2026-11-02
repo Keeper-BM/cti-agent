@@ -1,4 +1,4 @@
-# BlendedMeshup
+# CTI Agent
 
 Ubuntu 서버의 설치 패키지 상태와 공식 보안 자료를 연결해 취약점 영향 여부와 대응 근거를 보여주는 사이버 위협 인텔리전스 프로젝트입니다.
 
@@ -13,25 +13,25 @@ Ubuntu 서버의 설치 패키지 상태와 공식 보안 자료를 연결해 �
 
 ## 현재 웹 화면
 
-아래 이미지는 현재 구현된 웹을 로컬에서 실행하고 시연용 데이터를 입력한 뒤 캡처한 화면입니다.
+아래 이미지는 현재 구현된 웹을 로컬에서 실행하고 시연용 데이터를 입력한 뒤 캡처한 화면입니다. 이미지를 클릭하면 원본 크기로 볼 수 있습니다.
 
 ### 자산 등록
 
 자산 이름, 주소, 예상 Ubuntu 릴리스, 노출 범위와 담당자를 등록하고 목록에서 활성 상태를 확인할 수 있습니다. 현재 주소는 등록 정보로만 저장되며 자동 접속하지 않습니다.
 
-![자산 현황 화면](docs/screenshots-assets.png)
+[![자산 현황 화면](docs/screenshots-assets.jpg)](docs/screenshots-assets.jpg)
 
 ### 작업 큐와 Worker
 
 `Worker 연결 확인`을 누르면 작업이 큐에 등록되고 별도 Worker가 작업을 가져가 처리합니다.
 
-![작업 내역 화면](docs/screenshots-jobs.png)
+[![작업 내역 화면](docs/screenshots-jobs.jpg)](docs/screenshots-jobs.jpg)
 
 ### 시험용 CVE·판정·근거 예제
 
 가상 Ubuntu 패키지와 가상 CVE를 이용해 설치 버전, 수정 버전, 기대 판정, 비교 기준과 근거가 연결되는 모습을 확인합니다. 이 결과는 실제 서버 분석 결과가 아니라 계약과 화면 흐름을 검증하기 위한 고정 예제입니다.
 
-![시험 예제 화면](docs/screenshots-example.png)
+[![시험 예제 화면](docs/screenshots-example.jpg)](docs/screenshots-example.jpg)
 
 ## 구현 현황
 

@@ -41,7 +41,7 @@ def error_response(request: Request, error: AppError) -> JSONResponse:
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="BlendedMeshup · Threat Intelligence API",
+        title="CTI Agent API",
         version="0.1.0",
         description="Ubuntu asset and vulnerability intelligence API. Development version.",
         docs_url="/api/docs",

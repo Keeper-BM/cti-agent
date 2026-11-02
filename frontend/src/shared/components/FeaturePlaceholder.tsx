@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+
 export function FeaturePlaceholder({
   title,
   description,
@@ -8,29 +10,29 @@ export function FeaturePlaceholder({
   columns: string[];
 }) {
   return (
-    <section className="panel">
-      <div className="panel-heading">
-        <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
+    <section className="panel placeholder-panel">
+      <div className="placeholder-heading">
+        <span className="badge unavailable">준비 중</span>
+        <h2>{title}</h2>
+        <p>{description}</p>
+      </div>
+      <div className="placeholder-content">
+        <div className="placeholder-icon">
+          <Icon name="findings" />
         </div>
-        <span className="badge">연동 전</span>
-      </div>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {columns.map((column) => (
-                <th key={column}>{column}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody />
-        </table>
-      </div>
-      <div className="empty">
-        <strong>이 기능은 아직 사용할 수 없습니다</strong>
-        <p>실제 데이터 처리가 연결되면 결과와 공식 근거를 여기에서 확인할 수 있습니다.</p>
+        <div>
+          <h3>이 기능은 준비 중입니다</h3>
+          <p>기능이 제공되면 아래 정보를 확인할 수 있습니다.</p>
+          <div className="placeholder-fields">
+            <span>제공 예정 정보</span>
+            {columns.map((column) => (
+              <span key={column}>{column}</span>
+            ))}
+          </div>
+          <a className="inline-link" href="#/example">
+            시험 예제 살펴보기 <Icon name="arrow" />
+          </a>
+        </div>
       </div>
     </section>
   );

@@ -9,7 +9,17 @@ from pydantic import BaseModel, ConfigDict, field_validator
 class TimestampResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("created_at", "updated_at", "started_at", "finished_at", check_fields=False)
+    @field_validator(
+        "created_at",
+        "updated_at",
+        "started_at",
+        "finished_at",
+        "collected_at",
+        "ingested_at",
+        "captured_at",
+        "completed_at",
+        check_fields=False,
+    )
     @classmethod
     def utc_timestamps(cls, value: datetime | None) -> datetime | None:
         if value is not None and value.tzinfo is None:
@@ -32,12 +42,18 @@ class FeatureFlags(BaseModel):
     assets: bool = True
     development_examples: bool = True
     worker_system_check: bool = True
-    ssh_collection: bool = False
-    security_feeds: bool = False
-    assessment: bool = False
-    rag: bool = False
-    reports: bool = False
-    user_accounts: bool = False
+    inventory_import: bool = True
+    ssh_collection: bool = True
+    package_verification: bool = True
+    security_feeds: bool = True
+    assessment: bool = True
+    ai_explanations: bool = True
+    rag: bool = True
+    reports: bool = True
+    user_accounts: bool = True
+    audit: bool = True
+    comparisons: bool = True
+    remediation: bool = True
 
 
 class CapabilitiesResponse(BaseModel):

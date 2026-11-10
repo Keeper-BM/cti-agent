@@ -25,6 +25,7 @@ def test_postgres_migration_pgvector_worker_and_singleton(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", os.environ["TEST_POSTGRES_URL"])
     monkeypatch.setenv("DEV_API_TOKEN", token)
     monkeypatch.setenv("APP_ENV", "development")
+    monkeypatch.setenv("AUTH_MODE", "token")
     get_engine.cache_clear()
     get_settings.cache_clear()
     engine = get_engine()

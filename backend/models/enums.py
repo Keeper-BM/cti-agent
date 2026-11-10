@@ -18,6 +18,7 @@ class ProcessingStatus(StrEnum):
 
 
 class OriginStatus(StrEnum):
+    OFFICIAL_MATCH = "OFFICIAL_MATCH"
     VERIFIED_LAB = "VERIFIED_LAB"
     SUPPORTED_ORIGIN = "SUPPORTED_ORIGIN"
     USER_DECLARED = "USER_DECLARED"

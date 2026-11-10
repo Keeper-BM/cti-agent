@@ -1,7 +1,22 @@
 import type { HttpClient } from "../../api/client";
 import type { components } from "../../api/schema";
 
-export type QuestionRequest = components["schemas"]["QuestionRequest"];
-// LLM·작업 큐가 연결되기 전에는 501을 반환한다.
-export const submitQuestion = (api: HttpClient, body: QuestionRequest) =>
-  api.request<unknown>("/questions", { method: "POST", body: JSON.stringify(body) });
+export type Question = components["schemas"]["QuestionDetail"];
+export type QuestionResult = components["schemas"]["QuestionResult"];
+export const listQuestions = (api: HttpClient, page: number, signal?: AbortSignal) =>
+  api.request<components["schemas"]["QuestionList"]>(`/questions?limit=10&offset=${page * 10}`, {
+    signal,
+  });
+export const getQuestion = (api: HttpClient, id: string, signal?: AbortSignal) =>
+  api.request<Question>(`/questions/${id}`, { signal });
+export const askQuestion = (
+  api: HttpClient,
+  analysisIds: string[],
+  question: string,
+  key: string,
+) =>
+  api.request<components["schemas"]["QuestionResponse"]>("/questions", {
+    method: "POST",
+    headers: { "Idempotency-Key": key },
+    body: JSON.stringify({ analysis_ids: analysisIds, question }),
+  });

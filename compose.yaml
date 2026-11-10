@@ -12,6 +12,27 @@ x-backend: &backend
     SUPPORTED_UBUNTU_RELEASE: ${SUPPORTED_UBUNTU_RELEASE:-}
     LLM_BASE_URL: ${LLM_BASE_URL:-}
     LLM_MODEL: ${LLM_MODEL:-}
+    LLM_API_KEY: ${LLM_API_KEY:-}
+    LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-45}
+    LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-2200}
+    NVD_API_KEY: ${NVD_API_KEY:-}
+    SSH_ALLOWED_TARGETS: ${SSH_ALLOWED_TARGETS:-}
+    SSH_KEY_DIRECTORY: /run/cti-ssh-keys
+    SSH_KEY_PASSWORD: ${SSH_KEY_PASSWORD:-}
+    SSH_TIMEOUT_SECONDS: ${SSH_TIMEOUT_SECONDS:-45}
+    PACKAGE_CACHE_DIRECTORY: /var/cache/cti-packages
+    PACKAGE_CACHE_MIB: ${PACKAGE_CACHE_MIB:-768}
+    AUTH_MODE: ${AUTH_MODE:-token}
+    SESSION_HOURS: ${SESSION_HOURS:-8}
+    SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+  volumes:
+    - type: bind
+      source: ${SSH_KEY_DIRECTORY:-./.data/ssh-keys}
+      target: /run/cti-ssh-keys
+      read_only: true
+    - type: volume
+      source: package-cache
+      target: /var/cache/cti-packages
   init: true
 
 services:
@@ -67,3 +88,4 @@ services:
 
 volumes:
   db-data:
+  package-cache:

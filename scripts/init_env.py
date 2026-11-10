@@ -85,6 +85,7 @@ def initialize(root: Path = ROOT) -> bool:
     lines.extend(f"{key}={value}" for key, value in additions.items())
     updated = "\n".join(lines) + "\n"
     (root / ".data").mkdir(exist_ok=True)
+    (root / ".data" / "ssh-keys").mkdir(exist_ok=True)
     if target.exists() and not replacements and not additions:
         print("Validated .env; existing values preserved.")
         return False

@@ -4,6 +4,9 @@ import type { components } from "../../api/schema";
 export type Asset = components["schemas"]["AssetResponse"];
 export type AssetCreate = components["schemas"]["AssetCreate"];
 export type AssetList = components["schemas"]["AssetList"];
+export type AssetPatch = components["schemas"]["AssetPatch"];
+export const editAsset = (api: HttpClient, id: string, body: AssetPatch) =>
+  api.request<Asset>(`/assets/${id}`, { method: "PATCH", body: JSON.stringify(body) });
 export const listAssets = (api: HttpClient, offset = 0, signal?: AbortSignal) =>
   api.request<AssetList>(`/assets?limit=20&offset=${offset}`, { signal });
 export const createAsset = (api: HttpClient, body: AssetCreate) =>

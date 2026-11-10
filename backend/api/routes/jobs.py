@@ -28,6 +28,10 @@ def enqueue_system_check(
 ):
     job = db.scalar(select(Job).where(Job.idempotency_key == idempotency_key))
     if job is not None:
+        if job.kind != "SYSTEM_CHECK":
+            raise AppError(
+                "IDEMPOTENCY_CONFLICT", "같은 요청 키가 다른 작업에 사용되었습니다.", 409
+            )
         return job
     job = Job(kind="SYSTEM_CHECK", idempotency_key=idempotency_key)
     db.add(job)

@@ -8,15 +8,18 @@ import { useSession } from "./session";
 
 const icons = {
   assets: "assets",
+  sources: "reports",
   findings: "findings",
   questions: "insights",
   reports: "reports",
   jobs: "jobs",
   example: "example",
+  accounts: "assets",
+  audit: "jobs",
 } as const;
 
 export function WorkspaceLayout({ route, children }: { route: Route; children: ReactNode }) {
-  const { api, disconnect } = useSession();
+  const { api, disconnect, user, isAdmin, mode } = useSession();
   const mobileNav = useRef<HTMLElement>(null);
   useEffect(() => {
     const nav = mobileNav.current;
@@ -28,18 +31,19 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
       nav.scrollLeft += item.left - bounds.left - 12;
     }
   }, [route.id]);
-  const links = routes.map((item) => (
-    <a
-      key={item.id}
-      className={`nav-link ${route.id === item.id ? "selected" : ""}`}
-      href={`#/${item.id}`}
-      aria-current={route.id === item.id ? "page" : undefined}
-    >
-      <Icon name={icons[item.id]} className="nav-icon" />
-      <span className="nav-text">{item.title}</span>
-      {["findings", "questions", "reports"].includes(item.id) && <small>준비 중</small>}
-    </a>
-  ));
+  const links = routes
+    .filter((item) => item.id !== "audit" || isAdmin)
+    .map((item) => (
+      <a
+        key={item.id}
+        className={`nav-link ${route.id === item.id ? "selected" : ""}`}
+        href={`#/${item.id}`}
+        aria-current={route.id === item.id ? "page" : undefined}
+      >
+        <Icon name={icons[item.id]} className="nav-icon" />
+        <span className="nav-text">{item.title}</span>
+      </a>
+    ));
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -67,10 +71,10 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
             <strong>{route.title}</strong>
           </div>
           <div className="topbar-actions">
-            <span className="environment">개발 환경</span>
+            <span className="environment">{user ? user.display_name : "개발 환경"}</span>
             {api && (
-              <button className="topbar-disconnect" onClick={disconnect}>
-                연결 해제
+              <button className="topbar-disconnect" onClick={() => disconnect()}>
+                {mode === "accounts" ? "로그아웃" : "연결 해제"}
               </button>
             )}
           </div>

@@ -64,11 +64,11 @@ def test_invalid_input_is_rejected_without_echoing_values(client, headers, patch
     assert "PRIVATE-KEY-MUST-NOT-BE-ECHOED" not in response.text
 
 
-def test_collection_is_explicitly_unimplemented(client, headers):
+def test_collection_requires_an_explicit_connection_profile(client, headers):
     asset = client.post("/api/v1/assets", json=ASSET, headers=headers).json()
     response = client.post(f"/api/v1/assets/{asset['id']}/collections", headers=headers)
-    assert response.status_code == 501
-    assert response.json()["error"]["code"] == "FEATURE_NOT_IMPLEMENTED"
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
     assert client.get("/api/v1/jobs", headers=headers).json()["total"] == 0
 
 
@@ -92,5 +92,5 @@ def test_wrong_token_and_capabilities(client, headers):
     rejected = client.get("/api/v1/assets", headers={"Authorization": "Bearer incorrect"})
     assert rejected.status_code == 401
     features = client.get("/api/v1/capabilities", headers=headers).json()["features"]
-    assert features["assessment"] is False
+    assert features["assessment"] is True
     assert features["worker_system_check"] is True

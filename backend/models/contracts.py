@@ -13,6 +13,7 @@ from backend.models.enums import (
     ReasonCode,
     Verdict,
 )
+from backend.models.runtime import ApacheHTTP2Evidence
 
 
 class Contract(BaseModel):
@@ -31,6 +32,7 @@ class InstalledPackage(BaseModel):
     install_status: str
     origin_status: OriginStatus = OriginStatus.UNKNOWN
     origin_evidence_ref: str | None = None
+    origin_description: str | None = None
 
 
 class OperatingSystem(BaseModel):
@@ -46,6 +48,8 @@ class Coverage(BaseModel):
 
 
 class InventorySnapshot(Contract):
+    apache_http2: ApacheHTTP2Evidence | None = None
+    verification_id: UUID | None = None
     inventory_id: UUID
     asset_id: UUID
     collected_at: AwareDatetime
@@ -57,6 +61,7 @@ class InventorySnapshot(Contract):
     coverage: Coverage
     errors: list[str] = Field(default_factory=list)
     collector_version: str
+    is_synthetic: bool = False
 
     @model_validator(mode="after")
     def validate_completeness(self) -> Self:
@@ -93,6 +98,7 @@ class AdvisoryPackageRule(BaseModel):
     fixed_version: str | None = None
     version_scheme: Literal["DEBIAN"] = "DEBIAN"
     limitations: list[str] = Field(default_factory=list)
+    runtime_condition: Literal["apache-http2-cve-2024-27316/1.0"] | None = None
 
     @model_validator(mode="after")
     def validate_fixed_version(self) -> Self:

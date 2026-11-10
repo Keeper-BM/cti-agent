@@ -55,7 +55,7 @@ export function ExamplePage() {
               <h2>패키지별 판정 예시</h2>
               <span className="count">{example?.expected_findings.length ?? "—"}</span>
             </div>
-            <p>패키지와 설치 버전에 따라 결과가 어떻게 표시되는지 살펴보세요.</p>
+            <p>가상 패키지·설치 버전별 판정 결과 및 근거</p>
           </div>
           <button className="secondary" disabled={!api || query.loading} onClick={query.refresh}>
             <Icon name="refresh" />
@@ -164,9 +164,9 @@ export function ExamplePage() {
             </strong>
             <p>
               {!api
-                ? "먼저 서비스에 연결해 주세요."
+                ? "서비스 연결이 필요합니다."
                 : query.loading
-                  ? "잠시만 기다려 주세요."
+                  ? "예제 조회 중…"
                   : "잠시 후 다시 시도해 주세요."}
             </p>
           </div>
@@ -177,7 +177,7 @@ export function ExamplePage() {
           <section className="panel example-panel">
             <div className="panel-heading">
               <div>
-                <h2>설명과 근거 예제</h2>
+                <h2>응답 및 근거 예제</h2>
                 <p>고정된 예시 설명이며 AI가 생성한 응답이 아닙니다.</p>
               </div>
               <span className="badge unavailable">가상 근거</span>
@@ -203,7 +203,7 @@ export function ExamplePage() {
             <div className="panel-heading">
               <div>
                 <h2>예제 원본 데이터</h2>
-                <p>예제에 사용된 입력과 결과를 확인할 수 있습니다.</p>
+                <p>예제 입력 및 기대 결과</p>
               </div>
             </div>
             <div className="example-content data-details">

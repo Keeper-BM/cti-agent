@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "is_synthetic": true,
+  "collected_at": "2026-11-09T09:00:00+09:00",
+  "os": {
+    "id": "ubuntu",
+    "version_id": "22.04",
+    "codename": "jammy",
+    "architecture": "amd64"
+  },
+  "package_list_complete": false,
+  "packages": [
+    {
+      "binary_name": "apache2",
+      "binary_version": "2.4.52-1ubuntu4.4",
+      "source_name": "apache2",
+      "source_version": "2.4.52-1ubuntu4.4",
+      "architecture": "amd64",
+      "origin": "형식 확인용 가상 입력입니다. 실제 서버에서 수집하지 않았습니다."
+    },
+    {
+      "binary_name": "mysql-server-8.0",
+      "binary_version": null,
+      "source_name": "mysql-8.0",
+      "source_version": null,
+      "architecture": "amd64",
+      "origin": null
+    }
+  ]
+}

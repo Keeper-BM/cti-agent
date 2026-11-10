@@ -27,19 +27,31 @@ Ctrl+C 또는 종료 신호를 받으면 실행기가 시작한 프로세스와 
 
 ## 환경 변수
 
-| 변수                       | 기본값·초기값              | 적용 범위                                        |
-| -------------------------- | -------------------------- | ------------------------------------------------ |
-| `APP_ENV`                  | `development`              | API·Worker; 현재 유일하게 허용되는 실행 모드     |
-| `DEV_API_TOKEN`            | 초기화 시 생성             | 보호 API 인증; 최소 32자                         |
-| `DATABASE_URL`             | `sqlite:///./.data/dev.db` | 로컬 API·Worker·Alembic의 저장소                 |
-| `POSTGRES_DB`              | `threat_intel`             | Compose 데이터베이스 이름                        |
-| `POSTGRES_USER`            | `threat_intel`             | Compose 데이터베이스 계정                        |
-| `POSTGRES_PASSWORD`        | 초기화 시 생성             | Compose 데이터베이스 비밀번호                    |
-| `WEB_PORT`                 | `8080`                     | Compose 웹의 호스트 포트                         |
-| `WORKER_POLL_SECONDS`      | `2`                        | 대기 작업이 없을 때 재조회 간격; 0.1~60초        |
-| `SUPPORTED_UBUNTU_RELEASE` | 빈 값                      | 향후 판정 범위 설정용; 현재 동작에 적용되지 않음 |
-| `LLM_BASE_URL`             | 빈 값                      | 향후 추론 연결용; 현재 외부 요청 없음            |
-| `LLM_MODEL`                | 빈 값                      | 향후 생성 모델 식별용; 현재 사용하지 않음        |
+| 변수                       | 기본값·초기값              | 적용 범위                                              |
+| -------------------------- | -------------------------- | ------------------------------------------------------ |
+| `APP_ENV`                  | `development`              | API·Worker; 현재 로컬·시연 실행 모드                   |
+| `DEV_API_TOKEN`            | 초기화 시 생성             | 보호 API 인증; 최소 32자                               |
+| `DATABASE_URL`             | `sqlite:///./.data/dev.db` | 로컬 API·Worker·Alembic의 저장소                       |
+| `POSTGRES_DB`              | `threat_intel`             | Compose 데이터베이스 이름                              |
+| `POSTGRES_USER`            | `threat_intel`             | Compose 데이터베이스 계정                              |
+| `POSTGRES_PASSWORD`        | 초기화 시 생성             | Compose 데이터베이스 비밀번호                          |
+| `WEB_PORT`                 | `8080`                     | Compose 웹의 호스트 포트                               |
+| `WORKER_POLL_SECONDS`      | `2`                        | 대기 작업이 없을 때 재조회 간격; 0.1~60초              |
+| `SUPPORTED_UBUNTU_RELEASE` | 빈 값                      | 향후 판정 범위 설정용; 현재 동작에 적용되지 않음       |
+| `LLM_BASE_URL`             | 빈 값                      | 학교 API 주소; https://code.cu.ac.kr/llm/v1만 허용     |
+| `LLM_MODEL`                | 빈 값                      | 학교 API에 요청할 모델 ID                              |
+| `LLM_API_KEY`              | 빈 값                      | 학교 API 키. 백엔드 설정에서만 사용                    |
+| `LLM_TIMEOUT_SECONDS`      | `45`                       | 총 요청 제한 시간, 5~60초                              |
+| `LLM_MAX_TOKENS`           | `2200`                     | 최대 출력 토큰, 512~4096                               |
+| `NVD_API_KEY`              | 빈 값                      | 선택 사항. NVD CVE API 인증; Worker에만 전송           |
+| `SSH_ALLOWED_TARGETS`      | 빈 값                      | 허용 IP:포트 목록, 쉼표 구분; 없으면 SSH 비활성        |
+| `SSH_KEY_DIRECTORY`        | `.data/ssh-keys`           | 백엔드 개인키 디렉터리; Compose에서는 읽기 전용 마운트 |
+| `SSH_KEY_PASSWORD`         | 빈 값                      | 암호화된 개인키의 암호, 현재 모든 키에 공통 적용       |
+| `SSH_TIMEOUT_SECONDS`      | `45`                       | SSH 연결·인증·조회 전체 제한, 5~60초                   |
+
+[AI 설명 사용 방법과 오류 처리](ai-explanations.md)를 참고하세요. 설정이 없어도 기존 분석과 저장 설명은 조회할 수 있으며, 시작·조회 시 외부 LLM을 호출하지 않습니다.
+
+[SSH 접속 준비·호스트 키 확인·권한 설정](ssh-collection.md)을 참고하세요. SSH 설정이 없어도 JSON 입력·분석·보고서는 사용할 수 있습니다. 초기화 스크립트는 빈 `.data/ssh-keys/` 디렉터리도 준비합니다.
 
 API·Worker 설정은 실행 환경 변수와 `.env`에서 읽으며, 실행 환경 변수 값이 우선합니다. 설정은 프로세스에서 캐시하므로 변경 후 API와 Worker를 다시 시작합니다.
 
@@ -66,13 +78,22 @@ Vite의 기본 포트는 `5173`이며 지정 포트가 이미 사용 중이면 �
 uv run alembic upgrade head
 ```
 
-## 개발 인증
+## 계정 인증과 검증 캐시
 
-웹과 API 문서는 `.env`의 `DEV_API_TOKEN`을 사용합니다. 웹 입력값은 현재 페이지의 메모리에만 유지됩니다. 페이지를 다시 로드하면 재입력이 필요합니다.
+`AUTH_MODE=accounts`를 사용하면 발급 계정으로 로그인하고 역할·자산 권한을 적용합니다. 첫 관리자는 마이그레이션 후 `uv run python -m scripts.manage_users admin`으로 생성합니다. `AUTH_MODE=token`은 기존 DEV_API_TOKEN 개발 관리자 연결입니다. accounts 모드에서 개발 토큰은 사용하지 않습니다.
 
-현재 토큰은 사용자 계정이나 권한을 구분하지 않습니다. 이 버전은 로컬 개발을 위한 실행 구성입니다. 운영 인증·접근 제어의 개발 범위는 [기능 명세](specification.md)에 설명되어 있습니다.
+| 변수                    | 기본값              | 의미                                              |
+| ----------------------- | ------------------- | ------------------------------------------------- |
+| AUTH_MODE               | token               | token 또는 accounts                               |
+| SESSION_HOURS           | 8                   | 세션 만료 시간, 1~24시간                          |
+| SESSION_COOKIE_SECURE   | false               | HTTPS 제공 시 true                                |
+| PACKAGE_CACHE_DIRECTORY | .data/package-cache | 공식 패키지·목록 캐시; 여유 있는 드라이브 권장    |
+| PACKAGE_CACHE_MIB       | 768                 | 캐시 용량 상한, 256~4096 MiB                      |
+| GPG_BINARY              | 빈 값               | GnuPG 경로; PATH 또는 Windows Git GnuPG 자동 선택 |
 
-`.env`, `.data/`, 가상환경, 의존성 폴더, 빌드 산출물, 개인키, VM 이미지와 모델 가중치는 Git 제외 대상입니다. `.env.example`에는 실제 비밀값을 저장하지 않습니다.
+Compose 검증 캐시는 package-cache 볼륨에 둡니다. Windows 시험 환경의 Python·다운로드 캐시와 VM 디스크는 D 드라이브에 둘 수 있습니다. SSH APT 참고 조회는 별도 12초 제한을 두고, 이 조회만 실패하면 필수 패키지 기록을 보존하며 부분 상태를 표시합니다. 현재 시험 환경은 SSH_TIMEOUT_SECONDS=60입니다.
+
+[계정·세션·감사·백업·복원](operations.md), [공식 파일 검증](package-verification.md)을 참고하세요. `.env`·키·캐시·DB·VM 이미지는 Git에서 제외합니다. 설정 변경 후 API·Worker를 재시작합니다.
 
 ## 오류 진단
 
@@ -103,4 +124,4 @@ curl --fail http://127.0.0.1:8000/api/v1/readiness
 | 작업이 계속 `QUEUED`                      | Worker 실행 여부, API와 Worker의 DB 일치 여부                    |
 | PostgreSQL Worker가 중복 실행 오류로 종료 | 기존 Worker 프로세스 실행 여부                                   |
 | 자산 목록이 실행 방식마다 다름            | SQLite와 Compose PostgreSQL의 저장소 분리                        |
-| 기능이 501 반환                           | 현재 미구현 기능인지 [API 명세](api-contracts.md) 확인           |
+| 403 또는 CSRF 오류                        | 로그인 상태·자산 권한·같은 서비스 주소와 포트 확인               |

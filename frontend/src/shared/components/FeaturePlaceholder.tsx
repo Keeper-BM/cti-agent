@@ -21,8 +21,8 @@ export function FeaturePlaceholder({
           <Icon name="findings" />
         </div>
         <div>
-          <h3>이 기능은 준비 중입니다</h3>
-          <p>기능이 제공되면 아래 정보를 확인할 수 있습니다.</p>
+          <h3>미구현 기능</h3>
+          <p>예정된 제공 범위</p>
           <div className="placeholder-fields">
             <span>제공 예정 정보</span>
             {columns.map((column) => (
@@ -30,7 +30,7 @@ export function FeaturePlaceholder({
             ))}
           </div>
           <a className="inline-link" href="#/example">
-            시험 예제 살펴보기 <Icon name="arrow" />
+            시험 예제 <Icon name="arrow" />
           </a>
         </div>
       </div>

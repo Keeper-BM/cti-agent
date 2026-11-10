@@ -18,7 +18,7 @@ const labels: Record<Job["status"], string> = {
 };
 
 export function JobsPage() {
-  const { api } = useSession();
+  const { api, canWrite } = useSession();
   const load = useCallback((signal: AbortSignal) => listJobs(api!, signal), [api]);
   const query = usePollingQuery(api ? load : null);
   const action = useAction();
@@ -34,7 +34,7 @@ export function JobsPage() {
           </div>
           <button
             className="secondary"
-            disabled={!api || action.pending}
+            disabled={!api || !canWrite || action.pending}
             onClick={async () => {
               if (
                 api &&
@@ -62,7 +62,7 @@ export function JobsPage() {
             </strong>
             <p>
               {!api
-                ? "먼저 서비스에 연결해 주세요."
+                ? "서비스 연결이 필요합니다."
                 : query.error
                   ? "잠시 후 다시 시도해 주세요."
                   : query.loading
@@ -78,7 +78,28 @@ export function JobsPage() {
                   <Icon name="jobs" />
                 </div>
                 <div className="job-detail">
-                  <strong>{job.kind === "SYSTEM_CHECK" ? "Worker 연결 확인" : job.kind}</strong>
+                  <strong>
+                    {job.kind === "SYSTEM_CHECK"
+                      ? "Worker 연결 확인"
+                      : job.kind === "SOURCE_SYNC"
+                        ? "공식 보안 자료 수집"
+                        : job.kind === "ASSESSMENT"
+                          ? "패키지 취약점 분석"
+                          : job.kind === "EXPLANATION"
+                            ? "CVE AI Summary 생성"
+                            : job.kind === "REPORT"
+                              ? "대응 보고서 생성"
+                              : job.kind === "SSH_COLLECTION"
+                                ? "서버 패키지 수집"
+                                : job.kind === "VERIFICATION"
+                                  ? "공식 패키지 파일 검증"
+                                  : job.kind === "COMPARISON"
+                                    ? "패키지 전후 비교"
+                                    : job.kind === "QUESTION"
+                                      ? "근거 기반 질문"
+                                      : job.kind}
+                  </strong>
+                  {job.result?.message != null && <span>{String(job.result.message)}</span>}
                   <span className="mono">
                     {job.id.slice(0, 8)} · {formatKst(job.created_at)}
                   </span>

@@ -1,4 +1,4 @@
-"""Unimplemented endpoints must not produce assessment or AI results."""
+"""Invalid or inaccessible question scopes must never enqueue AI work."""
 
 from uuid import uuid4
 
@@ -10,19 +10,7 @@ FIXTURE_ID = str(uuid4())
 @pytest.mark.parametrize(
     ("method", "path", "payload"),
     [
-        ("get", "/findings", None),
-        ("get", f"/findings/{FIXTURE_ID}", None),
-        (
-            "post",
-            "/analyses",
-            {"inventory_id": FIXTURE_ID, "feed_snapshot_id": FIXTURE_ID},
-        ),
-        ("post", "/questions", {"requested_asset_ids": [FIXTURE_ID], "question": "근거는?"}),
-        ("post", "/reports", {"analysis_ids": [FIXTURE_ID]}),
-        ("get", f"/reports/{FIXTURE_ID}", None),
-        ("get", f"/reports/{FIXTURE_ID}/markdown", None),
-        ("get", "/sources/status", None),
-        ("post", "/sources/ubuntu/sync", None),
+        ("post", "/questions", {"analysis_ids": [FIXTURE_ID], "question": "근거를 알려줘"}),
     ],
 )
 def test_feature_boundaries_require_auth_and_do_not_enqueue_work(
@@ -30,21 +18,26 @@ def test_feature_boundaries_require_auth_and_do_not_enqueue_work(
 ):
     kwargs = {"json": payload} if payload is not None else {}
     assert client.request(method, f"/api/v1{path}", **kwargs).status_code == 401
-    response = client.request(method, f"/api/v1{path}", headers=headers, **kwargs)
-    assert response.status_code == 501
-    assert response.json()["error"]["code"] == "FEATURE_NOT_IMPLEMENTED"
+    response = client.request(
+        method, f"/api/v1{path}", headers={**headers, "Idempotency-Key": "missing-scope"}, **kwargs
+    )
+    assert response.status_code == 404
     assert client.get("/api/v1/jobs", headers=headers).json()["total"] == 0
 
 
 @pytest.mark.parametrize(
     "payload",
     [
-        {"requested_asset_ids": [], "question": "근거는?"},
-        {"requested_asset_ids": [FIXTURE_ID], "question": "   "},
-        {"requested_asset_ids": [FIXTURE_ID], "question": "근거는?", "command": "whoami"},
+        {"analysis_ids": [], "question": "근거를 알려줘"},
+        {"analysis_ids": [FIXTURE_ID], "question": "   "},
+        {"analysis_ids": [FIXTURE_ID], "question": "근거를 알려줘", "command": "whoami"},
+        {"analysis_ids": [FIXTURE_ID, FIXTURE_ID], "question": "근거를 알려줘"},
+        {"analysis_ids": [FIXTURE_ID], "question": "dcu_llm_secret-key"},
     ],
 )
 def test_questions_require_asset_scope_and_nonempty_text(client, headers, payload):
-    response = client.post("/api/v1/questions", headers=headers, json=payload)
+    response = client.post(
+        "/api/v1/questions", headers={**headers, "Idempotency-Key": "invalid"}, json=payload
+    )
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"

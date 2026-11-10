@@ -11,4 +11,6 @@ def test_example_is_authenticated_repeatable_and_has_no_database_side_effects(cl
     assert client.get("/api/v1/jobs", headers=headers).json()["total"] == 0
     features = client.get("/api/v1/capabilities", headers=headers).json()["features"]
     assert features["development_examples"] is True
-    assert features["assessment"] is False
+    assert features["assessment"] is True
+    assert client.get("/api/v1/analyses", headers=headers).json()["total"] == 0
+    assert client.get("/api/v1/findings", headers=headers).json()["total"] == 0

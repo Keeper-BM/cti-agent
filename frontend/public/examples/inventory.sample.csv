@@ -1,0 +1,2 @@
+os_release,os_architecture,collected_at,package_list_complete,is_synthetic,binary_name,binary_version,source_name,source_version,architecture,origin
+24.04,amd64,2026-11-10T12:00:00+09:00,false,true,apache2-bin,2.4.58-1ubuntu8.18,apache2,2.4.58-1ubuntu8.18,amd64,가상 입력 예제

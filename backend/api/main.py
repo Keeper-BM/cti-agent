@@ -7,12 +7,30 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 
 from backend.api.dependencies import Database, require_token
-from backend.api.routes import assets, examples, findings, jobs, questions, reports, sources
+from backend.api.inventory_upload import InventoryUploadMiddleware
+from backend.api.routes import (
+    assets,
+    auth,
+    collections,
+    comparisons,
+    examples,
+    explanations,
+    findings,
+    inventories,
+    jobs,
+    questions,
+    reports,
+    sources,
+    verifications,
+)
 from backend.api.schemas.common import CapabilitiesResponse, ErrorResponse, FeatureFlags
+from backend.core.audit import audit
 from backend.core.config import get_settings
+from backend.core.database import get_engine
 from backend.core.diagnostics import safe_exception_details
 from backend.core.errors import AppError
 
@@ -49,6 +67,7 @@ def create_app() -> FastAPI:
         openapi_url="/api/openapi.json",
         lifespan=lifespan,
     )
+    app.add_middleware(InventoryUploadMiddleware)
 
     @app.middleware("http")
     async def request_id(request: Request, call_next):
@@ -66,6 +85,26 @@ def create_app() -> FastAPI:
             )
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["Cache-Control"] = "no-store"
+        if response.status_code in {401, 403} and request.url.path.startswith("/api/v1/"):
+            try:
+                with Session(get_engine()) as audit_db, audit_db.begin():
+                    audit_db.info["request_id"] = request.state.request_id
+                    principal = getattr(request.state, "principal", None)
+                    audit(
+                        audit_db,
+                        "request.denied",
+                        outcome="DENIED",
+                        actor_id=principal.user_id if principal else None,
+                        details={
+                            "method": request.method,
+                            "route": getattr(request.scope.get("route"), "path", "unknown")[:150],
+                            "status": response.status_code,
+                        },
+                    )
+            except SQLAlchemyError:
+                logger.error(
+                    "Could not store access-denial audit; request_id=%s", request.state.request_id
+                )
         return response
 
     @app.exception_handler(AppError)
@@ -75,6 +114,12 @@ def create_app() -> FastAPI:
     @app.exception_handler(RequestValidationError)
     async def validation_error_handler(request: Request, exc: RequestValidationError):
         fields = ", ".join(".".join(map(str, item["loc"])) for item in exc.errors())
+        if request.method == "POST" and request.url.path.rstrip("/").endswith("/inventories"):
+            # Import validators use fixed messages, never interpolate submitted values.
+            fields = "; ".join(
+                f"{'.'.join(map(str, item['loc']))[:120]}: {item['msg']}"
+                for item in exc.errors()[:5]
+            )
         return error_response(
             request, AppError("VALIDATION_ERROR", f"입력값을 확인하세요: {fields}", 422)
         )
@@ -96,6 +141,21 @@ def create_app() -> FastAPI:
             db.execute(text("SELECT version_num FROM alembic_version"))
             db.execute(text("SELECT id FROM assets LIMIT 1"))
             db.execute(text("SELECT id FROM jobs LIMIT 1"))
+            db.execute(text("SELECT inventory_id FROM inventory_snapshots LIMIT 1"))
+            db.execute(text("SELECT id FROM security_snapshots LIMIT 1"))
+            db.execute(text("SELECT id FROM analyses LIMIT 1"))
+            db.execute(text("SELECT id FROM findings LIMIT 1"))
+            db.execute(text("SELECT id FROM explanations LIMIT 1"))
+            db.execute(text("SELECT id FROM reports LIMIT 1"))
+            db.execute(text("SELECT id FROM ssh_profiles LIMIT 1"))
+            db.execute(text("SELECT id FROM collection_runs LIMIT 1"))
+            db.execute(text("SELECT id FROM verification_runs LIMIT 1"))
+            db.execute(text("SELECT id FROM users LIMIT 1"))
+            db.execute(text("SELECT id FROM audit_events LIMIT 1"))
+            db.execute(text("SELECT id FROM comparisons LIMIT 1"))
+            db.execute(text("SELECT id FROM questions LIMIT 1"))
+            db.execute(text("SELECT id FROM text_chunks LIMIT 1"))
+            db.execute(text("SELECT question_id FROM question_assets LIMIT 1"))
         except SQLAlchemyError:
             raise AppError(
                 "DATABASE_NOT_READY", "DB 연결과 마이그레이션을 확인하세요.", 503, True
@@ -105,11 +165,19 @@ def create_app() -> FastAPI:
     protected = APIRouter(
         prefix="/api/v1",
         dependencies=[Depends(require_token)],
-        responses={code: {"model": ErrorResponse} for code in [401, 404, 409, 422, 500, 501]},
+        responses={
+            code: {"model": ErrorResponse} for code in [401, 403, 404, 409, 422, 429, 500, 502, 503]
+        },
     )
     protected.include_router(assets.router)
+    protected.include_router(auth.router)
+    protected.include_router(collections.router)
+    protected.include_router(verifications.router)
+    protected.include_router(comparisons.router)
+    protected.include_router(inventories.router)
     protected.include_router(jobs.router)
     protected.include_router(findings.router)
+    protected.include_router(explanations.router)
     protected.include_router(questions.router)
     protected.include_router(reports.router)
     protected.include_router(sources.router)
@@ -119,6 +187,7 @@ def create_app() -> FastAPI:
     def capabilities():
         return CapabilitiesResponse(features=FeatureFlags())
 
+    app.include_router(auth.public)
     app.include_router(protected)
     return app
 

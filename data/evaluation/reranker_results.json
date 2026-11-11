@@ -1,0 +1,770 @@
+{
+  "metadata": {
+    "model": "BAAI/bge-m3",
+    "reranker": "BAAI/bge-reranker-v2-m3",
+    "reranker_top_k": 20,
+    "rerank_seconds_total": 91.63129058550112,
+    "rerank_seconds_average": 4.581564529275056,
+    "device": "mps",
+    "document_count": 300,
+    "chunk_count": 392,
+    "question_count": 20,
+    "label_status": "source_cve_only",
+    "document_embedding_seconds": 81.30609249998815,
+    "query_embedding_seconds": 0.5943160420283675
+  },
+  "summary": {
+    "BGE-M3": {
+      "Recall@5": 1.0,
+      "MRR@10": 0.975,
+      "nDCG@10": 0.9815464876785729
+    },
+    "BGE-M3+Reranker": {
+      "Recall@5": 1.0,
+      "MRR@10": 1.0,
+      "nDCG@10": 1.0
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "Q01",
+      "question": "Apache Commons FileUpload에서 업로드 요청의 파트 개수 제한이 없어 서비스 거부가 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2023-24998"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-24998",
+          "CVE-2026-43515",
+          "CVE-2024-45009",
+          "CVE-2026-66337",
+          "CVE-2023-45363"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-24998",
+          "CVE-2026-66331",
+          "CVE-2026-43515",
+          "CVE-2025-38458",
+          "CVE-2024-9393"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q02",
+      "question": "Linux 커널의 Unix 소켓 처리 과정에서 경쟁 상태와 해제된 메모리 접근으로 권한 상승이 가능한 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2023-4622"
+      ],
+      "BGE-M3": {
+        "rank": 2,
+        "top5": [
+          "CVE-2023-53623",
+          "CVE-2023-4622",
+          "CVE-2026-64179",
+          "CVE-2024-56747",
+          "CVE-2024-27064"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 0.5,
+          "nDCG@10": 0.6309297535714575
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-4622",
+          "CVE-2024-26583",
+          "CVE-2024-26718",
+          "CVE-2023-53623",
+          "CVE-2025-39903"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q03",
+      "question": "exiftags에서 Nikon 메타데이터를 처리할 때 버퍼 범위를 벗어나 쓰기가 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2023-50671"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-50671",
+          "CVE-2026-68159",
+          "CVE-2023-53570",
+          "CVE-2025-40241",
+          "CVE-2024-49894"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-50671",
+          "CVE-2024-10573",
+          "CVE-2024-36027",
+          "CVE-2024-26611",
+          "CVE-2026-68159"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q04",
+      "question": "GTKWave에서 악의적인 VCD 파일을 변환하는 과정에 임의 메모리 쓰기와 코드 실행이 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2023-37923"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-37923",
+          "CVE-2023-39413",
+          "CVE-2024-0444",
+          "CVE-2023-37329",
+          "CVE-2024-47540"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-37923",
+          "CVE-2023-39413",
+          "CVE-2024-10573",
+          "CVE-2025-23244",
+          "CVE-2024-0444"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q05",
+      "question": "Linux CXL 영구 메모리 장치의 등록 과정에서 경쟁 상태로 커널 충돌이 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2023-54323"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-54323",
+          "CVE-2026-23021",
+          "CVE-2024-53680",
+          "CVE-2023-53623",
+          "CVE-2025-22034"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2023-54323",
+          "CVE-2025-21947",
+          "CVE-2026-23021",
+          "CVE-2026-98752",
+          "CVE-2023-54278"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q06",
+      "question": "GitLab에서 GraphQL을 통해 그룹의 IP 접근 제한을 우회할 수 있는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2024-3127"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-3127",
+          "CVE-2025-14592",
+          "CVE-2025-12562",
+          "CVE-2025-1278",
+          "CVE-2024-6685"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-3127",
+          "CVE-2025-12562",
+          "CVE-2025-1278",
+          "CVE-2025-14592",
+          "CVE-2024-44934"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q07",
+      "question": "mpg123에서 조작된 오디오 스트림을 디코딩할 때 힙 메모리 범위를 벗어나 쓰기가 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2024-10573"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-10573",
+          "CVE-2026-68159",
+          "CVE-2023-37329",
+          "CVE-2025-5917",
+          "CVE-2026-66337"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-10573",
+          "CVE-2023-54284",
+          "CVE-2026-68159",
+          "CVE-2026-66337",
+          "CVE-2023-37329"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q08",
+      "question": "AngularJS의 이미지 소스 집합 처리 정규표현식에서 과도한 백트래킹으로 서비스 거부가 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2024-21490"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-21490",
+          "CVE-2024-9622",
+          "CVE-2023-22795",
+          "CVE-2026-32289",
+          "CVE-2025-46688"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-21490",
+          "CVE-2023-22795",
+          "CVE-2026-32289",
+          "CVE-2025-27219",
+          "CVE-2026-123533"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q09",
+      "question": "Linux RDMA 드라이버에서 사용자 큐 생성 실패 시 자원이 제대로 해제되지 않는 문제는?",
+      "relevant_cve_ids": [
+        "CVE-2024-26743"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-26743",
+          "CVE-2025-38024",
+          "CVE-2023-52515",
+          "CVE-2024-56747",
+          "CVE-2026-90081"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-26743",
+          "CVE-2025-38024",
+          "CVE-2026-68209",
+          "CVE-2023-52515",
+          "CVE-2024-57844"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q10",
+      "question": "AMD 디스플레이 드라이버에서 타이밍 생성기 포인터의 NULL 검사 누락으로 발생하는 문제는?",
+      "relevant_cve_ids": [
+        "CVE-2024-26661"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-26661",
+          "CVE-2026-31488",
+          "CVE-2025-68214",
+          "CVE-2025-22099",
+          "CVE-2025-39807"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2024-26661",
+          "CVE-2026-31488",
+          "CVE-2023-54323",
+          "CVE-2025-39807",
+          "CVE-2025-38458"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q11",
+      "question": "Firefox의 WebCompat 확장 기능에서 브라우저 식별자가 사생활 보호 모드 사이에도 유지되는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2025-6425"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-6425",
+          "CVE-2025-9180",
+          "CVE-2024-7525",
+          "CVE-2024-7527",
+          "CVE-2024-10462"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-6425",
+          "CVE-2024-7527",
+          "CVE-2024-7525",
+          "CVE-2024-2607",
+          "CVE-2026-74973"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q12",
+      "question": "Go chi 라우터에서 Host 헤더를 조작해 사용자를 공격자 사이트로 리다이렉트하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2025-71405"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-71405",
+          "CVE-2026-42387",
+          "CVE-2026-56154",
+          "CVE-2026-119285",
+          "CVE-2023-37329"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-71405",
+          "CVE-2026-79977",
+          "CVE-2026-113436",
+          "CVE-2026-119285",
+          "CVE-2024-49891"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q13",
+      "question": "Wasmtime의 공유 WebAssembly 메모리를 Rust 호스트에서 안전하지 않게 접근하여 데이터 경쟁이 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2025-64345"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-64345",
+          "CVE-2026-23021",
+          "CVE-2024-9622",
+          "CVE-2025-22034",
+          "CVE-2026-90081"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-64345",
+          "CVE-2024-23651",
+          "CVE-2024-12224",
+          "CVE-2023-53623",
+          "CVE-2024-44934"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q14",
+      "question": "KDE Connect에서 브로드캐스트 UDP 패킷을 조작해 표시되는 장치 정보를 변경할 수 있는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2025-32900"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-32900",
+          "CVE-2025-9566",
+          "CVE-2024-31157",
+          "CVE-2024-26611",
+          "CVE-2023-52577"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-32900",
+          "CVE-2025-21865",
+          "CVE-2024-26611",
+          "CVE-2025-39872",
+          "CVE-2026-79977"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q15",
+      "question": "Ruby JSON 라이브러리에서 조작된 JSON 문서로 범위를 벗어난 읽기와 충돌이 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2025-27788"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-27788",
+          "CVE-2025-27219",
+          "CVE-2025-22003",
+          "CVE-2023-22795",
+          "CVE-2024-41123"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2025-27788",
+          "CVE-2025-22003",
+          "CVE-2024-41123",
+          "CVE-2024-22181",
+          "CVE-2025-27219"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q16",
+      "question": "Node.js undici의 서버 전송 이벤트 처리에서 파서 상태가 무제한 증가해 메모리가 고갈되는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2026-109924"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-109924",
+          "CVE-2026-113436",
+          "CVE-2024-43816",
+          "CVE-2026-66337",
+          "CVE-2024-3447"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-109924",
+          "CVE-2026-113436",
+          "CVE-2024-36027",
+          "CVE-2025-38458",
+          "CVE-2023-53623"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q17",
+      "question": "gitoxide의 커밋 그래프 파서가 잘못된 부모 위치를 검증하지 않아 프로그램이 중단되는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2026-123533"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-123533",
+          "CVE-2025-14592",
+          "CVE-2024-3127",
+          "CVE-2024-47540",
+          "CVE-2025-12562"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-123533",
+          "CVE-2023-52639",
+          "CVE-2024-44934",
+          "CVE-2026-93113",
+          "CVE-2024-47540"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q18",
+      "question": "Apache Thrift의 Delphi 버퍼 전송 기능에서 자원 할당 제한이 없어 서비스 거부가 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2026-66331"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-66331",
+          "CVE-2023-7250",
+          "CVE-2023-30086",
+          "CVE-2025-21857",
+          "CVE-2025-38458"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-66331",
+          "CVE-2023-30086",
+          "CVE-2024-26611",
+          "CVE-2025-38458",
+          "CVE-2024-36027"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q19",
+      "question": "DNS Recursor가 악의적인 서버의 조작된 존 데이터를 처리할 때 입력 검증 부족으로 충돌하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2026-42387"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-42387",
+          "CVE-2023-26437",
+          "CVE-2024-40907",
+          "CVE-2025-40178",
+          "CVE-2025-6547"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-42387",
+          "CVE-2023-26437",
+          "CVE-2023-52434",
+          "CVE-2025-6547",
+          "CVE-2025-69646"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    },
+    {
+      "question_id": "Q20",
+      "question": "Apache Traffic Server가 잘못된 HTTP 302 응답을 캐시에 저장해 캐시 오염이 발생하는 취약점은?",
+      "relevant_cve_ids": [
+        "CVE-2026-111816"
+      ],
+      "BGE-M3": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-111816",
+          "CVE-2024-9622",
+          "CVE-2026-42387",
+          "CVE-2024-10462",
+          "CVE-2026-43515"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      },
+      "BGE-M3+Reranker": {
+        "rank": 1,
+        "top5": [
+          "CVE-2026-111816",
+          "CVE-2026-93198",
+          "CVE-2026-43515",
+          "CVE-2026-66331",
+          "CVE-2025-21857"
+        ],
+        "metrics": {
+          "Recall@5": 1.0,
+          "MRR@10": 1.0,
+          "nDCG@10": 1.0
+        }
+      }
+    }
+  ]
+}

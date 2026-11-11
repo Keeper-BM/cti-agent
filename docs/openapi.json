@@ -9273,7 +9273,7 @@
           "collector_version": {
             "type": "string",
             "title": "Collector Version",
-            "default": "ubuntu-ssh/1.1"
+            "default": "ubuntu-ssh/1.2"
           },
           "observed_at": {
             "type": "string",
@@ -9306,6 +9306,13 @@
             },
             "type": "array",
             "title": "Warnings"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceObservation"
+            },
+            "type": "array",
+            "title": "Services"
           }
         },
         "type": "object",
@@ -13404,6 +13411,93 @@
           "status"
         ],
         "title": "SecurityRecord"
+      },
+      "ServiceObservation": {
+        "properties": {
+          "unit": {
+            "type": "string",
+            "enum": [
+              "apache2.service",
+              "mysql.service"
+            ],
+            "title": "Unit"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OBSERVED",
+              "NOT_FOUND",
+              "UNKNOWN"
+            ],
+            "title": "Status"
+          },
+          "load_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Load State"
+          },
+          "active_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active State"
+          },
+          "sub_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub State"
+          },
+          "unit_file_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit File State"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "COMMAND_FAILED",
+                  "OUTPUT_INVALID"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "unit",
+          "status"
+        ],
+        "title": "ServiceObservation"
       },
       "SessionResponse": {
         "properties": {

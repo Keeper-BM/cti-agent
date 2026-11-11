@@ -29,7 +29,11 @@ def collect_job(engine: Engine, job_id: str) -> dict:
         db.expunge(profile)
     results = collect_ssh(profile, get_settings())
     inventory, evidence = make_inventory(UUID(asset_id), run_id, results, profile.host_fingerprint)
-    partial = inventory.collection_status == "PARTIAL" or any(r.exit_code != 0 for r in results)
+    partial = (
+        inventory.collection_status == "PARTIAL"
+        or any(r.exit_code != 0 for r in results)
+        or any(service.status == "UNKNOWN" for service in evidence.services)
+    )
     with Session(engine) as db, db.begin():
         job = db.get(Job, job_id)
         if job.status != "RUNNING":

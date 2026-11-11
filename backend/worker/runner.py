@@ -50,6 +50,11 @@ def single_worker(engine: Engine):
 def recover_interrupted_jobs(engine: Engine) -> None:
     """Do not silently retry a job whose side effects are unknown."""
     with Session(engine) as db, db.begin():
+        interrupted = db.execute(
+            select(Job.id, Job.kind, Job.asset_id, Job.requested_by).where(
+                Job.status == JobStatus.RUNNING
+            )
+        ).all()
         db.execute(
             update(Job)
             .where(Job.status == JobStatus.RUNNING)
@@ -59,6 +64,16 @@ def recover_interrupted_jobs(engine: Engine) -> None:
                 finished_at=utcnow(),
             )
         )
+        for job in interrupted:
+            audit(
+                db,
+                "job.interrupted",
+                asset_id=job.asset_id,
+                target_id=job.id,
+                actor_id=job.requested_by,
+                outcome="FAILED",
+                details={"kind": job.kind, "error_code": "WORKER_RESTARTED"},
+            )
         db.execute(
             update(QuestionRun)
             .where(

@@ -76,7 +76,8 @@ jobs:
       - name: Verify PostgreSQL restore and account access through real API processes
         run: >-
           uv run pytest tests/integration/test_postgres_backup.py
-          tests/integration/test_account_restore_compose.py -v
+          tests/integration/test_account_restore_compose.py
+          tests/integration/test_backup_job_compose.py -v
         env:
           TEST_POSTGRES_COMPOSE_PROJECT: blended-threat-intel
           TEST_POSTGRES_COMPOSE_ENV_FILE: .env

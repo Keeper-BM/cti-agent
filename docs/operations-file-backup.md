@@ -57,6 +57,10 @@ uv run python -m scripts.operations_backup verify /secure/backups/cti-20261112.c
 키를 분리 보관한 뒤 정기 복원 훈련을 수행해야 합니다. 외부 복제·스케줄·보관 기간·자동 삭제는
 별도 운영 결정이며 이번 구현이 자동 설정하지 않습니다.
 
+PostgreSQL 덤프 생성부터 암호화·보관본 검증·완료 기록까지 한 번에 실행하는 도구와
+Ubuntu 예약 설정 예제는 [정기 백업 준비](scheduled-backup.md)에 있습니다.
+외부 보관 위치·운영 주기 확정과 예약 활성화는 해당 안내에 따라 별도로 수행합니다.
+
 ## 복원과 서비스 전환
 
 ```bash

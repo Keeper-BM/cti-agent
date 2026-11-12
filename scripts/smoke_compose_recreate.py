@@ -15,7 +15,9 @@ import httpx
 
 
 def run(args, *, capture=False):
-    return subprocess.run(args, check=True, text=True, capture_output=capture, timeout=120).stdout
+    return subprocess.run(
+        args, check=True, text=True, stdout=subprocess.PIPE if capture else None, timeout=120
+    ).stdout
 
 
 def inspect_container(container):

@@ -60,6 +60,8 @@ jobs:
   compose-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      COMPOSE_FILE: compose.yaml:.github/compose-smoke.yaml
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6

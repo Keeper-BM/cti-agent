@@ -73,6 +73,11 @@ jobs:
       - run: docker compose config --quiet
       - run: docker compose up --build -d --wait --wait-timeout 180
       - run: uv run python scripts/smoke_http.py
+      - name: Verify PostgreSQL backup and restore against the Compose database
+        run: uv run pytest tests/integration/test_postgres_backup.py -v
+        env:
+          TEST_POSTGRES_COMPOSE_PROJECT: blended-threat-intel
+          TEST_POSTGRES_COMPOSE_ENV_FILE: .env
       - run: uv run python scripts/smoke_compose_recreate.py --project-name blended-threat-intel --env-file .env
       - run: uv run python scripts/smoke_http.py
       - if: failure()

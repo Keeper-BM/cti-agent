@@ -59,22 +59,20 @@ SQLite 연결은 검사·복사 직후 닫습니다. 저장 실패 시 이번 �
 
 ## PostgreSQL 백업·복원
 
-Compose의 DB 볼륨을 직접 복사하는 대신 pg_dump를 사용합니다. 아래 명령은 Linux 셸 기준이며 비밀번호를 인수로 전달하지 않습니다.
+Compose DB의 custom-format 논리 백업을 생성하고 임시 DB에 실제 복원해 검증합니다.
 
 ```bash
-docker compose exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc -f /tmp/cti-backup.dump'
-docker compose cp db:/tmp/cti-backup.dump ./cti-backup.dump
+uv run python -m scripts.postgres_backup create .data/backups/cti-20261112.dump --project-name blended-threat-intel --env-file .env
+uv run python -m scripts.postgres_backup verify .data/backups/cti-20261112.dump
+uv run python -m scripts.postgres_backup restore .data/backups/cti-20261112.dump --project-name blended-threat-intel --env-file .env --target-db cti_restore_20261112
 ```
 
-시험 복원은 기존 DB와 다른 이름으로 수행합니다.
-
-```bash
-docker compose cp ./cti-backup.dump db:/tmp/cti-restore.dump
-docker compose exec -T db sh -c 'createdb -U "$POSTGRES_USER" cti_restore'
-docker compose exec -T db sh -c 'pg_restore --no-owner -U "$POSTGRES_USER" -d cti_restore /tmp/cti-restore.dump'
-```
-
-DB가 이미 존재하면 createdb가 실패하므로 그대로 덮어쓰지 않습니다. 복원본의 스키마·행 수·대표 보고서를 확인한 뒤 접속 대상을 바꾸세요. `docker compose down`은 볼륨을 보존합니다. `down -v`는 데이터 볼륨을 삭제하므로 일반 종료 명령으로 사용하지 않습니다.
+덤프와 `.dump.json`을 함께 보관합니다. 복원은 새 DB에만 수행하며 파일 SHA-256,
+Alembic revision, 테이블 내용·행 수, 시퀀스, 확장 버전이 일치해야 성공합니다.
+기존 DB·파일은 덮어쓰지 않고 복원 실패 시 이번 실행이 만든 DB만 정리합니다.
+복원본 검증 후 관리자가 API·Worker 접속 대상을 전환합니다.
+DB 밖의 `.env`·SSH 키·패키지 캐시는 별도 보관합니다.
+자세한 전제·실패 정리·복구 절차는 [PostgreSQL 백업 자동화](postgres-backup.md)를 따릅니다.
 
 ## 작업 복구
 

@@ -446,3 +446,10 @@ SMOKE_BASE_URL=http://127.0.0.1:5173 uv run python scripts/smoke_http.py
 | `compose-smoke` | 환경 생성, Compose 설정·빌드·기동, 예제 조회·HTTP 작업 완료 확인  |
 
 통합 기능의 수용 조건은 [인수 시험 명세](../tests/acceptance/README.md)에 정의합니다.
+
+## 2026-11-12 — MySQL 버전 비교·PostgreSQL 복원 자동화
+
+실제 Ubuntu 24.04 MySQL 8.0.36 → 8.0.46 업그레이드 및 VM 스냅샷 복원,
+고정 자료 기준의 CVE 비교, PostgreSQL 24개 테이블 백업·새 DB 복원과 API 9개 응답 대조를
+완료했습니다. 전체 Python 424개 통과 후 시험기 근거 ID 비교 수정 관련 8개 시험도 통과했습니다.
+자세한 버전·한계·증거는 [별도 검증 기록](mysql-backup-verification.md)을 참조하세요.

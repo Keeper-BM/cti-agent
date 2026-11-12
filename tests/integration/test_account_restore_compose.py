@@ -12,10 +12,13 @@ from pathlib import Path
 
 import httpx
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from backend.auth.passwords import verify_password
 from backend.auth.session import token_hash
-from scripts.postgres_backup import backup, restore
+from scripts import operations_backup
+from scripts.postgres_backup import ComposePostgres, backup, restore
 from tests.fixtures.compose_accounts import (
     account_stack,
     command,
@@ -273,7 +276,9 @@ def test_account_permissions_sessions_and_reports_survive_postgres_restore(
         )
         require(stack.password not in json.dumps(audit), "Password leaked into audit history")
         stack.stop_worker()
-        archive = tmp_path / "accounts.dump"
+        evidence = tmp_path / "database-evidence"
+        evidence.mkdir()
+        archive = evidence / "accounts.dump"
         metadata = backup(stack.db, archive)
         counts = {t.name: t.rows for t in metadata.database.tables}
         require(
@@ -283,8 +288,41 @@ def test_account_permissions_sessions_and_reports_survive_postgres_restore(
             counts["login_sessions"] > 0 and counts["audit_events"] > 0,
             "Session/audit backup is empty",
         )
-        restore(stack.db, archive, stack.target)
+        # Recover the actual dump, its manifest and Compose settings through authenticated
+        # file encryption before starting the restored API. No application code changes.
+        recovery_key = tmp_path / "recovery.key"
+        operations_backup.generate_key(recovery_key)
+        ssh_directory = tmp_path / "ssh-input"
+        ssh_directory.mkdir()
+        ssh_key = Ed25519PrivateKey.generate()
+        operations_backup.write_new(
+            ssh_directory / "collector_key",
+            ssh_key.private_bytes(
+                serialization.Encoding.PEM,
+                serialization.PrivateFormat.OpenSSH,
+                serialization.NoEncryption(),
+            ),
+        )
+        encrypted = tmp_path / "operations.ctiops"
+        file_metadata = operations_backup.create(
+            encrypted,
+            recovery_key,
+            env_file=Path(os.environ["TEST_POSTGRES_COMPOSE_ENV_FILE"]),
+            ssh_directory=ssh_directory,
+            evidence_directory=evidence,
+        )
+        recovered = tmp_path / "recovered"
+        operations_backup.restore(encrypted, recovery_key, recovered)
+        recovered_key = serialization.load_ssh_private_key(
+            (recovered / "ssh/collector_key").read_bytes(), password=None
+        )
+        ssh_key.public_key().verify(recovered_key.sign(b"recovery-proof"), b"recovery-proof")
+        recovery_db = ComposePostgres(
+            os.environ["TEST_POSTGRES_COMPOSE_PROJECT"], recovered / "config/app.env"
+        )
+        restore(recovery_db, recovered / "evidence/accounts.dump", stack.target)
         stack.databases.append(stack.target)
+        stack.db.compose = recovery_db.compose
         restored_url = stack.start(stack.target)
         restored_admin, restored_operator, restored_viewer = (
             client(restored_url),
@@ -364,5 +402,6 @@ def test_account_permissions_sessions_and_reports_survive_postgres_restore(
             "audit_events": counts["audit_events"],
             "saved_responses": len(saved),
             "dump_sha256": metadata.sha256,
+            "encrypted_files": len(file_metadata["files"]),
         }.items():
             record_testsuite_property("account_restore." + name, value)

@@ -1,5 +1,23 @@
 # 검증 기록
 
+## Compose → 실제 VM SSH·PostgreSQL·화면 통합 — 2026-11-12 KST
+
+별도 Docker 프로젝트에서 Nginx → API → PostgreSQL → Worker → 실제 Ubuntu 22.04 VM
+경로로 패키지 642개와 Apache·MySQL 활성 상태를 수집했습니다. 실제 브라우저 수집 버튼과
+서비스 상태·패키지 조회도 확인했습니다. 정상·부분 수집, 호스트 키 오류·허가 대상·키 권한
+거부, 볼륨 보존 재기동 후 응답 일치를 검증했습니다.
+
+실제 Compose Worker를 수집 중 SIGKILL한 뒤 `WORKER_RESTARTED` 실패 처리,
+감사 이벤트 1건, 이전 스냅샷 보존과 새 수집 성공을 확인했습니다.
+재실행 가능한 `scripts/smoke_ssh_http.py`와 보호 조건 단위 시험 3개를 추가했습니다.
+
+PR의 첫 원격 CI에서는 Backend·Frontend 통과, Compose IP 점유 단계 실패를 확인했습니다.
+CI 전용 명시적 서브넷과 stderr 보존으로 보완했습니다. 동일 구성의 로컬 검사와
+수정 커밋 `dd6bf9b`의 [원격 CI #10](https://github.com/Keeper-BM/cti-agent/actions/runs/43142429093)에서
+Backend·Frontend·Compose 세 작업이 모두 통과했습니다.
+최신 원격 결과는 [PR #1](https://github.com/Keeper-BM/cti-agent/pull/1)의 커밋별 CI를 참조하세요.
+실제 실행 범위·재실행 방법은 [Compose SSH 통합 검증](compose-ssh-verification.md)에 있습니다.
+
 ## PostgreSQL 기능 매트릭스·최종 회귀 — 2026-11-11 KST
 
 자산·CSV/JSON 입력·계정 권한·SSH 수집·Worker 복구의 기존 시험 67개를

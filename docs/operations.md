@@ -88,6 +88,8 @@ Docker DNS를 다시 조회하며, 교체 중 요청은 일시 실패할 수 있
 
 실제 MySQL 시험 VM과 PostgreSQL 별도 DB의 수집·스냅샷·논리 백업 복원 결과 및
 재실행 방법은 [실환경 인수 시험](lab-acceptance.md)에 기록합니다.
+별도 Compose Worker에서 실제 VM을 수집하고 재기동 전후 응답을 비교하는 HTTP 도구와
+실제 Worker 강제 종료 시험은 [Compose SSH 통합 검증](compose-ssh-verification.md)을 참조하세요.
 
 SQLite OS 파일 잠금과 PostgreSQL advisory lock으로 중복 Worker를 차단합니다. Worker를 재시작하면 중간 RUNNING 작업은 WORKER_RESTARTED로 실패하고 기존 결과는 유지합니다. QUEUED 작업은 계속 처리합니다. 실패 이력을 확인한 뒤 새 요청으로 다시 실행하세요. 학교 API 장애 시 분석이나 원문 조회를 다시 실행할 필요는 없습니다.
 

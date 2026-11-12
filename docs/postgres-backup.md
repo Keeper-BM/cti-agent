@@ -81,3 +81,10 @@ CI의 Compose smoke 단계에서도 실행합니다. 미지정 시 skip하며 �
 
 설계 근거: [PostgreSQL 17 pg_dump](https://www.postgresql.org/docs/17/app-pgdump.html),
 [PostgreSQL 17 pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html).
+
+## 계정 데이터가 있는 복원 인수
+
+계정·권한·세션·감사·보고서를 실제 API로 생성해 백업하고 새 DB/API에서 접근 제한과
+다운로드 내용이 유지되는지 확인하는 [계정 복원 인수 시험](accounts-recovery-verification.md)을
+추가했습니다. 백업 이후의 권한 회수나 세션 취소가 자동 재적용되는 것은 아니므로 운영 전환 전
+세션 취소·최신 권한 재적용 절차를 따릅니다. 이 시험은 검색·LLM·보고서 구현을 변경하지 않습니다.

@@ -1,3 +1,4 @@
+import hashlib
 from uuid import uuid4
 
 import pytest
@@ -6,10 +7,11 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.api.main import create_app
+from backend.collectors.ssh_protocol import CommandResult
 from backend.core.config import get_settings
 from backend.models.tables import CollectionRun, InventoryRecord, Job
 from backend.worker.runner import recover_interrupted_jobs, run_once
-from tests.fixtures.ssh_server import APACHE, ssh_server
+from tests.fixtures.ssh_server import APACHE, APACHE_SERVICE, ssh_server
 from tests.integration import test_sources as source_tests
 
 source_wire = source_tests.source_wire
@@ -70,6 +72,8 @@ def test_loopback_collection_persists_inventory_and_readonly_evidence(client, he
     assert snapshot["collection_method"] == "SSH" and len(snapshot["packages"]) == 2
     assert all(p["origin_status"] == "UNKNOWN" for p in snapshot["packages"])
     assert detail["evidence"]["verified_host_fingerprint"] == profile["host_fingerprint"]
+    assert detail["evidence"]["services"][0]["active_state"] == "active"
+    assert detail["evidence"]["services"][1]["active_state"] == "inactive"
     assert "PRIVATE-REMOTE" not in str(detail)
     assert "PRIVATE KEY" not in str(detail)
     with TestClient(create_app()) as fresh:
@@ -78,6 +82,87 @@ def test_loopback_collection_persists_inventory_and_readonly_evidence(client, he
         client.get(f"/api/v1/assets/{asset['id']}/collections", headers=headers).json()["total"]
         == 1
     )
+
+
+@pytest.mark.parametrize(
+    "output",
+    [(124, ""), (126, ""), (0, "Id=apache2.service\n"), (0, APACHE_SERVICE * 2)],
+)
+def test_service_failure_is_partial_but_preserves_complete_packages(
+    client, headers, engine, lab, output
+):
+    server, asset, profile, _ = lab
+    first = enqueue(client, headers, asset, profile)
+    run_once(engine)
+    saved = get_run(client, headers, asset, first)
+    server.outputs["service_apache2"] = output
+    run = enqueue(client, headers, asset, profile)
+    run_once(engine)
+    detail = get_run(client, headers, asset, run)
+    assert detail["job"]["status"] == "PARTIAL"
+    assert detail["evidence"]["services"][0]["status"] == "UNKNOWN"
+    assert detail["evidence"]["services"][1]["status"] == "OBSERVED"
+    snapshot = client.get(
+        f"/api/v1/assets/{asset['id']}/inventories/{detail['inventory_id']}", headers=headers
+    ).json()
+    assert snapshot["collection_status"] == "COMPLETE"
+    assert snapshot["coverage"]["package_list_complete"] and len(snapshot["packages"]) == 2
+    assert get_run(client, headers, asset, first) == saved
+
+
+def test_missing_unit_is_a_successful_observation_not_missing_package(client, headers, engine, lab):
+    server, asset, profile, _ = lab
+    server.outputs["service_apache2"] = (
+        0,
+        "Id=apache2.service\nLoadState=not-found\nActiveState=inactive\nSubState=dead\nUnitFileState=\n",
+    )
+    run = enqueue(client, headers, asset, profile)
+    run_once(engine)
+    detail = get_run(client, headers, asset, run)
+    assert detail["job"]["status"] == "SUCCEEDED"
+    assert detail["evidence"]["services"][0]["status"] == "NOT_FOUND"
+    snapshot = client.get(
+        f"/api/v1/assets/{asset['id']}/inventories/{detail['inventory_id']}", headers=headers
+    ).json()
+    assert snapshot["packages"][0]["install_status"] == "installed"
+
+
+def test_old_evidence_remains_readable_without_fabricating_service_states(
+    client, headers, engine, lab
+):
+    _, asset, profile, _ = lab
+    run = enqueue(client, headers, asset, profile)
+    run_once(engine)
+    with Session(engine) as db, db.begin():
+        record = db.get(CollectionRun, run["id"])
+        evidence = dict(record.evidence)
+        evidence.pop("services")
+        evidence["commands"] = [
+            c for c in evidence["commands"] if not c["name"].startswith("service_")
+        ]
+        evidence["collector_version"] = "ubuntu-ssh/1.1"
+        wire = "\n".join(
+            CommandResult.model_validate(c).model_dump_json() for c in evidence["commands"]
+        )
+        evidence["output_sha256"] = hashlib.sha256(wire.encode()).hexdigest()
+        record.evidence = evidence
+    detail = get_run(client, headers, asset, run)
+    assert detail["evidence"]["services"] == []
+    assert detail["evidence"]["collector_version"] == "ubuntu-ssh/1.1"
+    with Session(engine) as db:
+        assert "services" not in db.get(CollectionRun, run["id"]).evidence
+
+
+def test_queued_old_collector_version_requires_new_request(client, headers, engine, lab):
+    server, asset, profile, _ = lab
+    run = enqueue(client, headers, asset, profile)
+    with Session(engine) as db, db.begin():
+        db.get(CollectionRun, run["id"]).collector_version = "ubuntu-ssh/1.1"
+    run_once(engine)
+    detail = get_run(client, headers, asset, run)
+    assert detail["job"]["status"] == "FAILED"
+    assert detail["job"]["error_code"] == "COLLECTOR_CHANGED"
+    assert detail["inventory_id"] is None and not server.commands
 
 
 def test_partial_and_failure_preserve_previous_inventory(client, headers, engine, lab):

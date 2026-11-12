@@ -1,7 +1,8 @@
+import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.models.tables import Job, utcnow
+from backend.models.tables import AuditEvent, Job, utcnow
 from backend.worker.runner import recover_interrupted_jobs, run_once
 
 
@@ -45,6 +46,7 @@ def test_restart_records_interrupted_work_and_preserves_completed_jobs(engine):
             ]
         )
     recover_interrupted_jobs(engine)
+    recover_interrupted_jobs(engine)
     with Session(engine) as db:
         records = {job.idempotency_key: job for job in db.scalars(select(Job))}
         assert records["running"].status == "FAILED"
@@ -52,3 +54,27 @@ def test_restart_records_interrupted_work_and_preserves_completed_jobs(engine):
         assert records["done"].result == {"previous": True}
         assert records["done"].status == "SUCCEEDED"
         assert records["queued"].status == "QUEUED"
+        events = db.scalars(select(AuditEvent).where(AuditEvent.action == "job.interrupted")).all()
+        assert len(events) == 1
+        assert events[0].target_id == records["running"].id
+        assert events[0].outcome == "FAILED"
+        assert events[0].details == {"kind": "SYSTEM_CHECK", "error_code": "WORKER_RESTARTED"}
+
+
+def test_recovery_audit_and_status_change_are_atomic(engine, monkeypatch):
+    with Session(engine) as db, db.begin():
+        job = Job(kind="SYSTEM_CHECK", idempotency_key="running", status="RUNNING")
+        db.add(job)
+        db.flush()
+        job_id = job.id
+
+    def unavailable_audit(*args, **kwargs):
+        raise RuntimeError("simulated audit storage failure")
+
+    monkeypatch.setattr("backend.worker.runner.audit", unavailable_audit)
+    with pytest.raises(RuntimeError, match="audit storage"):
+        recover_interrupted_jobs(engine)
+    with Session(engine) as db:
+        assert db.get(Job, job_id).status == "RUNNING"
+        assert db.get(Job, job_id).error_code is None
+        assert db.scalars(select(AuditEvent)).all() == []

@@ -1,0 +1,182 @@
+[
+  {
+    "question_id": "Q01",
+    "question": "Apache Commons FileUpload에서 업로드 요청의 파트 개수 제한이 없어 서비스 거부가 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2023-24998"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q02",
+    "question": "Linux 커널의 Unix 소켓 처리 과정에서 경쟁 상태와 해제된 메모리 접근으로 권한 상승이 가능한 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2023-4622"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q03",
+    "question": "exiftags에서 Nikon 메타데이터를 처리할 때 버퍼 범위를 벗어나 쓰기가 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2023-50671"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q04",
+    "question": "GTKWave에서 악의적인 VCD 파일을 변환하는 과정에 임의 메모리 쓰기와 코드 실행이 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2023-37923"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q05",
+    "question": "Linux CXL 영구 메모리 장치의 등록 과정에서 경쟁 상태로 커널 충돌이 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2023-54323"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q06",
+    "question": "GitLab에서 GraphQL을 통해 그룹의 IP 접근 제한을 우회할 수 있는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2024-3127"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q07",
+    "question": "mpg123에서 조작된 오디오 스트림을 디코딩할 때 힙 메모리 범위를 벗어나 쓰기가 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2024-10573"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q08",
+    "question": "AngularJS의 이미지 소스 집합 처리 정규표현식에서 과도한 백트래킹으로 서비스 거부가 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2024-21490"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q09",
+    "question": "Linux RDMA 드라이버에서 사용자 큐 생성 실패 시 자원이 제대로 해제되지 않는 문제는?",
+    "relevant_cve_ids": [
+      "CVE-2024-26743"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q10",
+    "question": "AMD 디스플레이 드라이버에서 타이밍 생성기 포인터의 NULL 검사 누락으로 발생하는 문제는?",
+    "relevant_cve_ids": [
+      "CVE-2024-26661"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q11",
+    "question": "Firefox의 WebCompat 확장 기능에서 브라우저 식별자가 사생활 보호 모드 사이에도 유지되는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2025-6425"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q12",
+    "question": "Go chi 라우터에서 Host 헤더를 조작해 사용자를 공격자 사이트로 리다이렉트하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2025-71405"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q13",
+    "question": "Wasmtime의 공유 WebAssembly 메모리를 Rust 호스트에서 안전하지 않게 접근하여 데이터 경쟁이 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2025-64345"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q14",
+    "question": "KDE Connect에서 브로드캐스트 UDP 패킷을 조작해 표시되는 장치 정보를 변경할 수 있는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2025-32900"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q15",
+    "question": "Ruby JSON 라이브러리에서 조작된 JSON 문서로 범위를 벗어난 읽기와 충돌이 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2025-27788"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q16",
+    "question": "Node.js undici의 서버 전송 이벤트 처리에서 파서 상태가 무제한 증가해 메모리가 고갈되는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2026-109924"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q17",
+    "question": "gitoxide의 커밋 그래프 파서가 잘못된 부모 위치를 검증하지 않아 프로그램이 중단되는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2026-123533"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q18",
+    "question": "Apache Thrift의 Delphi 버퍼 전송 기능에서 자원 할당 제한이 없어 서비스 거부가 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2026-66331"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q19",
+    "question": "DNS Recursor가 악의적인 서버의 조작된 존 데이터를 처리할 때 입력 검증 부족으로 충돌하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2026-42387"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  },
+  {
+    "question_id": "Q20",
+    "question": "Apache Traffic Server가 잘못된 HTTP 302 응답을 캐시에 저장해 캐시 오염이 발생하는 취약점은?",
+    "relevant_cve_ids": [
+      "CVE-2026-111816"
+    ],
+    "question_type": "semantic_ko",
+    "label_status": "source_cve_only"
+  }
+]

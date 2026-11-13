@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     session_hours: int = Field(default=8, ge=1, le=24)
     session_cookie_secure: bool = False
 
+    retrieval_mode: Literal["tfidf", "dense"] = "tfidf"
+    embedding_model: str = "BAAI/bge-m3"
+    embedding_cache_directory: str = ".data/embedding-cache"
+
 
 @lru_cache
 def get_settings() -> Settings:

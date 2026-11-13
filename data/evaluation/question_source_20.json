@@ -1,0 +1,3730 @@
+[
+  {
+    "id": "CVE-2023-24998",
+    "text": "CVE: CVE-2023-24998\nDescription: Apache Commons FileUpload before 1.5 does not limit the number of request parts to be processed resulting in the possibility of an attacker triggering a DoS with a malicious upload or series of uploads. Note that, like all of the file upload limits, the           new configuration option (FileUploadBase#setFileCountMax) is not           enabled by default and must be explicitly configured.\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:25.10; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: libcommons-fileupload-java; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:25.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "libcommons-fileupload-java",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2023/UBUNTU-CVE-2023-24998.json"
+  },
+  {
+    "id": "CVE-2023-4622",
+    "text": "CVE: CVE-2023-4622\nDescription: A use-after-free vulnerability in the Linux kernel's af_unix component can be exploited to achieve local privilege escalation. The unix_stream_sendpage() function tries to add data to the last skb in the peer's recv queue without locking the queue. Thus there is a race where unix_stream_sendpage() could access an skb locklessly that is being released by garbage collection, resulting in use-after-free. We recommend upgrading past commit 790c2f9d15b594350ae9bca7b236f2b1859de02c (or backported equivalents).\nPackage: linux-aws; Ubuntu: Ubuntu:Pro:14.04:LTS; Fixed: 4.4.0-1124.130\nPackage: linux-azure; Ubuntu: Ubuntu:Pro:14.04:LTS; Fixed: 4.15.0-1171.186~14.04.1\nPackage: linux-lts-xenial; Ubuntu: Ubuntu:Pro:14.04:LTS; Fixed: 4.4.0-246.280~14.04.1\nPackage: linux; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.4.0-246.280\nPackage: linux-aws; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.4.0-1162.177\nPackage: linux-aws-hwe; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.15.0-1162.175~16.04.1\nPackage: linux-azure; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.15.0-1171.186~16.04.1\nPackage: linux-gcp; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.15.0-1156.173~16.04.1\nPackage: linux-hwe; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.15.0-219.230~16.04.1\nPackage: linux-kvm; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.4.0-1125.135\nPackage: linux-oracle; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: 4.15.0-1125.136~16.04.1\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:16.04:LTS; Fixed: 4.4.0-1094.101\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS:16.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 4.15.0-219.230\nPackage: linux-aws; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 4.15.0-1162.175\nPackage: linux-aws-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-1112.121~18.04.2\nPackage: linux-azure; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-4.15; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 4.15.0-1171.186\nPackage: linux-azure-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-1118.125~18.04.1\nPackage: linux-azure-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-4.15; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 4.15.0-1156.173\nPackage: linux-gcp-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-1116.125~18.04.1\nPackage: linux-gke-4.15; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gke-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gkeop-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-165.182~18.04.1\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-ibm-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-1059.64~18.04.1\nPackage: linux-kvm; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 4.15.0-1146.151\nPackage: linux-oem; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 4.15.0-1125.136\nPackage: linux-oracle-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-1111.120~18.04.1\nPackage: linux-raspi-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 5.4.0-1096.107~18.04.1\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: 4.15.0-2101.107\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: 4.15.0-2080.86\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: 4.15.0-1117.128\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: 4.15.0-2064.69\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-165.182\nPackage: linux-aws; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1112.121\nPackage: linux-aws-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1048.53~20.04.1\nPackage: linux-azure; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1118.125\nPackage: linux-azure-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1050.57~20.04.1\nPackage: linux-bluefield; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1073.79\nPackage: linux-gcp; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1116.125\nPackage: linux-gcp-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1045.53~20.04.2\nPackage: linux-gkeop; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1079.83\nPackage: linux-gkeop-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1031.37~20.04.1\nPackage: linux-hwe-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-87.97~20.04.1\nPackage: linux-ibm; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1059.64\nPackage: linux-ibm-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1041.44~20.04.1\nPackage: linux-intel-iotg-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1043.49~20.04.1\nPackage: linux-iot; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1024.25\nPackage: linux-kvm; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1101.107\nPackage: linux-lowlatency-hwe-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-87.96~20.04.1\nPackage: linux-nvidia-tegra-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1019.19~20.04.1\nPackage: linux-oracle; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1111.120\nPackage: linux-oracle-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1046.52~20.04.1\nPackage: linux-raspi; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1096.107\nPackage: linux-riscv-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1044.48~20.04.1\nPackage: linux-xilinx-zynqmp; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.4.0-1032.36\nPackage: linux-aws-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fde; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-intel-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.10; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.14; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.6; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-raspi2; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: 5.4.0-1112.121+fips1\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: 5.4.0-1118.125+fips1\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: 5.4.0-1087.96\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: 5.4.0-1116.125+fips1\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-87.97\nPackage: linux-allwinner-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1048.53\nPackage: linux-aws-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1014.14~22.04.1\nPackage: linux-azure; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1050.57\nPackage: linux-azure-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1015.15~22.04.1\nPackage: linux-azure-fde; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1050.57.1\nPackage: linux-azure-fde-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1015.15~22.04.1.1\nPackage: linux-gcp; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1045.53\nPackage: linux-gcp-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1017.19~22.04.1\nPackage: linux-gke; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1045.50\nPackage: linux-gkeop; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1031.37\nPackage: linux-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-35.35~22.04.1\nPackage: linux-ibm; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1041.44\nPackage: linux-intel-iotg; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1043.49\nPackage: linux-kvm; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1045.50\nPackage: linux-lowlatency; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-87.96\nPackage: linux-lowlatency-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1015.15~22.04.1\nPackage: linux-nvidia; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1039.39\nPackage: linux-nvidia-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1011.11\nPackage: linux-nvidia-tegra; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1019.19\nPackage: linux-nvidia-tegra-igx; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1006.6\nPackage: linux-oem-5.17; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.0; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.1; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.1.0-1023.23\nPackage: linux-oracle; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1046.52\nPackage: linux-raspi; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1041.44\nPackage: linux-realtime; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.2.0-1007.8~22.04.1\nPackage: linux-xilinx-zynqmp; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1025.29\nPackage: linux-bluefield; Ubuntu: Ubuntu:Nvidia-BlueField:22.04:LTS; Fixed: 5.15.0-1028.30\nPackage: linux-intel-iot-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: 5.15.0-1041.43\nPackage: linux-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: 5.15.0-1049.55\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-raspi-realtime; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:Pro:14.04:LTS",
+        "fixed_versions": [
+          "4.4.0-1124.130"
+        ]
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:Pro:14.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1171.186~14.04.1"
+        ]
+      },
+      {
+        "package": "linux-lts-xenial",
+        "ecosystem": "Ubuntu:Pro:14.04:LTS",
+        "fixed_versions": [
+          "4.4.0-246.280~14.04.1"
+        ]
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.4.0-246.280"
+        ]
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.4.0-1162.177"
+        ]
+      },
+      {
+        "package": "linux-aws-hwe",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1162.175~16.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1171.186~16.04.1"
+        ]
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1156.173~16.04.1"
+        ]
+      },
+      {
+        "package": "linux-hwe",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.15.0-219.230~16.04.1"
+        ]
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.4.0-1125.135"
+        ]
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1125.136~16.04.1"
+        ]
+      },
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:16.04:LTS",
+        "fixed_versions": [
+          "4.4.0-1094.101"
+        ]
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-219.230"
+        ]
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1162.175"
+        ]
+      },
+      {
+        "package": "linux-aws-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1112.121~18.04.2"
+        ]
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-4.15",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1171.186"
+        ]
+      },
+      {
+        "package": "linux-azure-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1118.125~18.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-4.15",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1156.173"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1116.125~18.04.1"
+        ]
+      },
+      {
+        "package": "linux-gke-4.15",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-165.182~18.04.1"
+        ]
+      },
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-ibm-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1059.64~18.04.1"
+        ]
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1146.151"
+        ]
+      },
+      {
+        "package": "linux-oem",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1125.136"
+        ]
+      },
+      {
+        "package": "linux-oracle-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1111.120~18.04.1"
+        ]
+      },
+      {
+        "package": "linux-raspi-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1096.107~18.04.1"
+        ]
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-2101.107"
+        ]
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-2080.86"
+        ]
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-1117.128"
+        ]
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": [
+          "4.15.0-2064.69"
+        ]
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-165.182"
+        ]
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1112.121"
+        ]
+      },
+      {
+        "package": "linux-aws-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1048.53~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1118.125"
+        ]
+      },
+      {
+        "package": "linux-azure-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1050.57~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-bluefield",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1073.79"
+        ]
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1116.125"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1045.53~20.04.2"
+        ]
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1079.83"
+        ]
+      },
+      {
+        "package": "linux-gkeop-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1031.37~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-hwe-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-87.97~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-ibm",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1059.64"
+        ]
+      },
+      {
+        "package": "linux-ibm-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1041.44~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-intel-iotg-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1043.49~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-iot",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1024.25"
+        ]
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1101.107"
+        ]
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-87.96~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1019.19~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1111.120"
+        ]
+      },
+      {
+        "package": "linux-oracle-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1046.52~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-raspi",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1096.107"
+        ]
+      },
+      {
+        "package": "linux-riscv-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1044.48~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-xilinx-zynqmp",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1032.36"
+        ]
+      },
+      {
+        "package": "linux-aws-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.10",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.14",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.6",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi2",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1112.121+fips1"
+        ]
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1118.125+fips1"
+        ]
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1087.96"
+        ]
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": [
+          "5.4.0-1116.125+fips1"
+        ]
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-87.97"
+        ]
+      },
+      {
+        "package": "linux-allwinner-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1048.53"
+        ]
+      },
+      {
+        "package": "linux-aws-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1014.14~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1050.57"
+        ]
+      },
+      {
+        "package": "linux-azure-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1015.15~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1050.57.1"
+        ]
+      },
+      {
+        "package": "linux-azure-fde-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1015.15~22.04.1.1"
+        ]
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1045.53"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1017.19~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1045.50"
+        ]
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1031.37"
+        ]
+      },
+      {
+        "package": "linux-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-35.35~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-ibm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1041.44"
+        ]
+      },
+      {
+        "package": "linux-intel-iotg",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1043.49"
+        ]
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1045.50"
+        ]
+      },
+      {
+        "package": "linux-lowlatency",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-87.96"
+        ]
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1015.15~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-nvidia",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1039.39"
+        ]
+      },
+      {
+        "package": "linux-nvidia-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1011.11"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1019.19"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra-igx",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1006.6"
+        ]
+      },
+      {
+        "package": "linux-oem-5.17",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.0",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.1",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.1.0-1023.23"
+        ]
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1046.52"
+        ]
+      },
+      {
+        "package": "linux-raspi",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1041.44"
+        ]
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.2.0-1007.8~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-xilinx-zynqmp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1025.29"
+        ]
+      },
+      {
+        "package": "linux-bluefield",
+        "ecosystem": "Ubuntu:Nvidia-BlueField:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1028.30"
+        ]
+      },
+      {
+        "package": "linux-intel-iot-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1041.43"
+        ]
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1049.55"
+        ]
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi-realtime",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2023/UBUNTU-CVE-2023-4622.json"
+  },
+  {
+    "id": "CVE-2023-50671",
+    "text": "CVE: CVE-2023-50671\nDescription: In exiftags 1.01, nikon_prop1 in nikon.c has a heap-based buffer overflow (write of size 28) because snprintf can write to an unexpected address.\nPackage: exiftags; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:25.10; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: exiftags; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:25.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "exiftags",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2023/UBUNTU-CVE-2023-50671.json"
+  },
+  {
+    "id": "CVE-2023-37923",
+    "text": "CVE: CVE-2023-37923\nDescription: Multiple arbitrary write vulnerabilities exist in the VCD sorted bsearch functionality of GTKWave 3.3.115. A specially crafted .vcd file can lead to arbitrary code execution. A victim would need to open a malicious file to trigger these vulnerabilities.This vulnerability concerns the arbitrary write when triggered via the vcd2lxt conversion utility.\nPackage: gtkwave; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:25.10; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: gtkwave; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:25.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "gtkwave",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2023/UBUNTU-CVE-2023-37923.json"
+  },
+  {
+    "id": "CVE-2023-54323",
+    "text": "CVE: CVE-2023-54323\nDescription: In the Linux kernel, the following vulnerability has been resolved: cxl/pmem: Fix nvdimm registration races A loop of the form:     while true; do modprobe cxl_pci; modprobe -r cxl_pci; done ...fails with the following crash signature:     BUG: kernel NULL pointer dereference, address: 0000000000000040     [..]     RIP: 0010:cxl_internal_send_cmd+0x5/0xb0 [cxl_core]     [..]     Call Trace:      <TASK>      cxl_pmem_ctl+0x121/0x240 [cxl_pmem]      nvdimm_get_config_data+0xd6/0x1a0 [libnvdimm]      nd_label_data_init+0x135/0x7e0 [libnvdimm]      nvdimm_probe+0xd6/0x1c0 [libnvdimm]      nvdimm_bus_probe+0x7a/0x1e0 [libnvdimm]      really_probe+0xde/0x380      __driver_probe_device+0x78/0x170      driver_probe_device+0x1f/0x90      __device_attach_driver+0x85/0x110      bus_for_each_drv+0x7d/0xc0      __device_attach+0xb4/0x1e0      bus_probe_device+0x9f/0xc0      device_add+0x445/0x9c0      nd_async_device_register+0xe/0x40 [libnvdimm]      async_run_entry_fn+0x30/0x130 ...namely that the bottom half of async nvdimm device registration runs after the CXL has already torn down the context that cxl_pmem_ctl() needs. Unlike the ACPI NFIT case that benefits from launching multiple nvdimm device registrations in parallel from those listed in the table, CXL is already marked PROBE_PREFER_ASYNCHRONOUS. So provide for a synchronous registration path to preclude this scenario.\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: linux-aws-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gke-4.15; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gke-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gkeop-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oem; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fde; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fde-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gkeop; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gkeop-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-ibm-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-intel-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-intel-iotg-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-nvidia-tegra-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.10; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.14; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.6; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-raspi2; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.15; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-allwinner-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gke; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gkeop; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-ibm; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-intel-iot-realtime; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-intel-iotg; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-kvm; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-tegra; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-tegra-igx; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-5.17; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.0; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.1; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oracle; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oracle-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-raspi; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-realtime; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-xilinx-zynqmp; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-bluefield; Ubuntu: Ubuntu:Nvidia-BlueField:22.04:LTS; Fixed: unknown\nPackage: linux-intel-iot-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: unknown\nPackage: linux-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.11; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.11; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.11; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.11; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-nvidia-6.11; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-oem-6.11; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-oem-6.8; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-raspi-realtime; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-realtime; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: linux-riscv-6.14; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-4.15",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-ibm-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-iotg-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-tegra-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.10",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.14",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.6",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi2",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.15",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-allwinner-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-ibm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-iot-realtime",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-iotg",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-tegra",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-tegra-igx",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.17",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.0",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.1",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-xilinx-zynqmp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-bluefield",
+        "ecosystem": "Ubuntu:Nvidia-BlueField:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-iot-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.11",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.11",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.11",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.11",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-6.11",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.11",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.8",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi-realtime",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-6.14",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2023/UBUNTU-CVE-2023-54323.json"
+  },
+  {
+    "id": "CVE-2024-3127",
+    "text": "CVE: CVE-2024-3127\nDescription: An issue has been discovered in GitLab EE affecting all versions starting from 12.5 before 17.1.6, all versions starting from 17.2 before 17.2.4, all versions starting from 17.3 before 17.3.1. Under certain conditions it may be possible to bypass the IP restriction for groups through GraphQL allowing unauthorised users to perform some actions at the group level.\nPackage: gitlab; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "gitlab",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2024/UBUNTU-CVE-2024-3127.json"
+  },
+  {
+    "id": "CVE-2024-10573",
+    "text": "CVE: CVE-2024-10573\nDescription: An out-of-bounds write flaw was found in mpg123 when handling crafted streams. When decoding PCM, the libmpg123 may write past the end of a heap-located buffer. Consequently, heap corruption may happen, and arbitrary code execution is not discarded. The complexity required to exploit this flaw is considered high as the payload must be validated by the MPEG decoder and the PCM synth before execution. Additionally, to successfully execute the attack, the user must scan through the stream, making web live stream content (such as web radios) a very unlikely attack vector.\nPackage: mpg123; Ubuntu: Ubuntu:Pro:14.04:LTS; Fixed: unknown\nPackage: mpg123; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: mpg123; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: mpg123; Ubuntu: Ubuntu:20.04:LTS; Fixed: 1.25.13-1ubuntu0.2\nPackage: mpg123; Ubuntu: Ubuntu:22.04:LTS; Fixed: 1.29.3-1ubuntu0.1\nPackage: mpg123; Ubuntu: Ubuntu:24.04:LTS; Fixed: 1.32.5-1ubuntu1.1",
+    "affected": [
+      {
+        "package": "mpg123",
+        "ecosystem": "Ubuntu:Pro:14.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mpg123",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mpg123",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mpg123",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "1.25.13-1ubuntu0.2"
+        ]
+      },
+      {
+        "package": "mpg123",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "1.29.3-1ubuntu0.1"
+        ]
+      },
+      {
+        "package": "mpg123",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": [
+          "1.32.5-1ubuntu1.1"
+        ]
+      }
+    ],
+    "source": "osv/cve/2024/UBUNTU-CVE-2024-10573.json"
+  },
+  {
+    "id": "CVE-2024-21490",
+    "text": "CVE: CVE-2024-21490\nDescription: This affects versions of the package angular from 1.3.0; versions of the package angularjs from 1.3.0. A regular expression used to split the value of the ng-srcset directive is vulnerable to super-linear runtime due to backtracking. With large carefully-crafted input, this can result in catastrophic backtracking and cause a denial of service.    **Note:**  This package is EOL and will not receive any updates to address this issue. Users should migrate to [@angular/core](https://www.npmjs.com/package/@angular/core).\nPackage: angular.js; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: 1.5.10-1ubuntu0.1~esm1\nPackage: angular.js; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: 1.7.9-1ubuntu0.1~esm1\nPackage: angular.js; Ubuntu: Ubuntu:22.04:LTS; Fixed: 1.8.2-2ubuntu0.1\nPackage: angular.js; Ubuntu: Ubuntu:24.04:LTS; Fixed: 1.8.3-1ubuntu0.24.04.1",
+    "affected": [
+      {
+        "package": "angular.js",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": [
+          "1.5.10-1ubuntu0.1~esm1"
+        ]
+      },
+      {
+        "package": "angular.js",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": [
+          "1.7.9-1ubuntu0.1~esm1"
+        ]
+      },
+      {
+        "package": "angular.js",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "1.8.2-2ubuntu0.1"
+        ]
+      },
+      {
+        "package": "angular.js",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": [
+          "1.8.3-1ubuntu0.24.04.1"
+        ]
+      }
+    ],
+    "source": "osv/cve/2024/UBUNTU-CVE-2024-21490.json"
+  },
+  {
+    "id": "CVE-2024-26743",
+    "text": "CVE: CVE-2024-26743\nDescription: In the Linux kernel, the following vulnerability has been resolved: RDMA/qedr: Fix qedr_create_user_qp error flow Avoid the following warning by making sure to free the allocated resources in case that qedr_init_user_queue() fail. -----------[ cut here ]----------- WARNING: CPU: 0 PID: 143192 at drivers/infiniband/core/rdma_core.c:874 uverbs_destroy_ufile_hw+0xcf/0xf0 [ib_uverbs] Modules linked in: tls target_core_user uio target_core_pscsi target_core_file target_core_iblock ib_srpt ib_srp scsi_transport_srp nfsd nfs_acl rpcsec_gss_krb5 auth_rpcgss nfsv4 dns_resolver nfs lockd grace fscache netfs 8021q garp mrp stp llc ext4 mbcache jbd2 opa_vnic ib_umad ib_ipoib sunrpc rdma_ucm ib_isert iscsi_target_mod target_core_mod ib_iser libiscsi scsi_transport_iscsi rdma_cm iw_cm ib_cm hfi1 intel_rapl_msr intel_rapl_common mgag200 qedr sb_edac drm_shmem_helper rdmavt x86_pkg_temp_thermal drm_kms_helper intel_powerclamp ib_uverbs coretemp i2c_algo_bit kvm_intel dell_wmi_descriptor ipmi_ssif sparse_keymap kvm ib_core rfkill syscopyarea sysfillrect video sysimgblt irqbypass ipmi_si ipmi_devintf fb_sys_fops rapl iTCO_wdt mxm_wmi iTCO_vendor_support intel_cstate pcspkr dcdbas intel_uncore ipmi_msghandler lpc_ich acpi_power_meter mei_me mei fuse drm xfs libcrc32c qede sd_mod ahci libahci t10_pi sg crct10dif_pclmul crc32_pclmul crc32c_intel qed libata tg3 ghash_clmulni_intel megaraid_sas crc8 wmi [last unloaded: ib_srpt] CPU: 0 PID: 143192 Comm: fi_rdm_tagged_p Kdump: loaded Not tainted 5.14.0-408.el9.x86_64 #1 Hardware name: Dell Inc. PowerEdge R430/03XKDV, BIOS 2.14.0 01/25/2022 RIP: 0010:uverbs_destroy_ufile_hw+0xcf/0xf0 [ib_uverbs] Code: 5d 41 5c 41 5d 41 5e e9 0f 26 1b dd 48 89 df e8 67 6a ff ff 49 8b 86 10 01 00 00 48 85 c0 74 9c 4c 89 e7 e8 83 c0 cb dd eb 92 <0f> 0b eb be 0f 0b be 04 00 00 00 48 89 df e8 8e f5 ff ff e9 6d ff RSP: 0018:ffffb7c6cadfbc60 EFLAGS: 00010286 RAX: ffff8f0889ee3f60 RBX: ffff8f088c1a5200 RCX: 00000000802a0016 RDX: 00000000802a0017 RSI: 0000000000000001 RDI: ffff8f0880042600 RBP: 0000000000000001 R08: 0000000000000001 R09: 0000000000000000 R10: ffff8f11fffd5000 R11: 0000000000039000 R12: ffff8f0d5b36cd80 R13: ffff8f088c1a5250 R14: ffff8f1206d91000 R15: 0000000000000000 FS: 0000000000000000(0000) GS:ffff8f11d7c00000(0000) knlGS:0000000000000000 CS: 0010 DS: 0000 ES: 0000 CR0: 0000000080050033 CR2: 0000147069200e20 CR3: 00000001c7210002 CR4: 00000000001706f0 Call Trace: <TASK> ? show_trace_log_lvl+0x1c4/0x2df ? show_trace_log_lvl+0x1c4/0x2df ? ib_uverbs_close+0x1f/0xb0 [ib_uverbs] ? uverbs_destroy_ufile_hw+0xcf/0xf0 [ib_uverbs] ? __warn+0x81/0x110 ? uverbs_destroy_ufile_hw+0xcf/0xf0 [ib_uverbs] ? report_bug+0x10a/0x140 ? handle_bug+0x3c/0x70 ? exc_invalid_op+0x14/0x70 ? asm_exc_invalid_op+0x16/0x20 ? uverbs_destroy_ufile_hw+0xcf/0xf0 [ib_uverbs] ib_uverbs_close+0x1f/0xb0 [ib_uverbs] __fput+0x94/0x250 task_work_run+0x5c/0x90 do_exit+0x270/0x4a0 do_group_exit+0x2d/0x90 get_signal+0x87c/0x8c0 arch_do_signal_or_restart+0x25/0x100 ? ib_uverbs_ioctl+0xc2/0x110 [ib_uverbs] exit_to_user_mode_loop+0x9c/0x130 exit_to_user_mode_prepare+0xb6/0x100 syscall_exit_to_user_mode+0x12/0x40 do_syscall_64+0x69/0x90 ? syscall_exit_work+0x103/0x130 ? syscall_exit_to_user_mode+0x22/0x40 ? do_syscall_64+0x69/0x90 ? syscall_exit_work+0x103/0x130 ? syscall_exit_to_user_mode+0x22/0x40 ? do_syscall_64+0x69/0x90 ? do_syscall_64+0x69/0x90 ? common_interrupt+0x43/0xa0 entry_SYSCALL_64_after_hwframe+0x72/0xdc RIP: 0033:0x1470abe3ec6b Code: Unable to access opcode bytes at RIP 0x1470abe3ec41. RSP: 002b:00007fff13ce9108 EFLAGS: 00000246 ORIG_RAX: 0000000000000010 RAX: fffffffffffffffc RBX: 00007fff13ce9218 RCX: 00001470abe3ec6b RDX: 00007fff13ce9200 RSI: 00000000c0181b01 RDI: 0000000000000004 RBP: 00007fff13ce91e0 R08: 0000558d9655da10 R09: 0000558d9655dd00 R10: 00007fff13ce95c0 R11: 0000000000000246 R12: 00007fff13ce9358 R13: 0000000000000013 R14: 0000558d9655db50 R15: 00007fff13ce9470 </TASK> --[ end trace 888a9b92e04c5c97 ]--\nPackage: linux-azure; Ubuntu: Ubuntu:Pro:14.04:LTS; Fixed: unknown\nPackage: linux-aws-hwe; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: linux-hwe; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: linux-oracle; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-aws; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-4.15; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-azure-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-azure-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-4.15; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-gke-4.15; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gke-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gkeop-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-ibm-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-kvm; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-oem; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-raspi-5.4; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:18.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1063.69~20.04.1\nPackage: linux-azure-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1065.74~20.04.1\nPackage: linux-gcp-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1062.70~20.04.1\nPackage: linux-gkeop-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1046.53~20.04.1\nPackage: linux-hwe-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-113.123~20.04.1\nPackage: linux-ibm-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1057.60~20.04.1\nPackage: linux-intel-iotg-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1058.64~20.04.1\nPackage: linux-lowlatency-hwe-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-110.120~20.04.1\nPackage: linux-nvidia-tegra-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1027.27~20.04.1\nPackage: linux-oracle-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1061.67~20.04.1\nPackage: linux-riscv-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1059.63~20.04.1\nPackage: linux; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-aws; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fde; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-bluefield; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gkeop; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-ibm; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-intel-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-iot; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-kvm; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.10; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.14; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.6; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-raspi; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-raspi2; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-xilinx-zynqmp; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:20.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS:20.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-112.122\nPackage: linux-allwinner-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1063.69\nPackage: linux-aws-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1066.75\nPackage: linux-azure-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1067.76.1\nPackage: linux-azure-fde-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1062.70\nPackage: linux-gcp-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gke; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1060.66\nPackage: linux-gkeop; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1046.53\nPackage: linux-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-ibm; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1056.59\nPackage: linux-intel-iotg; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1058.64\nPackage: linux-kvm; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1060.65\nPackage: linux-lowlatency; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-110.120\nPackage: linux-lowlatency-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1058.59\nPackage: linux-nvidia-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-tegra; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1026.26\nPackage: linux-nvidia-tegra-igx; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1015.15\nPackage: linux-oem-5.17; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.0; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.1; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oracle; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1061.67\nPackage: linux-oracle-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-raspi; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1058.61\nPackage: linux-realtime; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-xilinx-zynqmp; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1030.34\nPackage: linux-bluefield; Ubuntu: Ubuntu:Nvidia-BlueField:22.04:LTS; Fixed: 5.15.0-1044.46\nPackage: linux-intel-iot-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: 5.15.0-1056.58\nPackage: linux-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: 5.15.0-1064.72\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-1063.69+fips1\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-1065.74+fips1\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-111.121+fips1\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-1062.70+fips1\nPackage: linux-raspi-realtime; Ubuntu: Ubuntu:Pro:Realtime:24.04:LTS; Fixed: 6.8.0-2002.2",
+    "affected": [
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:Pro:14.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-hwe",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-4.15",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-4.15",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-4.15",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-ibm-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi-5.4",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1063.69~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1065.74~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1062.70~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-gkeop-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1046.53~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-hwe-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-113.123~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-ibm-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1057.60~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-intel-iotg-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1058.64~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-110.120~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1027.27~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-oracle-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1061.67~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-riscv-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1059.63~20.04.1"
+        ]
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-bluefield",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-ibm",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-iot",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.10",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.14",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.6",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi2",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-xilinx-zynqmp",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-112.122"
+        ]
+      },
+      {
+        "package": "linux-allwinner-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1063.69"
+        ]
+      },
+      {
+        "package": "linux-aws-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1066.75"
+        ]
+      },
+      {
+        "package": "linux-azure-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1067.76.1"
+        ]
+      },
+      {
+        "package": "linux-azure-fde-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1062.70"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1060.66"
+        ]
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1046.53"
+        ]
+      },
+      {
+        "package": "linux-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-ibm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1056.59"
+        ]
+      },
+      {
+        "package": "linux-intel-iotg",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1058.64"
+        ]
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1060.65"
+        ]
+      },
+      {
+        "package": "linux-lowlatency",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-110.120"
+        ]
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1058.59"
+        ]
+      },
+      {
+        "package": "linux-nvidia-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-tegra",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1026.26"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra-igx",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1015.15"
+        ]
+      },
+      {
+        "package": "linux-oem-5.17",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.0",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.1",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1061.67"
+        ]
+      },
+      {
+        "package": "linux-oracle-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1058.61"
+        ]
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-xilinx-zynqmp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1030.34"
+        ]
+      },
+      {
+        "package": "linux-bluefield",
+        "ecosystem": "Ubuntu:Nvidia-BlueField:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1044.46"
+        ]
+      },
+      {
+        "package": "linux-intel-iot-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1056.58"
+        ]
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1064.72"
+        ]
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1063.69+fips1"
+        ]
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1065.74+fips1"
+        ]
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-111.121+fips1"
+        ]
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1062.70+fips1"
+        ]
+      },
+      {
+        "package": "linux-raspi-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:24.04:LTS",
+        "fixed_versions": [
+          "6.8.0-2002.2"
+        ]
+      }
+    ],
+    "source": "osv/cve/2024/UBUNTU-CVE-2024-26743.json"
+  },
+  {
+    "id": "CVE-2024-26661",
+    "text": "CVE: CVE-2024-26661\nDescription: In the Linux kernel, the following vulnerability has been resolved: drm/amd/display: Add NULL test for 'timing generator' in 'dcn21_set_pipe()' In \"u32 otg_inst = pipe_ctx->stream_res.tg->inst;\" pipe_ctx->stream_res.tg could be NULL, it is relying on the caller to ensure the tg is not NULL.\nPackage: linux-hwe-edge; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: linux-aws-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-azure-edge; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gke-4.15; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gke-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-gkeop-5.4; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-hwe; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oem; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.0; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.3; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: linux-aws-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1072.78~20.04.1\nPackage: linux-azure-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1078.87~20.04.1\nPackage: linux-gcp-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1071.79~20.04.1\nPackage: linux-gkeop-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1055.62~20.04.1\nPackage: linux-hwe-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-125.135~20.04.1\nPackage: linux-ibm-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1065.68~20.04.1\nPackage: linux-intel-iotg-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1067.73~20.04.1\nPackage: linux-lowlatency-hwe-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-125.135~20.04.1\nPackage: linux-nvidia-tegra-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1032.32~20.04.1\nPackage: linux-oracle-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1070.76~20.04.1\nPackage: linux-riscv-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: 5.15.0-1068.72~20.04.1\nPackage: linux-aws-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-aws-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-azure-fde; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gcp-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-gke-5.15; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-hwe-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-intel-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.10; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.14; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oem-5.6; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.13; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-oracle-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-raspi2; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.11; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.8; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: linux; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-125.135\nPackage: linux-allwinner-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1072.78\nPackage: linux-aws-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-aws-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1023.23~22.04.1\nPackage: linux-azure; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1075.84\nPackage: linux-azure-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1024.25~22.04.1\nPackage: linux-azure-fde; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1076.85.1\nPackage: linux-azure-fde-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fde-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1071.79\nPackage: linux-gcp-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1024.26~22.04.1\nPackage: linux-gke; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1069.75\nPackage: linux-gkeop; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1055.62\nPackage: linux-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-hwe-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-44.44~22.04.1\nPackage: linux-ibm; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1065.68\nPackage: linux-intel-iotg; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1067.73\nPackage: linux-kvm; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1069.74\nPackage: linux-lowlatency; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-125.135\nPackage: linux-lowlatency-hwe-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-lowlatency-hwe-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-44.44.1~22.04.1\nPackage: linux-nvidia; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1067.68\nPackage: linux-nvidia-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-nvidia-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1023.24\nPackage: linux-nvidia-tegra; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1032.32\nPackage: linux-nvidia-tegra-igx; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1020.20\nPackage: linux-oem-5.17; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.0; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.1; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-oem-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1027.28\nPackage: linux-oracle; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1070.76\nPackage: linux-oracle-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1026.26~22.04.1\nPackage: linux-raspi; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1065.68\nPackage: linux-realtime; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-riscv-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-5.19; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.2; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: linux-starfive-6.5; Ubuntu: Ubuntu:22.04:LTS; Fixed: 6.5.0-1017.18~22.04.1\nPackage: linux-xilinx-zynqmp; Ubuntu: Ubuntu:22.04:LTS; Fixed: 5.15.0-1038.42\nPackage: linux-bluefield; Ubuntu: Ubuntu:Nvidia-BlueField:22.04:LTS; Fixed: 5.15.0-1056.58\nPackage: linux-intel-iot-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: 5.15.0-1066.68\nPackage: linux-realtime; Ubuntu: Ubuntu:Pro:Realtime:22.04:LTS; Fixed: 5.15.0-1073.81\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-preview:22.04:LTS; Fixed: unknown\nPackage: linux-aws-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-1072.78+fips1\nPackage: linux-azure-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-1075.84+fips1\nPackage: linux-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-125.135+fips1\nPackage: linux-gcp-fips; Ubuntu: Ubuntu:Pro:FIPS-updates:22.04:LTS; Fixed: 5.15.0-1071.79+fips1\nPackage: linux-raspi-realtime; Ubuntu: Ubuntu:Pro:Realtime:24.04:LTS; Fixed: 6.8.0-2001.1",
+    "affected": [
+      {
+        "package": "linux-hwe-edge",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-edge",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-4.15",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gkeop-5.4",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.0",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.3",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1072.78~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1078.87~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1071.79~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-gkeop-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1055.62~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-hwe-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-125.135~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-ibm-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1065.68~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-intel-iotg-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1067.73~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-125.135~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1032.32~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-oracle-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1070.76~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-riscv-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1068.72~20.04.1"
+        ]
+      },
+      {
+        "package": "linux-aws-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gke-5.15",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-intel-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.10",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.14",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-5.6",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.13",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oracle-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-raspi2",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.11",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.8",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-125.135"
+        ]
+      },
+      {
+        "package": "linux-allwinner-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1072.78"
+        ]
+      },
+      {
+        "package": "linux-aws-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1023.23~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1075.84"
+        ]
+      },
+      {
+        "package": "linux-azure-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1024.25~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-azure-fde",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1076.85.1"
+        ]
+      },
+      {
+        "package": "linux-azure-fde-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fde-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1071.79"
+        ]
+      },
+      {
+        "package": "linux-gcp-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1024.26~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-gke",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1069.75"
+        ]
+      },
+      {
+        "package": "linux-gkeop",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1055.62"
+        ]
+      },
+      {
+        "package": "linux-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-hwe-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-44.44~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-ibm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1065.68"
+        ]
+      },
+      {
+        "package": "linux-intel-iotg",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1067.73"
+        ]
+      },
+      {
+        "package": "linux-kvm",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1069.74"
+        ]
+      },
+      {
+        "package": "linux-lowlatency",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-125.135"
+        ]
+      },
+      {
+        "package": "linux-lowlatency-hwe-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-lowlatency-hwe-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-44.44.1~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-nvidia",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1067.68"
+        ]
+      },
+      {
+        "package": "linux-nvidia-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-nvidia-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1023.24"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1032.32"
+        ]
+      },
+      {
+        "package": "linux-nvidia-tegra-igx",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1020.20"
+        ]
+      },
+      {
+        "package": "linux-oem-5.17",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.0",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.1",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-oem-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1027.28"
+        ]
+      },
+      {
+        "package": "linux-oracle",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1070.76"
+        ]
+      },
+      {
+        "package": "linux-oracle-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1026.26~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-raspi",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1065.68"
+        ]
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-riscv-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-5.19",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.2",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-starfive-6.5",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "6.5.0-1017.18~22.04.1"
+        ]
+      },
+      {
+        "package": "linux-xilinx-zynqmp",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1038.42"
+        ]
+      },
+      {
+        "package": "linux-bluefield",
+        "ecosystem": "Ubuntu:Nvidia-BlueField:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1056.58"
+        ]
+      },
+      {
+        "package": "linux-intel-iot-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1066.68"
+        ]
+      },
+      {
+        "package": "linux-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1073.81"
+        ]
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-preview:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "linux-aws-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1072.78+fips1"
+        ]
+      },
+      {
+        "package": "linux-azure-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1075.84+fips1"
+        ]
+      },
+      {
+        "package": "linux-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-125.135+fips1"
+        ]
+      },
+      {
+        "package": "linux-gcp-fips",
+        "ecosystem": "Ubuntu:Pro:FIPS-updates:22.04:LTS",
+        "fixed_versions": [
+          "5.15.0-1071.79+fips1"
+        ]
+      },
+      {
+        "package": "linux-raspi-realtime",
+        "ecosystem": "Ubuntu:Pro:Realtime:24.04:LTS",
+        "fixed_versions": [
+          "6.8.0-2001.1"
+        ]
+      }
+    ],
+    "source": "osv/cve/2024/UBUNTU-CVE-2024-26661.json"
+  },
+  {
+    "id": "CVE-2025-6425",
+    "text": "CVE: CVE-2025-6425\nDescription: An attacker who enumerated resources from the WebCompat extension could have obtained a persistent UUID that identified the browser, and persisted between containers and normal/private browsing mode, but not profiles. This vulnerability was fixed in Firefox 140, Firefox ESR 115.25, Firefox ESR 128.12, Thunderbird 140, and Thunderbird 128.12.\nPackage: mozjs52; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: mozjs38; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: mozjs68; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: mozjs52; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: mozjs102; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: mozjs78; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: mozjs91; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: thunderbird; Ubuntu: Ubuntu:22.04:LTS; Fixed: 1:128.12.0+build1-0ubuntu0.22.04.1\nPackage: mozjs102; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: mozjs115; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "mozjs52",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs38",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs68",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs52",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs102",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs78",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs91",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "thunderbird",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": [
+          "1:128.12.0+build1-0ubuntu0.22.04.1"
+        ]
+      },
+      {
+        "package": "mozjs102",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "mozjs115",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2025/UBUNTU-CVE-2025-6425.json"
+  },
+  {
+    "id": "CVE-2025-71405",
+    "text": "CVE: CVE-2025-71405\nDescription: chi versions before v5.2.2 contain an open redirect vulnerability in the RedirectSlashes middleware function that uses the Host header to construct redirect URLs. Attackers can manipulate the Host header to redirect users to arbitrary hosts, enabling phishing attacks and credential theft.\nPackage: golang-github-go-chi-chi; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: golang-github-go-chi-chi; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: golang-github-go-chi-chi; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: golang-github-go-chi-chi; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "golang-github-go-chi-chi",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "golang-github-go-chi-chi",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "golang-github-go-chi-chi",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "golang-github-go-chi-chi",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2025/UBUNTU-CVE-2025-71405.json"
+  },
+  {
+    "id": "CVE-2025-64345",
+    "text": "CVE: CVE-2025-64345\nDescription: Wasmtime is a runtime for WebAssembly. Prior to version 38.0.4, 37.0.3, 36.0.3, and 24.0.5, Wasmtime's Rust embedder API contains an unsound interaction where a WebAssembly shared linear memory could be viewed as a type which provides safe access to the host (Rust) to the contents of the linear memory. This is not sound for shared linear memories, which could be modified in parallel, and this could lead to a data race in the host. Patch releases have been issued for all supported versions of Wasmtime, notably: 24.0.5, 36.0.3, 37.0.3, and 38.0.4. These releases reject creation of shared memories via `Memory::new` and shared memories are now excluded from core dumps. As a workaround, eembeddings affected by this issue should use `SharedMemory::new` instead of `Memory::new` to create shared memories. Affected embeddings should also disable core dumps if they are unable to upgrade. Note that core dumps are disabled by default but the wasm threads proposal (and shared memory) is enabled by default.\nPackage: rust-wasmtime; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: rust-wasmtime; Ubuntu: Ubuntu:25.10; Fixed: unknown\nPackage: rust-wasmtime; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: rust-wasmtime; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "rust-wasmtime",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "rust-wasmtime",
+        "ecosystem": "Ubuntu:25.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "rust-wasmtime",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "rust-wasmtime",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2025/UBUNTU-CVE-2025-64345.json"
+  },
+  {
+    "id": "CVE-2025-32900",
+    "text": "CVE: CVE-2025-32900\nDescription: In the KDE Connect information-exchange protocol before 2025-04-18, a packet can be crafted to temporarily change the displayed information about a device, because broadcast UDP is used. This affects KDE Connect before 1.33.0 on Android, KDE Connect before 25.04 on desktop, KDE Connect before 0.5 on iOS, Valent before 1.0.0.alpha.47, and GSConnect before 59.\nPackage: kdeconnect; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:25.10; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: kdeconnect; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:25.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "kdeconnect",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2025/UBUNTU-CVE-2025-32900.json"
+  },
+  {
+    "id": "CVE-2025-27788",
+    "text": "CVE: CVE-2025-27788\nDescription: JSON is a JSON implementation for Ruby. Starting in version 2.10.0 and prior to version 2.10.2, a specially crafted document could cause an out of bound read, most likely resulting in a crash. Versions prior to 2.10.0 are not vulnerable. Version 2.10.2 fixes the problem. No known workarounds are available.\nPackage: ruby-json; Ubuntu: Ubuntu:Pro:14.04:LTS; Fixed: unknown\nPackage: ruby-json; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: ruby-json; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: ruby-json; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: ruby-json; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: ruby-json; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: ruby-json; Ubuntu: Ubuntu:25.04; Fixed: unknown",
+    "affected": [
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:Pro:14.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "ruby-json",
+        "ecosystem": "Ubuntu:25.04",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2025/UBUNTU-CVE-2025-27788.json"
+  },
+  {
+    "id": "CVE-2026-109924",
+    "text": "CVE: CVE-2026-109924\nDescription: undici is an HTTP client library for Node.js. In versions 6.5.0 through 6.29.0, 7.0.0 through 7.30.0, and 8.0.0 through 8.12.1, its EventSource client can be driven to exhaust process memory by a malicious or compromised Server-Sent Events peer. By sending millions of tiny completed data fields with no blank event separator, or a single unfinished line split across many chunks, the parser retains a growing amount of per-field and per-chunk state that the byte-based maxEventSize and maxResponseSize limits do not bound, and because maxResponseSize is enforced on the compressed body before decompression, a small compressed response can expand into enough retained memory to terminate the process. An application only needs to maintain an EventSource connection to an untrusted peer, which controls only the response, and availability is the only impact. The issue is fixed in undici 6.29.1, 7.30.1, and 8.12.2, which bound the retained parser state independently of the byte limits, and users should upgrade to one of those versions or later. There is no workaround.\nPackage: node-undici; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: node-undici; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: node-undici; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "node-undici",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "node-undici",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "node-undici",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2026/UBUNTU-CVE-2026-109924.json"
+  },
+  {
+    "id": "CVE-2026-123533",
+    "text": "CVE: CVE-2026-123533\nDescription: gix-commitgraph before 0.42.0, as used in gitoxide before 0.61.0, contains a denial of service vulnerability because its commit-graph parser does not validate parent graph positions against the declared commit count or check the EDGE chunk length for 4-byte alignment. Attackers can supply a repository containing a crafted .git/objects/info/commit-graph file to trigger panics that abort gix merge-base, gix blame, and applications embedding gix.\nPackage: rust-gix-commitgraph; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: rust-gix-commitgraph; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: rust-gix-commitgraph; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "rust-gix-commitgraph",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "rust-gix-commitgraph",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "rust-gix-commitgraph",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2026/UBUNTU-CVE-2026-123533.json"
+  },
+  {
+    "id": "CVE-2026-66331",
+    "text": "CVE: CVE-2026-66331\nDescription: Allocation of Resources Without Limits or Throttling vulnerability in Apache Thrift Delphi bindings buffered transport. This issue affects Apache Thrift: before 0.25.0. Users are recommended to upgrade to version 0.25.0, which fixes the issue.\nPackage: thrift; Ubuntu: Ubuntu:20.04:LTS; Fixed: unknown\nPackage: thrift; Ubuntu: Ubuntu:22.04:LTS; Fixed: unknown\nPackage: thrift; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: thrift; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: thrift; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "thrift",
+        "ecosystem": "Ubuntu:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "thrift",
+        "ecosystem": "Ubuntu:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "thrift",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "thrift",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "thrift",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2026/UBUNTU-CVE-2026-66331.json"
+  },
+  {
+    "id": "CVE-2026-42387",
+    "text": "CVE: CVE-2026-42387\nDescription: A malicious authoritative server can send a crafted zone via the ZoneToCache function that leads to a crash of the Recursor due to insuffcient input validation.\nPackage: pdns-recursor; Ubuntu: Ubuntu:Pro:16.04:LTS; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:Pro:18.04:LTS; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:Pro:22.04:LTS; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:25.10; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:26.10; Fixed: unknown\nPackage: pdns-recursor; Ubuntu: Ubuntu:26.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:Pro:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:Pro:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:Pro:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:25.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:26.10",
+        "fixed_versions": []
+      },
+      {
+        "package": "pdns-recursor",
+        "ecosystem": "Ubuntu:26.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2026/UBUNTU-CVE-2026-42387.json"
+  },
+  {
+    "id": "CVE-2026-111816",
+    "text": "CVE: CVE-2026-111816\nDescription: Apache Traffic Server forwarded a malformed 302 response that should have been rejected as a parse error, because the Transfer-Encoding: chunked carve-out bypassed the rejection path. A response that two peers can read differently is then stored and served, allowing cache poisoning and response-framing desync. This issue affects Apache Traffic Server: from 8.0.0 through 8.1.11, from 9.0.0 through 9.2.15, from 10.0.0 through 10.1.4, 10.2.0. Users are recommended to upgrade to version 9.2.16, 10.1.5, or 10.2.1, which fix the issue.\nPackage: trafficserver; Ubuntu: Ubuntu:16.04:LTS; Fixed: unknown\nPackage: trafficserver; Ubuntu: Ubuntu:18.04:LTS; Fixed: unknown\nPackage: trafficserver; Ubuntu: Ubuntu:Pro:20.04:LTS; Fixed: unknown\nPackage: trafficserver; Ubuntu: Ubuntu:Pro:22.04:LTS; Fixed: unknown\nPackage: trafficserver; Ubuntu: Ubuntu:24.04:LTS; Fixed: unknown",
+    "affected": [
+      {
+        "package": "trafficserver",
+        "ecosystem": "Ubuntu:16.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "trafficserver",
+        "ecosystem": "Ubuntu:18.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "trafficserver",
+        "ecosystem": "Ubuntu:Pro:20.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "trafficserver",
+        "ecosystem": "Ubuntu:Pro:22.04:LTS",
+        "fixed_versions": []
+      },
+      {
+        "package": "trafficserver",
+        "ecosystem": "Ubuntu:24.04:LTS",
+        "fixed_versions": []
+      }
+    ],
+    "source": "osv/cve/2026/UBUNTU-CVE-2026-111816.json"
+  }
+]

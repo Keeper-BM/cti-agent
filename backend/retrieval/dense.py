@@ -5,16 +5,21 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-import numpy as np
-
 
 @lru_cache(maxsize=2)
 def load_model(model_name):
     import torch
     from sentence_transformers import SentenceTransformer
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
-    return SentenceTransformer(model_name, device=device)
+    return SentenceTransformer(model_name, device=select_device(torch))
+
+
+def select_device(torch):
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
 
 
 def cache_path(cache_directory, model_name, text):
@@ -23,6 +28,8 @@ def cache_path(cache_directory, model_name, text):
 
 
 def embed_texts(texts, model_name, cache_directory):
+    import numpy as np
+
     results = [None] * len(texts)
     missing = []
     missing_indices = []

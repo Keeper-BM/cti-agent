@@ -25,11 +25,7 @@ def build_text(record):
     description = record["text"].split("Description:", 1)[-1]
     description = description.split("\nPackage:", 1)[0].strip()
 
-    packages = sorted({
-        item["package"]
-        for item in record["affected"]
-        if item.get("package")
-    })
+    packages = sorted({item["package"] for item in record["affected"] if item.get("package")})
 
     return (
         f"CVE: {record['id']}\n"
@@ -87,9 +83,7 @@ def main():
         tfidf_time = time.perf_counter() - start
 
         start = time.perf_counter()
-        query_embedding = model.encode(
-            [question], normalize_embeddings=True
-        )[0]
+        query_embedding = model.encode([question], normalize_embeddings=True)[0]
         similarities = embeddings @ query_embedding
         dense = sorted(
             zip(candidates, similarities, strict=True),
@@ -98,14 +92,8 @@ def main():
         dense_time = time.perf_counter() - start
 
         start = time.perf_counter()
-        tfidf_ranks = {
-            candidate["id"]: i
-            for i, (candidate, _) in enumerate(tfidf, 1)
-        }
-        dense_ranks = {
-            candidate["id"]: i
-            for i, (candidate, _) in enumerate(dense, 1)
-        }
+        tfidf_ranks = {candidate["id"]: i for i, (candidate, _) in enumerate(tfidf, 1)}
+        dense_ranks = {candidate["id"]: i for i, (candidate, _) in enumerate(dense, 1)}
 
         hybrid = sorted(
             candidates,
@@ -134,11 +122,7 @@ def main():
                     r"Description: (.*)",
                     candidate["text"],
                 )
-                snippet = (
-                    description.group(1)[:100]
-                    if description
-                    else ""
-                )
+                snippet = description.group(1)[:100] if description else ""
                 print(f"    {candidate['cve_id']}: {snippet}")
 
 

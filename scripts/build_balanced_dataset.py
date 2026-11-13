@@ -7,10 +7,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = (
-    Path.home()
-    / "Desktop/cti-agent-main/data/raw/ubuntu/official_osv/osv-all.tar.xz"
-)
+ARCHIVE = Path.home() / "Desktop/cti-agent-main/data/raw/ubuntu/official_osv/osv-all.tar.xz"
 OUTPUT = ROOT / "data/evaluation/ubuntu_osv_balanced_300.json"
 
 YEARS = (2023, 2024, 2025, 2026)
@@ -64,22 +61,26 @@ def main():
                     for event in range_item.get("events", [])
                     if "fixed" in event
                 ]
-                affected.append({
-                    "package": package.get("name"),
-                    "ecosystem": package.get("ecosystem"),
-                    "fixed_versions": fixed_versions,
-                })
+                affected.append(
+                    {
+                        "package": package.get("name"),
+                        "ecosystem": package.get("ecosystem"),
+                        "fixed_versions": fixed_versions,
+                    }
+                )
 
-            text = "\n".join([
-                f"CVE: {cve_id}",
-                f"Description: {description}",
-                *[
-                    f"Package: {a['package']}; "
-                    f"Ubuntu: {a['ecosystem']}; "
-                    f"Fixed: {', '.join(a['fixed_versions']) or 'unknown'}"
-                    for a in affected
-                ],
-            ])
+            text = "\n".join(
+                [
+                    f"CVE: {cve_id}",
+                    f"Description: {description}",
+                    *[
+                        f"Package: {a['package']}; "
+                        f"Ubuntu: {a['ecosystem']}; "
+                        f"Fixed: {', '.join(a['fixed_versions']) or 'unknown'}"
+                        for a in affected
+                    ],
+                ]
+            )
 
             record = {
                 "id": cve_id,
@@ -102,11 +103,7 @@ def main():
         if len(samples[year]) < PER_YEAR:
             raise RuntimeError(f"{year}년 데이터 부족: {len(samples[year])}건")
 
-    records = [
-        record
-        for year in YEARS
-        for record in samples[year]
-    ]
+    records = [record for year in YEARS for record in samples[year]]
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(
@@ -116,9 +113,7 @@ def main():
 
     print("평가 데이터셋 저장 완료:", OUTPUT)
     print("총 CVE:", len(records))
-    print("연도별 분포:", dict(Counter(
-        record["id"].split("-")[1] for record in records
-    )))
+    print("연도별 분포:", dict(Counter(record["id"].split("-")[1] for record in records)))
     print("파일 크기:", round(OUTPUT.stat().st_size / 1024 / 1024, 2), "MB")
 
 

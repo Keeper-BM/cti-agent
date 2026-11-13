@@ -25,11 +25,7 @@ def build_text(record):
     description = record["text"].split("Description:", 1)[-1]
     description = description.split("\nPackage:", 1)[0].strip()
 
-    packages = sorted({
-        item["package"]
-        for item in record["affected"]
-        if item.get("package")
-    })
+    packages = sorted({item["package"] for item in record["affected"] if item.get("package")})
 
     return (
         f"CVE: {record['id']}\n"
@@ -57,8 +53,7 @@ def calculate_metrics(ranked_ids, relevant_ids):
     )
 
     ideal_dcg = sum(
-        1 / math.log2(position + 1)
-        for position in range(1, min(len(relevant), 10) + 1)
+        1 / math.log2(position + 1) for position in range(1, min(len(relevant), 10) + 1)
     )
 
     ndcg10 = dcg / ideal_dcg if ideal_dcg else 0.0
@@ -71,12 +66,8 @@ def calculate_metrics(ranked_ids, relevant_ids):
 
 
 def main():
-    records = json.loads(
-        (DATA_DIR / "ubuntu_osv_balanced_300.json").read_text()
-    )
-    questions = json.loads(
-        (DATA_DIR / "retrieval_questions_20.json").read_text()
-    )
+    records = json.loads((DATA_DIR / "ubuntu_osv_balanced_300.json").read_text())
+    questions = json.loads((DATA_DIR / "retrieval_questions_20.json").read_text())
 
     texts = [build_text(record) for record in records]
 
@@ -117,10 +108,7 @@ def main():
     )
     query_embedding_seconds = time.perf_counter() - start
 
-    results = {
-        f"RRF_{w:.1f}_{1.0-w:.1f}": []
-        for w in (0.5, 0.3, 0.2, 0.0)
-    }
+    results = {f"RRF_{w:.1f}_{1.0 - w:.1f}": [] for w in (0.5, 0.3, 0.2, 0.0)}
     per_question = []
 
     for question_item, query_embedding in zip(questions, query_embeddings, strict=True):
@@ -134,14 +122,8 @@ def main():
         dense_indices = np.argsort(-similarities, kind="stable")
         dense_ids = [candidates[i]["cve_id"] for i in dense_indices]
 
-        tfidf_ranks = {
-            cve: position
-            for position, cve in enumerate(tfidf_ids, 1)
-        }
-        dense_ranks = {
-            cve: position
-            for position, cve in enumerate(dense_ids, 1)
-        }
+        tfidf_ranks = {cve: position for position, cve in enumerate(tfidf_ids, 1)}
+        dense_ranks = {cve: position for position, cve in enumerate(dense_ids, 1)}
 
         row = {
             "question_id": question_item["question_id"],
@@ -157,11 +139,7 @@ def main():
                 dense_ids,
                 key=lambda cve: (
                     -(
-                        (
-                            tfidf_weight / (60 + tfidf_ranks[cve])
-                            if cve in tfidf_ranks
-                            else 0
-                        )
+                        (tfidf_weight / (60 + tfidf_ranks[cve]) if cve in tfidf_ranks else 0)
                         + dense_weight / (60 + dense_ranks[cve])
                     ),
                     cve,

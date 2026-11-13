@@ -20,15 +20,16 @@ def test_dense_retrieval_preserves_evidence_scope(
     calls = []
 
     def fake_rank_dense(question, candidates, limit=10, **kwargs):
-        calls.append({
-            "question": question,
-            "candidate_snapshot_ids": [
-                candidate["record"].snapshot_id
-                for candidate in candidates
-            ],
-            "limit": limit,
-            "kwargs": kwargs,
-        })
+        calls.append(
+            {
+                "question": question,
+                "candidate_snapshot_ids": [
+                    candidate["record"].snapshot_id for candidate in candidates
+                ],
+                "limit": limit,
+                "kwargs": kwargs,
+            }
+        )
         return [(candidate, 0.9) for candidate in candidates[:limit]]
 
     fake_module = ModuleType("backend.retrieval.dense")
@@ -48,18 +49,13 @@ def test_dense_retrieval_preserves_evidence_scope(
     with Session(engine) as db:
         run = db.get(QuestionRun, response.json()["id"])
         context = run.input_payload
-        snapshots = set(
-            db.get(AnalysisRun, baseline["id"]).source_snapshot_ids
-        )
+        snapshots = set(db.get(AnalysisRun, baseline["id"]).source_snapshot_ids)
 
         assert context["retrieval_version"] == "dense/BAAI/bge-m3"
         assert context["facts"]
         assert not context["insufficient_evidence"]
 
-        evidence = [
-            citation for citation in context["citations"]
-            if citation["id"].startswith("E")
-        ]
+        evidence = [citation for citation in context["citations"] if citation["id"].startswith("E")]
         assert evidence
 
         for citation in evidence:
@@ -69,9 +65,6 @@ def test_dense_retrieval_preserves_evidence_scope(
             assert chunk.end_offset - chunk.start_offset == len(chunk.text)
 
         assert calls[0]["limit"] == 10
-        assert all(
-            snapshot_id in snapshots
-            for snapshot_id in calls[0]["candidate_snapshot_ids"]
-        )
+        assert all(snapshot_id in snapshots for snapshot_id in calls[0]["candidate_snapshot_ids"])
 
     get_settings.cache_clear()

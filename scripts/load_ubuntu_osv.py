@@ -5,10 +5,7 @@ import random
 import tarfile
 from pathlib import Path
 
-ARCHIVE = (
-    Path.home()
-    / "Desktop/cti-agent-main/data/raw/ubuntu/official_osv/osv-all.tar.xz"
-)
+ARCHIVE = Path.home() / "Desktop/cti-agent-main/data/raw/ubuntu/official_osv/osv-all.tar.xz"
 
 YEARS = {2023, 2024, 2025, 2026}
 SAMPLE_SIZE = 300
@@ -26,10 +23,7 @@ def load_records():
             if not (
                 member.isfile()
                 and member.name.endswith(".json")
-                and any(
-                    f"/cve/{year}/" in member.name
-                    for year in YEARS
-                )
+                and any(f"/cve/{year}/" in member.name for year in YEARS)
             ):
                 continue
 
@@ -51,22 +45,26 @@ def load_records():
                     if "fixed" in event
                 ]
 
-                affected.append({
-                    "package": package.get("name"),
-                    "ecosystem": package.get("ecosystem"),
-                    "fixed_versions": fixed_versions,
-                })
+                affected.append(
+                    {
+                        "package": package.get("name"),
+                        "ecosystem": package.get("ecosystem"),
+                        "fixed_versions": fixed_versions,
+                    }
+                )
 
-            text = "\n".join([
-                f"CVE: {cve_id}",
-                f"Description: {description}",
-                *[
-                    f"Package: {a['package']}; "
-                    f"Ubuntu: {a['ecosystem']}; "
-                    f"Fixed: {', '.join(a['fixed_versions']) or 'unknown'}"
-                    for a in affected
-                ],
-            ])
+            text = "\n".join(
+                [
+                    f"CVE: {cve_id}",
+                    f"Description: {description}",
+                    *[
+                        f"Package: {a['package']}; "
+                        f"Ubuntu: {a['ecosystem']}; "
+                        f"Fixed: {', '.join(a['fixed_versions']) or 'unknown'}"
+                        for a in affected
+                    ],
+                ]
+            )
 
             record = {
                 "id": cve_id,

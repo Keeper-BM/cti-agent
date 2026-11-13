@@ -40,18 +40,13 @@ def test_real_bge_m3_question_api(
     with Session(engine) as db:
         run = db.get(QuestionRun, response.json()["id"])
         context = run.input_payload
-        snapshots = set(
-            db.get(AnalysisRun, baseline["id"]).source_snapshot_ids
-        )
+        snapshots = set(db.get(AnalysisRun, baseline["id"]).source_snapshot_ids)
 
         assert context["retrieval_version"] == "dense/BAAI/bge-m3"
         assert context["facts"]
         assert not context["insufficient_evidence"]
 
-        evidence = [
-            citation for citation in context["citations"]
-            if citation["id"].startswith("E")
-        ]
+        evidence = [citation for citation in context["citations"] if citation["id"].startswith("E")]
         assert evidence
 
         for citation in evidence:

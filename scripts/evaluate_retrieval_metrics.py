@@ -25,11 +25,7 @@ def build_text(record):
     description = record["text"].split("Description:", 1)[-1]
     description = description.split("\nPackage:", 1)[0].strip()
 
-    packages = sorted({
-        item["package"]
-        for item in record["affected"]
-        if item.get("package")
-    })
+    packages = sorted({item["package"] for item in record["affected"] if item.get("package")})
 
     return (
         f"CVE: {record['id']}\n"
@@ -57,8 +53,7 @@ def calculate_metrics(ranked_ids, relevant_ids):
     )
 
     ideal_dcg = sum(
-        1 / math.log2(position + 1)
-        for position in range(1, min(len(relevant), 10) + 1)
+        1 / math.log2(position + 1) for position in range(1, min(len(relevant), 10) + 1)
     )
 
     ndcg10 = dcg / ideal_dcg if ideal_dcg else 0.0
@@ -71,12 +66,8 @@ def calculate_metrics(ranked_ids, relevant_ids):
 
 
 def main():
-    records = json.loads(
-        (DATA_DIR / "ubuntu_osv_balanced_300.json").read_text()
-    )
-    questions = json.loads(
-        (DATA_DIR / "retrieval_questions_20.json").read_text()
-    )
+    records = json.loads((DATA_DIR / "ubuntu_osv_balanced_300.json").read_text())
+    questions = json.loads((DATA_DIR / "retrieval_questions_20.json").read_text())
 
     texts = [build_text(record) for record in records]
 
@@ -131,24 +122,14 @@ def main():
         dense_indices = np.argsort(-similarities, kind="stable")
         dense_ids = [candidates[i]["cve_id"] for i in dense_indices]
 
-        tfidf_ranks = {
-            cve: position
-            for position, cve in enumerate(tfidf_ids, 1)
-        }
-        dense_ranks = {
-            cve: position
-            for position, cve in enumerate(dense_ids, 1)
-        }
+        tfidf_ranks = {cve: position for position, cve in enumerate(tfidf_ids, 1)}
+        dense_ranks = {cve: position for position, cve in enumerate(dense_ids, 1)}
 
         hybrid_ids = sorted(
             dense_ids,
             key=lambda cve: (
                 -(
-                    (
-                        1 / (60 + tfidf_ranks[cve])
-                        if cve in tfidf_ranks
-                        else 0
-                    )
+                    (1 / (60 + tfidf_ranks[cve]) if cve in tfidf_ranks else 0)
                     + 1 / (60 + dense_ranks[cve])
                 ),
                 cve,
@@ -170,11 +151,7 @@ def main():
             results[name].append(metrics)
 
             row[name] = {
-                "rank": (
-                    ranked_ids.index(relevant[0]) + 1
-                    if relevant[0] in ranked_ids
-                    else None
-                ),
+                "rank": (ranked_ids.index(relevant[0]) + 1 if relevant[0] in ranked_ids else None),
                 "top5": ranked_ids[:5],
                 "metrics": metrics,
             }

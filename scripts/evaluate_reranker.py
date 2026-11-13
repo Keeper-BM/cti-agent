@@ -27,11 +27,7 @@ def build_text(record):
     description = record["text"].split("Description:", 1)[-1]
     description = description.split("\nPackage:", 1)[0].strip()
 
-    packages = sorted({
-        item["package"]
-        for item in record["affected"]
-        if item.get("package")
-    })
+    packages = sorted({item["package"] for item in record["affected"] if item.get("package")})
 
     return (
         f"CVE: {record['id']}\n"
@@ -59,8 +55,7 @@ def calculate_metrics(ranked_ids, relevant_ids):
     )
 
     ideal_dcg = sum(
-        1 / math.log2(position + 1)
-        for position in range(1, min(len(relevant), 10) + 1)
+        1 / math.log2(position + 1) for position in range(1, min(len(relevant), 10) + 1)
     )
 
     ndcg10 = dcg / ideal_dcg if ideal_dcg else 0.0
@@ -73,25 +68,23 @@ def calculate_metrics(ranked_ids, relevant_ids):
 
 
 def main():
-    records = json.loads(
-        (DATA_DIR / "ubuntu_osv_balanced_300.json").read_text()
-    )
-    questions = json.loads(
-        (DATA_DIR / "retrieval_questions_20.json").read_text()
-    )
+    records = json.loads((DATA_DIR / "ubuntu_osv_balanced_300.json").read_text())
+    questions = json.loads((DATA_DIR / "retrieval_questions_20.json").read_text())
 
     chunks = []
     for record in records:
         text = build_text(record)
         for ordinal, start_offset in enumerate(range(0, len(text), 1000)):
-            excerpt = text[start_offset:start_offset + 1200]
-            chunks.append({
-                "id": len(chunks) + 1,
-                "cve_id": record["id"],
-                "ordinal": ordinal,
-                "text": excerpt,
-                "vector": vector(excerpt),
-            })
+            excerpt = text[start_offset : start_offset + 1200]
+            chunks.append(
+                {
+                    "id": len(chunks) + 1,
+                    "cve_id": record["id"],
+                    "ordinal": ordinal,
+                    "text": excerpt,
+                    "vector": vector(excerpt),
+                }
+            )
 
     texts = [chunk["text"] for chunk in chunks]
     candidates = chunks
@@ -151,10 +144,7 @@ def main():
         dense_ids = unique_cves(dense_indices)
 
         top_indices = dense_indices[:TOP_K]
-        pairs = [
-            (question, candidates[i]["text"])
-            for i in top_indices
-        ]
+        pairs = [(question, candidates[i]["text"]) for i in top_indices]
 
         rerank_start = time.perf_counter()
         scores = reranker.predict(pairs, batch_size=4)
@@ -165,12 +155,8 @@ def main():
             key=lambda i: (-float(scores[i]), i),
         )
 
-        reranked_top = [
-            top_indices[i] for i in reranked_indices
-        ]
-        reranked_ids = unique_cves(
-            list(reranked_top) + list(dense_indices[TOP_K:])
-        )
+        reranked_top = [top_indices[i] for i in reranked_indices]
+        reranked_ids = unique_cves(list(reranked_top) + list(dense_indices[TOP_K:]))
 
         row = {
             "question_id": question_item["question_id"],
@@ -186,11 +172,7 @@ def main():
             results[name].append(metrics)
 
             row[name] = {
-                "rank": (
-                    ranked_ids.index(relevant[0]) + 1
-                    if relevant[0] in ranked_ids
-                    else None
-                ),
+                "rank": (ranked_ids.index(relevant[0]) + 1 if relevant[0] in ranked_ids else None),
                 "top5": ranked_ids[:5],
                 "metrics": metrics,
             }

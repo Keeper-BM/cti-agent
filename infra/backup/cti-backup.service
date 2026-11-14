@@ -1,0 +1,23 @@
+[Unit]
+Description=Verified and encrypted CTI operational backup
+After=docker.service
+Requires=docker.service
+# Adjust these paths for the approved backup volume before installation.
+RequiresMountsFor=/srv/cti-backups /var/lib/cti-backup
+
+[Service]
+Type=oneshot
+User=cti-backup
+Group=cti-backup
+SupplementaryGroups=docker
+WorkingDirectory=/opt/cti-agent
+ExecStart=/opt/cti-agent/.venv/bin/python -m scripts.backup_job --config /etc/cti-backup/job.json
+UMask=0077
+Environment=PYTHONDONTWRITEBYTECODE=1
+TimeoutStartSec=30min
+TimeoutStopSec=120s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/cti-backups /var/lib/cti-backup

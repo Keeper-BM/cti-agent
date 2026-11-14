@@ -44,3 +44,7 @@
 - [완료·인수 계획](completion-plan.md)
 
 - [실제 영향 있음 시연·실행 조건·원복](affected-demo.md)
+
+- [MySQL 기준 미달·수정 버전 비교](mysql-version-pair.md)
+- [PostgreSQL 백업·복원 자동화](postgres-backup.md)
+- [MySQL 비교·PostgreSQL 복원 실검증](mysql-backup-verification.md)

@@ -6,6 +6,7 @@
 
 - Ubuntu 22.04·24.04, 명시적인 IPv4/IPv6 주소와 포트, 공개키 인증을 지원합니다.
 - OS·아키텍처·dpkg 바이너리/소스 패키지명·전체 버전·설치 상태를 조회합니다. 설치가 중단된 패키지도 상태와 함께 남기며, 삭제 후 설정만 남은 패키지는 제외합니다.
+- `apache2.service`·`mysql.service`의 systemd 로드·활성·세부·활성화 설정을 수집 근거에 저장합니다. 서비스 유닛 부재, 중지, 조회 실패를 구분합니다.
 - 패키지 목록은 최대 5,000개입니다. 이후 취약점 분석 대상은 기존과 동일하게 Apache2·MySQL Ubuntu 패키지입니다.
 - Apache2·MySQL 관련 `apt-cache policy` 출력은 참고 근거로 보관합니다. 네트워크 자료 갱신, 패키지 설치·수정, sudo, 서비스 재시작은 실행하지 않습니다.
 - 호스트명·비밀번호 로그인·임의 명령 입력·점프 호스트·자동 주기 수집은 지원하지 않습니다.
@@ -41,6 +42,45 @@ Compose는 설정한 키 디렉터리를 `/run/cti-ssh-keys`에 읽기 전용으
 
 ## 화면 사용 순서
 
+### 선택 사항: 서버에서도 명령 제한
+
+애플리케이션의 고정 명령 외에 SSH 서버에서도 해당 키의 명령을 제한하려면,
+현재 코드로 독립 실행 래퍼를 생성하고 서버 관리자가 설치합니다.
+생성은 로컬 파일 출력만 수행하며 서버·계정·sudo 설정을 자동으로 바꾸지 않습니다.
+
+```bash
+uv run python -m scripts.render_ssh_guard > cti-readonly
+```
+
+서버 관리 채널로 전달한 파일을 root 소유 `/usr/local/libexec/cti-readonly`에 `0755`로
+설치합니다. `/usr/local/libexec`와 상위 디렉터리도 수집 계정이 수정할 수 없어야 합니다.
+sudo 권한 없는 전용 계정의 해당 `authorized_keys` 행은 다음 형태로 설정합니다.
+키 파일과 경로는 서버 관리자가 보호하고, 일반 관리용 키와 분리합니다.
+
+```text
+restrict,command="/usr/local/libexec/cti-readonly" ssh-ed25519 <collector-public-key>
+```
+
+래퍼는 Python `-I`로 시작하고 `SSH_ORIGINAL_COMMAND`가 현재 고정 명령과 정확히
+같은 경우에만 빈 환경으로 `execve`합니다. 임의 셸, 변경한 인수, 명령 연결, SFTP와
+대화형 접속은 종료 코드 126으로 거부합니다. `restrict`는 해당 키의 포워딩·PTY 등도 제한합니다.
+수집 계정의 다른 키나 인증 방식에도 같은 정책이 적용되는지는 서버 관리자가 확인해야 합니다.
+
+기본 래퍼는 패키지·서비스 수집 여섯 명령만 허용합니다. 기존 **공식 파일 검증**까지
+사용하려면 다음 옵션으로 생성합니다. 이 옵션도 정확한 번들 검증 프로그램 한 개만 추가하며,
+일반 Python 실행·임의 명령·sudo 권한은 허용하지 않습니다.
+
+```bash
+uv run python -m scripts.render_ssh_guard --include-file-verification > cti-readonly
+```
+
+선택적 Apache 실행 관측기의 설치·제한 sudo 설정은 [파일 검증 안내](package-verification.md)의
+별도 절차를 따릅니다. 이 생성 도구는 sudoers를 변경하지 않습니다. 수집기나 파일 검증
+프로그램이 변경되면 래퍼도 다시 생성·검토·설치합니다. 검증기를 허용하지 않은 래퍼에서
+공식 파일 검증을 실행하면 실패하며, 일반 SSH 수집은 계속 사용할 수 있습니다.
+
+### 웹에서 수집
+
 1. **자산 현황 → 자산 이름**을 선택합니다.
 2. **서버 패키지 가져오기**에서 IP, 포트, 계정, 등록 인증키, 호스트 키 지문을 입력하고 **연결 설정 저장**을 누릅니다.
 3. **패키지 정보 가져오기**를 누릅니다. 대기·수집 중·완료·일부 수집·실패 상태를 확인합니다.
@@ -52,7 +92,7 @@ Compose는 설정한 키 디렉터리를 `/run/cti-ssh-keys`에 읽기 전용으
 
 ## 고정 조회와 저장
 
-`backend/collectors/ssh_protocol.py`의 고정 명령 네 개만 실행합니다. 요청의 IP·사용자명·키 이름을 셸 명령에 끼워 넣지 않습니다. 원격 환경 변수는 비우고 고정 PATH·C 로캘을 사용합니다. `/etc/os-release`는 텍스트로 파싱하며 셸에서 source하지 않습니다.
+`backend/collectors/ssh_protocol.py`의 고정 명령 여섯 개만 실행합니다. 요청의 IP·사용자명·키 이름을 셸 명령에 끼워 넣지 않습니다. 원격 환경 변수는 비우고 고정 PATH·C 로캘을 사용합니다. `/etc/os-release`는 텍스트로 파싱하며 셸에서 source하지 않습니다.
 
 | 명령                                          | 저장 의미                                                           |
 | --------------------------------------------- | ------------------------------------------------------------------- |
@@ -60,6 +100,26 @@ Compose는 설정한 키 디렉터리를 `/run/cti-ssh-keys`에 읽기 전용으
 | `/usr/bin/dpkg --print-architecture`          | OS 기본 아키텍처                                                    |
 | `/usr/bin/dpkg-query --show --showformat=...` | 바이너리/소스 이름·버전·아키텍처·설치/오류 상태                     |
 | `/usr/bin/apt-cache ... policy ...`           | 고정 Apache2·MySQL 패키지의 캐시 참고 정보; 캐시 쓰기 경로 비활성화 |
+
+나머지 두 명령은 `systemctl --no-pager --all show`로 각각 `apache2.service`와
+`mysql.service`의 `Id,LoadState,ActiveState,SubState,UnitFileState`만 읽습니다.
+각 명령은 5초 뒤 timeout, 추가 1초 뒤 강제 종료하며 전체 SSH 시간·출력 한도도 적용합니다.
+서비스 시작·중지·설정 변경·로그 조회·sudo는 실행하지 않습니다.
+[systemd의 show 문서](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html)
+에 따라 기계 판독용 속성을 읽고, `--all`로 빈 속성도 포함합니다.
+
+서비스 관찰은 `CollectionDetail.evidence.services`에 저장합니다. `OBSERVED`는 상태 조회
+성공, `NOT_FOUND`는 서비스 유닛 부재, `UNKNOWN`은 명령 실패·시간 초과·권한 거부 또는
+출력 형식 오류입니다. 유닛 부재를 패키지 미설치로, 서비스 중지를 비취약으로 바꾸지 않습니다.
+유닛 별칭이 다른 서비스로 해석되거나 속성이 누락·중복되면 확인 불가로 남깁니다.
+서비스 조회만 실패하면 작업은 `PARTIAL`이지만 완전하게 읽은 패키지 목록은 유지합니다.
+이 관찰값은 취약점 판정 엔진의 확정 조건으로 사용하지 않습니다.
+
+서비스 필드는 기본값이 빈 목록인 추가 필드로, 과거 수집 근거 JSON을 변경하지 않고
+조회할 수 있습니다. 화면에는 과거 기록의 서비스 상태가 없음을 표시합니다.
+수집기 `ubuntu-ssh/1.2` 배포 시 API와 Worker를 함께 재시작하고,
+서버의 강제 명령 래퍼를 사용한다면 새 두 읽기 명령도 정확히 허용해야 합니다.
+기존 버전으로 이미 대기 중인 요청은 `COLLECTOR_CHANGED`로 종료되므로 새로 접수합니다.
 
 SSH 출력은 stdout·stderr 합계 2 MiB, 연결·인증·명령 실행 전체는 기본 45초(5~60초)로 제한합니다. stderr 본문은 저장하지 않고 존재 여부만 남깁니다. 출력 URL의 사용자명·비밀번호 영역은 가린 후 저장하며, 해시는 가린 `CommandResult` JSON들을 줄바꿈으로 연결한 UTF-8 바이트의 SHA-256입니다.
 

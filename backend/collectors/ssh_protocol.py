@@ -6,13 +6,14 @@ import shlex
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.assessment.debian_version import compare_versions
+from backend.collectors.service_status import SERVICE_UNITS, ServiceObservation, parse_service
 from backend.core.errors import AppError
 from backend.models.contracts import Coverage, InstalledPackage, InventorySnapshot, OperatingSystem
 
-COLLECTOR_VERSION = "ubuntu-ssh/1.1"
+COLLECTOR_VERSION = "ubuntu-ssh/1.2"
 ENV = "/usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C LANG=C "
 PACKAGE_FORMAT = (
     "${binary:Package}\t${Version}\t${source:Package}\t${source:Version}\t"
@@ -30,6 +31,13 @@ COMMANDS = {
     + "/usr/bin/timeout --kill-after=2s 12s /usr/bin/apt-cache "
     + "-o Dir::Cache::pkgcache= -o Dir::Cache::srcpkgcache= policy "
     + POLICY_PACKAGES,
+    **{
+        name: ENV
+        + "/usr/bin/timeout --kill-after=1s 5s /usr/bin/systemctl --no-pager --all show "
+        + "--property=Id,LoadState,ActiveState,SubState,UnitFileState "
+        + unit
+        for name, unit in SERVICE_UNITS.items()
+    },
 }
 MAX_OUTPUT_BYTES = 2 * 1024 * 1024
 MAX_PACKAGES = 5000
@@ -62,6 +70,7 @@ class CollectionEvidence(BaseModel):
     output_sha256: str
     origin_verification: str = "NOT_VERIFIED"
     warnings: list[str]
+    services: list[ServiceObservation] = Field(default_factory=list)
 
 
 def clean_output(value: str) -> str:
@@ -170,6 +179,13 @@ def make_inventory(asset_id: UUID, run_id: str, results: list[CommandResult], fi
         warnings.append(f"패키지 {malformed}줄을 해석하지 못했습니다. 부분 수집으로 저장합니다.")
     if by_name["apt_policy"].exit_code != 0:
         warnings.append("APT 캐시의 출처 참고 정보를 읽지 못했습니다.")
+    services = [
+        parse_service(unit, by_name[name].exit_code, by_name[name].stdout)
+        for name, unit in SERVICE_UNITS.items()
+    ]
+    for service in services:
+        if service.status == "UNKNOWN":
+            warnings.append(f"{service.unit}: 서비스 상태를 확인하지 못했습니다.")
     warnings.append(
         "APT 캐시는 저장소의 참고 정보입니다. 설치 출처·서명·파일 무결성을 증명하지 않습니다."
     )
@@ -196,5 +212,6 @@ def make_inventory(asset_id: UUID, run_id: str, results: list[CommandResult], fi
         commands=sanitized,
         output_sha256=hashlib.sha256(wire.encode("utf-8")).hexdigest(),
         warnings=warnings,
+        services=services,
     )
     return inventory, evidence

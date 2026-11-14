@@ -94,7 +94,7 @@ def test_os_file_is_data_not_shell_and_apt_credentials_are_redacted():
         {**DEFAULT_OUTPUTS, "apt_policy": (0, "https://user:private-password@repo.invalid/ubuntu")}
     )
     assert "private-password" not in evidence.model_dump_json()
-    assert "REDACTED" in evidence.commands[-1].stdout
+    assert "REDACTED" in next(c.stdout for c in evidence.commands if c.name == "apt_policy")
 
 
 @pytest.mark.parametrize(

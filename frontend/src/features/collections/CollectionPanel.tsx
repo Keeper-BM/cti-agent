@@ -396,6 +396,8 @@ function CollectionResult({
     architecture: "아키텍처",
     packages: "설치 패키지",
     apt_policy: "APT 저장소 참고 정보",
+    service_apache2: "Apache 서비스 상태",
+    service_mysql: "MySQL 서비스 상태",
   };
   return (
     <div className="collection-result" aria-live="polite">
@@ -426,6 +428,50 @@ function CollectionResult({
             서버에서 조회한 패키지 정보입니다. 설치 출처와 파일 무결성은 미검증 상태이며, SSH
             수집만으로 취약 여부를 확정하지 않습니다.
           </p>
+          <div className="collection-services">
+            <h3>서비스 상태</h3>
+            <p className="inventory-note">
+              수집 당시의 서비스 상태입니다. 서비스 유닛 부재와 패키지 미설치는 다르며, 활성
+              상태만으로 취약 여부를 판단하지 않습니다.
+            </p>
+            {evidence.services?.length ? (
+              <ul>
+                {evidence.services.map((service) => (
+                  <li key={service.unit}>
+                    <strong>{service.unit === "apache2.service" ? "Apache" : "MySQL"}</strong>
+                    {" · "}
+                    {service.status === "UNKNOWN"
+                      ? "확인 불가"
+                      : service.status === "NOT_FOUND"
+                        ? "서비스 유닛 없음"
+                        : service.active_state === "active"
+                          ? "활성"
+                          : service.active_state === "inactive"
+                            ? "중지"
+                            : service.active_state === "failed"
+                              ? "서비스 실패"
+                              : service.active_state}
+                    {service.status === "OBSERVED" && (
+                      <span>
+                        {" · "}
+                        {service.unit} · 로드 {service.load_state} · 상세 {service.sub_state}
+                        {" · "}활성화 설정 {service.unit_file_state ?? "없음"}
+                      </span>
+                    )}
+                    {service.status === "UNKNOWN" && (
+                      <span>
+                        {service.error_code === "COMMAND_FAILED"
+                          ? " · 조회 명령이 실패했습니다. 접속 계정의 허용 명령을 확인하세요."
+                          : " · 조회 출력이 불완전하거나 형식이 올바르지 않습니다."}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>이 수집 기록에는 서비스 상태가 없습니다. 새로 수집하면 확인할 수 있습니다.</p>
+            )}
+          </div>
           <details className="collection-evidence">
             <summary>수집 근거 및 제한 사항</summary>
             <ul>

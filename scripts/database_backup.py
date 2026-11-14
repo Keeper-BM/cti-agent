@@ -3,7 +3,10 @@
 import argparse
 import hashlib
 import json
+import os
+import re
 import sqlite3
+from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -13,12 +16,21 @@ from backend.core.config import get_settings
 
 
 def inspect_database(path: Path) -> str:
-    with sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True) as db:
+    with closing(sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
         if db.execute("PRAGMA integrity_check").fetchone() != ("ok",):
             raise ValueError("Database integrity check failed")
         if db.execute("PRAGMA foreign_key_check").fetchone() is not None:
             raise ValueError("Database foreign key check failed")
-        return db.execute("SELECT version_num FROM alembic_version").fetchone()[0]
+        revisions = db.execute("SELECT version_num FROM alembic_version").fetchall()
+        if len(revisions) != 1 or not isinstance(revisions[0][0], str) or not revisions[0][0]:
+            raise ValueError("Database must have exactly one migration revision")
+        return revisions[0][0]
+
+
+def create_private_file(path: Path):
+    """Create exclusively with owner-only POSIX permissions, even with a permissive umask."""
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    return os.fdopen(descriptor, "w", encoding="utf-8")
 
 
 def digest(path: Path) -> str:
@@ -33,11 +45,12 @@ def backup(source: Path, target: Path) -> dict:
         raise ValueError("Backup destination already exists; use a new file name")
     target.parent.mkdir(parents=True, exist_ok=True)
     # Exclusive creation prevents overwriting a database or following a destination symlink.
-    with target.open("xb"):
+    with create_private_file(target):
         pass
+    manifest_created = False
     try:
-        with sqlite3.connect(source.as_uri() + "?mode=ro", uri=True) as src:
-            with sqlite3.connect(target) as dst:
+        with closing(sqlite3.connect(source.as_uri() + "?mode=ro", uri=True)) as src:
+            with closing(sqlite3.connect(target)) as dst:
                 src.backup(dst, pages=256, sleep=0.05)
         version = inspect_database(target)
         meta = {
@@ -47,11 +60,14 @@ def backup(source: Path, target: Path) -> dict:
             "sha256": digest(target),
             "bytes": target.stat().st_size,
         }
-        with manifest.open("x", encoding="utf-8") as stream:
+        with create_private_file(manifest) as stream:
+            manifest_created = True
             json.dump(meta, stream, indent=2)
             stream.write("\n")
         return meta
     except Exception:
+        if manifest_created:
+            manifest.unlink(missing_ok=True)
         target.unlink(missing_ok=True)
         raise
 
@@ -59,6 +75,17 @@ def backup(source: Path, target: Path) -> dict:
 def verify(source: Path) -> dict:
     manifest = source.with_suffix(source.suffix + ".json")
     meta = json.loads(manifest.read_text(encoding="utf-8"))
+    # Validate untrusted JSON before dereferencing it or reading the database.
+    if (
+        not isinstance(meta, dict)
+        or not isinstance(meta.get("schema"), str)
+        or not meta["schema"]
+        or not isinstance(meta.get("sha256"), str)
+        or re.fullmatch(r"[0-9a-f]{64}", meta["sha256"]) is None
+        or type(meta.get("bytes")) is not int
+        or meta["bytes"] <= 0
+    ):
+        raise ValueError("Backup manifest fields are invalid")
     if (
         meta.get("format") != "cti-sqlite-backup/1.0"
         or meta.get("sha256") != digest(source)

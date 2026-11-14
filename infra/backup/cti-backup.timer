@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily CTI backup example; review time and storage before enabling
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 Asia/Seoul
+RandomizedDelaySec=5min
+Persistent=true
+Unit=cti-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1387,7 +1387,7 @@ export interface components {
         CollectionEvidence: {
             /**
              * Collector Version
-             * @default ubuntu-ssh/1.1
+             * @default ubuntu-ssh/1.2
              */
             collector_version: string;
             /**
@@ -1408,6 +1408,8 @@ export interface components {
             origin_verification: string;
             /** Warnings */
             warnings: string[];
+            /** Services */
+            services?: components["schemas"]["ServiceObservation"][];
         };
         /** CollectionList */
         CollectionList: {
@@ -3012,6 +3014,29 @@ export interface components {
             attributes?: {
                 [key: string]: string;
             };
+        };
+        /** ServiceObservation */
+        ServiceObservation: {
+            /**
+             * Unit
+             * @enum {string}
+             */
+            unit: "apache2.service" | "mysql.service";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "OBSERVED" | "NOT_FOUND" | "UNKNOWN";
+            /** Load State */
+            load_state?: string | null;
+            /** Active State */
+            active_state?: string | null;
+            /** Sub State */
+            sub_state?: string | null;
+            /** Unit File State */
+            unit_file_state?: string | null;
+            /** Error Code */
+            error_code?: ("COMMAND_FAILED" | "OUTPUT_INVALID") | null;
         };
         /** SessionResponse */
         SessionResponse: {

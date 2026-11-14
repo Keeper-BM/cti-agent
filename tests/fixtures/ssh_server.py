@@ -12,6 +12,14 @@ from backend.collectors.ssh_protocol import COMMANDS
 
 APACHE = "apache2-bin\t2.4.58-1ubuntu8.1\tapache2\t2.4.58-1ubuntu8.1\tamd64\tinstalled\tok\n"
 MYSQL = "mysql-server-8.0\t8.0.36-2ubuntu3\tmysql-8.0\t8.0.36-2ubuntu3\tamd64\tinstalled\tok\n"
+APACHE_SERVICE = (
+    "Id=apache2.service\nLoadState=loaded\nActiveState=active\nSubState=running\n"
+    "UnitFileState=enabled\n"
+)
+MYSQL_SERVICE = (
+    "Id=mysql.service\nLoadState=loaded\nActiveState=inactive\nSubState=dead\n"
+    "UnitFileState=disabled\n"
+)
 DEFAULT_OUTPUTS = {
     "os_release": (0, 'ID=ubuntu\nVERSION_ID="24.04"\nVERSION_CODENAME=noble\n'),
     "architecture": (0, "amd64\n"),
@@ -20,6 +28,8 @@ DEFAULT_OUTPUTS = {
         0,
         "apache2-bin:\n  Installed: 2.4.58-1ubuntu8.1\n  Candidate: 2.4.58-1ubuntu8.2\n",
     ),
+    "service_apache2": (0, APACHE_SERVICE),
+    "service_mysql": (0, MYSQL_SERVICE),
 }
 
 
@@ -44,6 +54,7 @@ def ssh_server(tmp_path, *, outputs=None, auth=True, slow=False):
         outputs=outputs or dict(DEFAULT_OUTPUTS),
         transports=[],
         errors=[],
+        slow=slow,
     )
     stop = threading.Event()
 
@@ -75,7 +86,7 @@ def ssh_server(tmp_path, *, outputs=None, auth=True, slow=False):
 
             def send():
                 try:
-                    if slow:
+                    if state.slow:
                         stop.wait(7)
                     else:
                         time.sleep(0.02)

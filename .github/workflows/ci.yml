@@ -34,7 +34,7 @@ jobs:
       - run: uv sync --frozen
       - run: uv run ruff check backend scripts tests
       - run: uv run ruff format --check backend scripts tests
-      - run: uv run pytest
+      - run: uv run pytest --postgres-matrix
       - run: uv run python scripts/export_openapi.py
       - run: git diff --exit-code -- docs/openapi.json
 
@@ -60,6 +60,8 @@ jobs:
   compose-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      COMPOSE_FILE: compose.yaml:.github/compose-smoke.yaml
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -70,6 +72,16 @@ jobs:
       - run: uv run python scripts/init_env.py
       - run: docker compose config --quiet
       - run: docker compose up --build -d --wait --wait-timeout 180
+      - run: uv run python scripts/smoke_http.py
+      - name: Verify PostgreSQL restore and account access through real API processes
+        run: >-
+          uv run pytest tests/integration/test_postgres_backup.py
+          tests/integration/test_account_restore_compose.py
+          tests/integration/test_backup_job_compose.py -v
+        env:
+          TEST_POSTGRES_COMPOSE_PROJECT: blended-threat-intel
+          TEST_POSTGRES_COMPOSE_ENV_FILE: .env
+      - run: uv run python scripts/smoke_compose_recreate.py --project-name blended-threat-intel --env-file .env
       - run: uv run python scripts/smoke_http.py
       - if: failure()
         run: docker compose logs --no-color api worker migrate web

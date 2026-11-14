@@ -1,0 +1,10 @@
+{
+  "project_name": "blended-threat-intel",
+  "env_file": "/opt/cti-agent/.env",
+  "key_file": "/etc/cti-backup/recovery.key",
+  "ssh_directory": "/opt/cti-agent/.data/ssh-keys",
+  "work_directory": "/var/lib/cti-backup",
+  "destination_directory": "/srv/cti-backups",
+  "destination_id": "cti-approved-backup-volume",
+  "timeout_seconds": 300
+}

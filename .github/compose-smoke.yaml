@@ -1,0 +1,7 @@
+# Disposable CI only: the DNS regression reserves an address with docker run --ip.
+# Explicit IPAM makes this work on engines that reject static IPs in auto-created subnets.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.254.0/24

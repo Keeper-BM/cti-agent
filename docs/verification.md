@@ -1,5 +1,84 @@
 # 검증 기록
 
+## Compose → 실제 VM SSH·PostgreSQL·화면 통합 — 2026-11-12 KST
+
+별도 Docker 프로젝트에서 Nginx → API → PostgreSQL → Worker → 실제 Ubuntu 22.04 VM
+경로로 패키지 642개와 Apache·MySQL 활성 상태를 수집했습니다. 실제 브라우저 수집 버튼과
+서비스 상태·패키지 조회도 확인했습니다. 정상·부분 수집, 호스트 키 오류·허가 대상·키 권한
+거부, 볼륨 보존 재기동 후 응답 일치를 검증했습니다.
+
+실제 Compose Worker를 수집 중 SIGKILL한 뒤 `WORKER_RESTARTED` 실패 처리,
+감사 이벤트 1건, 이전 스냅샷 보존과 새 수집 성공을 확인했습니다.
+재실행 가능한 `scripts/smoke_ssh_http.py`와 보호 조건 단위 시험 3개를 추가했습니다.
+
+PR의 첫 원격 CI에서는 Backend·Frontend 통과, Compose IP 점유 단계 실패를 확인했습니다.
+CI 전용 명시적 서브넷과 stderr 보존으로 보완했습니다. 동일 구성의 로컬 검사와
+수정 커밋 `dd6bf9b`의 [원격 CI #10](https://github.com/Keeper-BM/cti-agent/actions/runs/43142429093)에서
+Backend·Frontend·Compose 세 작업이 모두 통과했습니다.
+최신 원격 결과는 [PR #1](https://github.com/Keeper-BM/cti-agent/pull/1)의 커밋별 CI를 참조하세요.
+실제 실행 범위·재실행 방법은 [Compose SSH 통합 검증](compose-ssh-verification.md)에 있습니다.
+
+## PostgreSQL 기능 매트릭스·최종 회귀 — 2026-11-11 KST
+
+자산·CSV/JSON 입력·계정 권한·SSH 수집·Worker 복구의 기존 시험 67개를
+PostgreSQL에서도 실행하도록 `--postgres-matrix`를 추가했습니다. 시험마다 별도 DB를
+생성·마이그레이션·정리하며 SQLite 전용 백업 검사는 기존 실행을 유지합니다.
+기존 기대값을 재사용하고 CI의 백엔드 검사에도 매트릭스를 연결했습니다.
+
+실제 Ubuntu 22.04의 Apache·MySQL과 전용 PostgreSQL 17.11·pgvector 0.8.7을 사용한
+최종 전체 결과는 **398 passed, 0 skipped / 74.11초**입니다. 경고는 기존 TestClient
+deprecation과 JUnit `record_property` 형식 안내 각 1건입니다. Ruff 173개 파일과
+Compose·CI YAML 검사도 통과했습니다. 마지막 프론트엔드 검사는 8개 통과·타입·빌드·포맷
+통과이며 이후 화면 코드를 바꾸지 않았습니다.
+
+Compose 최종 논리 백업도 별도 DB에 복원해 24개 테이블의 행 수·내용 해시를 대조했습니다.
+추가 PostgreSQL 시험 DB의 잔여 수가 0임을 확인하고 시험 전용 컨테이너·볼륨을 제거했습니다.
+실행 방법과 검증 경계는 [PostgreSQL 시험 안내](postgres-testing.md)를 참조하세요.
+
+## Compose 전체 기동·계정·API 주소 변경 복구 — 2026-11-11 KST
+
+별도 Docker 프로젝트에서 전체 이미지 빌드, DB 마이그레이션, 웹 → API → DB → Worker
+작업 완료와 볼륨 보존 재기동을 확인했습니다. 재기동 전후 자산·완료 작업 응답이 같았습니다.
+계정 모드 전환 중 API IP가 변경되어 Nginx가 502를 반환하는 결함을 발견해
+런타임 Docker DNS 조회로 수정했습니다. 이전 IP를 별도 컨테이너로 점유시킨 회귀 검사에서
+Web 재시작 없이 새 API 주소로 복구했습니다. CI에도 해당 검사를 추가했습니다.
+
+실제 웹 프록시에서 계정 로그인·쿠키·CSRF·Origin 검증·로그아웃·인증 실패 429를
+확인했습니다. Web healthcheck도 프록시 준비 상태를 확인하도록 추가했습니다.
+실행 범위·근거·재현 절차는 [Compose 배포 검증](compose-verification.md)에 있습니다.
+
+## 서비스 상태 수집·명령 제한·추가 Ubuntu 검증 — 2026-11-11 KST
+
+수집기 `ubuntu-ssh/1.2`에 Apache·MySQL 서비스 관찰을 추가하고 수집 근거 API와
+웹 화면에 연결했습니다. 조회 실패 시 정상 패키지는 보존하고 일부 수집으로 표시합니다.
+과거 근거는 서비스 미수집 상태로 읽으며 판정 엔진의 확정 조건에는 사용하지 않습니다.
+명령 제한 래퍼 생성 도구와 선택적 파일 검사 허용도 추가했습니다.
+
+초기 전체 Python 329개 통과 후, Worker 복구 감사와 실제 프로세스 종료·재시작 시험을
+추가한 최종 결과는 **331 passed, 0 skipped / 45.43초**입니다. 프론트엔드 8개·타입·빌드·포맷·Ruff
+통과. Ubuntu 24.04와 새 22.04 VM에서 실제 MySQL 수집·CTI DB 복원을 확인했고,
+22.04에 Apache도 설치해 두 서비스의 활성 상태와 패키지 642개를 함께 수집했습니다.
+Vite → 별도 API/Worker → SSH 경로와 실제 브라우저에서 서비스 활성/중지·유닛 부재
+표시도 확인했습니다. 범위와 원시 증거는 [서비스 수집 검증 기록](service-collection-verification.md)에 있습니다.
+
+## macOS MySQL·PostgreSQL 실환경 수집·복원 — 2026-11-11 KST
+
+새 Ubuntu 24.04.5 arm64 VM의 MySQL `8.0.46-0ubuntu0.24.04.4`에서 패키지
+691개(MySQL 5개)를 실제 SSH 수집했습니다. 고정 읽기 계정, 호스트 키 불일치 실패와
+정상 이력 보존, CTI SQLite 백업·복원 후 API 응답 일치를 확인했습니다.
+VM 스냅샷 복원으로 변경한 시험 데이터·설정·서비스 상태를 되돌렸고,
+복원 전후 수집 출력 해시도 일치했습니다. MySQL 논리 백업의 별도 DB 복원도 통과했습니다.
+
+PostgreSQL 17.11·pgvector 0.8.7에서 기존 통합 시험을 실제 실행했습니다.
+별도 DB로 복원한 public 테이블 24개의 행 수·내용 해시가 원본과 일치했고,
+복원본을 사용한 통합 시험도 통과했습니다. 두 실환경을 포함한 전체 회귀 결과는
+**287 passed, 0 skipped / 34.93초**, 기존 TestClient deprecation 경고 1건입니다.
+Ruff 검사와 포맷 검사도 통과했습니다.
+
+자동화한 MySQL 인수 시험은 `tests/integration/test_mysql_lab.py`입니다.
+시험 환경·해시·재실행 절차·검증 경계는 [실환경 인수 기록](lab-acceptance.md)을 참조하세요.
+아래 Windows 및 과거 미검증 기록은 각 실행 당시의 결과로 유지합니다.
+
 ## 화면·보고서 용어 정리 — 2026-11-11 KST
 
 사용자 요청에 따라 대화체 제목·버튼·보조 문구를 제품 화면 용어로 정리했습니다. AI 설명 패널은 **AI Summary**, 세부 항목은 **취약점 개요 / 패키지 분석 결과 / 권고 조치 / 참조 근거**로 통일했습니다. 인사이트는 **AI Q&A / 질의 실행 / AI Response**, 나머지 화면은 **보고서 생성 / 대응 권고 / SSH 패키지 수집 / 분석 전후 비교** 등으로 정리했습니다. AI 생성 표시와 분석 원본의 구분, 검증 범위·제한 사항은 유지합니다.
@@ -367,3 +446,10 @@ SMOKE_BASE_URL=http://127.0.0.1:5173 uv run python scripts/smoke_http.py
 | `compose-smoke` | 환경 생성, Compose 설정·빌드·기동, 예제 조회·HTTP 작업 완료 확인  |
 
 통합 기능의 수용 조건은 [인수 시험 명세](../tests/acceptance/README.md)에 정의합니다.
+
+## 2026-11-12 — MySQL 버전 비교·PostgreSQL 복원 자동화
+
+실제 Ubuntu 24.04 MySQL 8.0.36 → 8.0.46 업그레이드 및 VM 스냅샷 복원,
+고정 자료 기준의 CVE 비교, PostgreSQL 24개 테이블 백업·새 DB 복원과 API 9개 응답 대조를
+완료했습니다. 전체 Python 424개 통과 후 시험기 근거 ID 비교 수정 관련 8개 시험도 통과했습니다.
+자세한 버전·한계·증거는 [별도 검증 기록](mysql-backup-verification.md)을 참조하세요.

@@ -16,6 +16,12 @@ dependencies = [
   "zstandard>=0.23,<1",
 ]
 
+[project.optional-dependencies]
+dense = [
+    "numpy>=1.26,<3",
+    "sentence-transformers>=5,<6",
+]
+
 [dependency-groups]
 dev = [
   "pytest>=8.3,<9",

@@ -6,6 +6,7 @@ from datetime import UTC
 from sqlalchemy import select
 
 from backend.assessment.contracts import AssessmentFinding
+from backend.core.config import get_settings
 from backend.core.errors import AppError
 from backend.llm.contracts import Citation
 from backend.models.tables import FindingRecord, SourceDocument, SourceRecord, TextChunk
@@ -181,7 +182,22 @@ def prepare(db, question, analyses):
                         "cve_id": record.cve_id,
                     }
                 )
-    for candidate, _score in rank(question, candidates, 10):
+    settings = get_settings()
+    if settings.retrieval_mode == "dense":
+        from backend.retrieval.dense import rank_dense
+
+        ranked = rank_dense(
+            question,
+            candidates,
+            10,
+            model_name=settings.embedding_model,
+            cache_directory=settings.embedding_cache_directory,
+        )
+        retrieval_version = f"dense/{settings.embedding_model}"
+    else:
+        ranked = rank(question, candidates, 10)
+        retrieval_version = VERSION
+    for candidate, _score in ranked:
         chunk = candidate["chunk"]
         record = candidate["record"]
         document = candidate["document"]
@@ -221,7 +237,7 @@ def prepare(db, question, analyses):
         summaries=summaries,
         facts=facts,
         citations=citations,
-        retrieval_version=VERSION,
+        retrieval_version=retrieval_version,
         facts_digest=sha({"facts": facts_wire, "summaries": summaries}),
         warnings=warnings,
         insufficient_evidence=not facts or not any(c.id.startswith("E") for c in citations),

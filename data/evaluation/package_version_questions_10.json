@@ -1,0 +1,136 @@
+[
+  {
+    "question_id": "PV01",
+    "question": "Ubuntu:20.04:LTS에서 linux-aws-5.15 패키지의 수정 버전이 5.15.0-1041.46~20.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "linux-aws-5.15",
+    "ecosystem": "Ubuntu:20.04:LTS",
+    "fixed_version": "5.15.0-1041.46~20.04.1",
+    "relevant_cve_ids": [
+      "CVE-2023-35829",
+      "CVE-2023-53623",
+      "CVE-2023-54078",
+      "CVE-2023-54284",
+      "CVE-2023-54294"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV02",
+    "question": "Ubuntu:22.04:LTS에서 linux-aws-6.8 패키지의 수정 버전이 6.8.0-1020.22~22.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "linux-aws-6.8",
+    "ecosystem": "Ubuntu:22.04:LTS",
+    "fixed_version": "6.8.0-1020.22~22.04.1",
+    "relevant_cve_ids": [
+      "CVE-2024-42315",
+      "CVE-2024-42317",
+      "CVE-2024-44934",
+      "CVE-2024-45009",
+      "CVE-2024-46724",
+      "CVE-2024-46746"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV03",
+    "question": "Ubuntu:Pro:20.04:LTS에서 linux-azure-5.15 패키지의 수정 버전이 5.15.0-1117.126~20.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "linux-azure-5.15",
+    "ecosystem": "Ubuntu:Pro:20.04:LTS",
+    "fixed_version": "5.15.0-1117.126~20.04.1",
+    "relevant_cve_ids": [
+      "CVE-2026-31754",
+      "CVE-2026-43123",
+      "CVE-2026-46304",
+      "CVE-2026-64179"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV04",
+    "question": "Ubuntu:22.04:LTS에서 lucene-solr 패키지의 수정 버전이 3.6.2+dfsg-24인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "lucene-solr",
+    "ecosystem": "Ubuntu:22.04:LTS",
+    "fixed_version": "3.6.2+dfsg-24",
+    "relevant_cve_ids": [
+      "CVE-2023-50386"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV05",
+    "question": "Ubuntu:22.04:LTS에서 webkit2gtk 패키지의 수정 버전이 2.50.4-0ubuntu0.22.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "webkit2gtk",
+    "ecosystem": "Ubuntu:22.04:LTS",
+    "fixed_version": "2.50.4-0ubuntu0.22.04.1",
+    "relevant_cve_ids": [
+      "CVE-2025-43529"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV06",
+    "question": "Ubuntu:22.04:LTS에서 thunderbird 패키지의 수정 버전이 1:128.12.0+build1-0ubuntu0.22.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "thunderbird",
+    "ecosystem": "Ubuntu:22.04:LTS",
+    "fixed_version": "1:128.12.0+build1-0ubuntu0.22.04.1",
+    "relevant_cve_ids": [
+      "CVE-2025-6425"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV07",
+    "question": "Ubuntu:20.04:LTS에서 mysql-8.0 패키지의 수정 버전이 8.0.33-0ubuntu0.20.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "mysql-8.0",
+    "ecosystem": "Ubuntu:20.04:LTS",
+    "fixed_version": "8.0.33-0ubuntu0.20.04.1",
+    "relevant_cve_ids": [
+      "CVE-2023-21977",
+      "CVE-2023-21982"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV08",
+    "question": "Ubuntu:Pro:14.04:LTS에서 tiff 패키지의 수정 버전이 4.0.3-7ubuntu0.11+esm8인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "tiff",
+    "ecosystem": "Ubuntu:Pro:14.04:LTS",
+    "fixed_version": "4.0.3-7ubuntu0.11+esm8",
+    "relevant_cve_ids": [
+      "CVE-2023-25433"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV09",
+    "question": "Ubuntu:Pro:16.04:LTS에서 iperf3 패키지의 수정 버전이 3.0.11-1ubuntu0.1~esm2인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "iperf3",
+    "ecosystem": "Ubuntu:Pro:16.04:LTS",
+    "fixed_version": "3.0.11-1ubuntu0.1~esm2",
+    "relevant_cve_ids": [
+      "CVE-2023-7250"
+    ],
+    "label_status": "exact_match_within_300"
+  },
+  {
+    "question_id": "PV10",
+    "question": "Ubuntu:20.04:LTS에서 firefox 패키지의 수정 버전이 129.0.1+build1-0ubuntu0.20.04.1인 CVE를 찾아줘.",
+    "question_type": "package_version_exact",
+    "package": "firefox",
+    "ecosystem": "Ubuntu:20.04:LTS",
+    "fixed_version": "129.0.1+build1-0ubuntu0.20.04.1",
+    "relevant_cve_ids": [
+      "CVE-2024-7525",
+      "CVE-2024-7527"
+    ],
+    "label_status": "exact_match_within_300"
+  }
+]

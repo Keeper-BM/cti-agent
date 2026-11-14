@@ -14,6 +14,7 @@ from scripts.postgres_backup import restore, verify
 from tests.fixtures.compose_accounts import account_stack, require
 
 
+@pytest.mark.skipif(os.name != "posix", reason="The scheduled backup job requires POSIX")
 @pytest.mark.skipif(
     not os.getenv("TEST_POSTGRES_COMPOSE_PROJECT"), reason="Requires an explicit Compose test DB"
 )

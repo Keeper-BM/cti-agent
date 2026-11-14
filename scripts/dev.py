@@ -149,6 +149,12 @@ def wait_for(url: str, processes: Processes, timeout: float = 30) -> None:
     raise RuntimeError("Development server did not become ready. Check the process output above.")
 
 
+def uv_commands(uv: str, retrieval_deps: str | None) -> tuple[list[str], list[str]]:
+    """Keep the selected optional retrieval dependencies in every uv invocation."""
+    extra = ["--extra", retrieval_deps] if retrieval_deps else []
+    return [uv, "sync", "--frozen", *extra], [uv, "run", "--frozen", *extra]
+
+
 def develop(args: argparse.Namespace) -> None:
     uv, node, npm = runtime("uv"), runtime("node"), runtime("npm")
     version = subprocess.check_output([node, "--version"], text=True).strip()
@@ -160,11 +166,12 @@ def develop(args: argparse.Namespace) -> None:
         check_port(args.api_port)
         check_port(args.web_port)
     processes = Processes()
+    sync_command, run_command = uv_commands(uv, args.retrieval_deps)
     with run_lock():
         try:
             processes.run("configuration", [sys.executable, "scripts/init_env.py"])
-            processes.run("Python dependencies", [uv, "sync", "--frozen"])
-            processes.run("effective settings", [uv, "run", "python", "scripts/check_env.py"])
+            processes.run("Python dependencies", sync_command)
+            processes.run("effective settings", [*run_command, "python", "scripts/check_env.py"])
             lock = (ROOT / "frontend" / "package-lock.json").read_bytes()
             fingerprint = hashlib.sha256(lock).hexdigest()
             marker = ROOT / "frontend" / "node_modules" / ".blendedmeshup-lock"
@@ -175,7 +182,7 @@ def develop(args: argparse.Namespace) -> None:
             ):
                 processes.run("JavaScript dependencies", [npm, "--prefix", "frontend", "ci"])
                 marker.write_text(fingerprint)
-            processes.run("database migrations", [uv, "run", "alembic", "upgrade", "head"])
+            processes.run("database migrations", [*run_command, "alembic", "upgrade", "head"])
             if args.prepare_only:
                 print("Development environment prepared; no servers started.", flush=True)
                 return
@@ -184,8 +191,7 @@ def develop(args: argparse.Namespace) -> None:
             processes.start(
                 "API",
                 [
-                    uv,
-                    "run",
+                    *run_command,
                     "uvicorn",
                     "backend.api.main:app",
                     "--reload",
@@ -198,7 +204,7 @@ def develop(args: argparse.Namespace) -> None:
             api_url = f"http://127.0.0.1:{args.api_port}"
             wait_for(f"{api_url}/api/v1/readiness", processes)
             if not args.no_worker:
-                processes.start("Worker", [uv, "run", "python", "-m", "backend.worker"])
+                processes.start("Worker", [*run_command, "python", "-m", "backend.worker"])
             processes.start(
                 "web",
                 [npm, "--prefix", "frontend", "run", "dev", "--", "--port", str(args.web_port)],
@@ -232,6 +238,11 @@ def main() -> int:
     )
     parser.add_argument("--api-port", type=int, default=8000)
     parser.add_argument("--web-port", type=int, default=5173)
+    parser.add_argument(
+        "--retrieval-deps",
+        choices=("dense", "dense-cuda"),
+        help="Keep the chosen optional BGE dependencies when starting API and Worker",
+    )
     args = parser.parse_args()
 
     def interrupted(*_):

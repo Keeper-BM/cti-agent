@@ -66,25 +66,46 @@ def regular_bytes(path, *, maximum=MAX_BYTES, private=False):
     if private and os.name == "posix":
         require(before.st_mode & 0o077 == 0, "Recovery key must be owner-only")
     require(before.st_size <= maximum, "Input file exceeds the size limit")
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_NONBLOCK", 0)
+        | getattr(os, "O_BINARY", 0)
+    )
+
+    def signature(info, *, include_change_time=True):
+        values = (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns)
+        return (*values, info.st_ctime_ns) if include_change_time else values
+
+    # On Windows, path-based stat and handle-based fstat can report different
+    # change times for a freshly written file even when its content is stable.
+    # Keep the change-time check between snapshots from the same open handle.
+    compare_path_change_time = os.name != "nt"
     with os.fdopen(os.open(path, flags), "rb") as stream:
         opened = os.fstat(stream.fileno())
         require(
             stat.S_ISREG(opened.st_mode)
-            and (opened.st_dev, opened.st_ino) == (before.st_dev, before.st_ino),
+            and signature(opened, include_change_time=compare_path_change_time)
+            == signature(before, include_change_time=compare_path_change_time),
             "Input file changed while opening",
         )
+        if private and os.name == "posix":
+            require(opened.st_mode & 0o077 == 0, "Recovery key must be owner-only")
         data = stream.read(maximum + 1)
         after = os.fstat(stream.fileno())
-
-    def signature(s):
-        return s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_ctime_ns
-
     require(
-        len(data) <= maximum and signature(before) == signature(after),
+        len(data) <= maximum
+        and len(data) == after.st_size
+        and signature(opened) == signature(after),
         "Input file changed while reading",
     )
-    require(signature(path.lstat()) == signature(after), "Input file was replaced while reading")
+    current = path.lstat()
+    require(
+        stat.S_ISREG(current.st_mode)
+        and signature(current, include_change_time=compare_path_change_time)
+        == signature(after, include_change_time=compare_path_change_time),
+        "Input file was replaced while reading",
+    )
     return data
 
 

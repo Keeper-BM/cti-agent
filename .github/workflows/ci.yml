@@ -38,6 +38,22 @@ jobs:
       - run: uv run python scripts/export_openapi.py
       - run: git diff --exit-code -- docs/openapi.json
 
+  windows-backend:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.0"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: >-
+          uv run pytest tests/unit/test_operations_backup.py tests/unit/test_dev.py
+          tests/unit/test_dense_device.py tests/integration/test_dense_ranking.py
+      - run: >-
+          uv run --with "numpy>=1.26,<3" pytest tests/integration/test_dense_ranking.py
+          tests/integration/test_dense_retrieval.py
+
   frontend:
     runs-on: ubuntu-latest
     defaults:

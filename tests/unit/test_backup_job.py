@@ -13,6 +13,10 @@ from scripts import operations_backup as files
 from scripts.postgres_backup import verify
 from tests.unit.test_postgres_backup_tool import FakePostgres
 
+pytestmark = pytest.mark.skipif(
+    os.name != "posix", reason="The scheduled backup job requires POSIX permissions and locks"
+)
+
 
 @pytest.fixture
 def config(tmp_path, monkeypatch):

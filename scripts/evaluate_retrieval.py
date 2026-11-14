@@ -2,6 +2,7 @@
 """Compare TF-IDF, BGE-M3 and Hybrid on real Ubuntu OSV records."""
 
 import json
+import os
 import re
 import sys
 import time
@@ -14,10 +15,11 @@ import torch
 import torch._dynamo
 from sentence_transformers import SentenceTransformer
 
+from backend.retrieval.dense import select_device
 from backend.retrieval.search import rank, vector
 
 DATA_PATH = ROOT / "data/evaluation/ubuntu_osv_300.json"
-MODEL_NAME = "BAAI/bge-m3"
+MODEL_NAME = os.environ.get("EMBEDDING_MODEL", "BAAI/bge-m3")
 TOP_K = 5
 
 
@@ -49,7 +51,7 @@ def main():
         for i, (record, text) in enumerate(zip(records, texts, strict=True), 1)
     ]
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device(torch)
     print(f"문서 수: {len(candidates)}")
     print(f"임베딩 장치: {device}")
 

@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     retrieval_mode: Literal["tfidf", "dense"] = "tfidf"
     embedding_model: str = "BAAI/bge-m3"
     embedding_cache_directory: str = ".data/embedding-cache"
+    dense_min_similarity: float = Field(default=0.45, ge=-1.0, le=1.0)
 
 
 @lru_cache

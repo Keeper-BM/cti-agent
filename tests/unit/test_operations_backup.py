@@ -7,11 +7,21 @@ import stat
 import subprocess
 import sys
 import tarfile
+from types import SimpleNamespace
 
 import pytest
 from cryptography.fernet import Fernet
 
 from scripts import operations_backup as ops
+
+
+def symlink_or_skip(link, target, *, target_is_directory=False):
+    try:
+        link.symlink_to(target, target_is_directory=target_is_directory)
+    except OSError as exc:
+        if os.name == "nt" and getattr(exc, "winerror", None) in {1, 5, 1314}:
+            pytest.skip("Creating symbolic links is not permitted on this Windows account")
+        raise
 
 
 @pytest.fixture
@@ -47,6 +57,59 @@ def tar(entries):
     return output.getvalue()
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Regression for Windows file timestamp behavior")
+def test_fresh_windows_files_are_read_without_false_change_detection(tmp_path):
+    content = b"binary\x00\x1a\r\n\xffcontents"
+    for index in range(24):
+        path = tmp_path / f"new-{index}"
+        ops.write_new(path, content)
+        assert ops.regular_bytes(path) == content
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Regression for Windows file timestamp behavior")
+def test_fresh_windows_backup_roundtrips_repeatedly(tmp_path):
+    for index in range(12):
+        sample = tmp_path / str(index)
+        sample.mkdir()
+        key = sample / "recovery.key"
+        env_file = sample / "app.env"
+        ssh_directory = sample / "ssh"
+        ssh_directory.mkdir()
+        archive = sample / "backup.ctiops"
+        destination = sample / "restored"
+        ops.generate_key(key)
+        ops.write_new(env_file, b"test-value\x00\x1a\r\n")
+        ops.create(archive, key, env_file=env_file, ssh_directory=ssh_directory)
+        ops.restore(archive, key, destination)
+        assert (destination / "config/app.env").read_bytes() == env_file.read_bytes()
+
+
+def test_regular_bytes_still_rejects_a_change_during_read(tmp_path, monkeypatch):
+    path = tmp_path / "data"
+    path.write_bytes(b"original")
+    original_fstat = os.fstat
+    calls = 0
+
+    def changing_fstat(descriptor):
+        nonlocal calls
+        value = original_fstat(descriptor)
+        calls += 1
+        if calls == 2:
+            return SimpleNamespace(
+                st_mode=value.st_mode,
+                st_dev=value.st_dev,
+                st_ino=value.st_ino,
+                st_size=value.st_size,
+                st_mtime_ns=value.st_mtime_ns + 1,
+                st_ctime_ns=value.st_ctime_ns,
+            )
+        return value
+
+    monkeypatch.setattr(os, "fstat", changing_fstat)
+    with pytest.raises(ops.BackupError, match="changed while reading"):
+        ops.regular_bytes(path)
+
+
 def test_roundtrip_encryption_unicode_permissions_and_exclusive_output(tmp_path, inputs):
     key, args = inputs
     archive, destination = tmp_path / "archive.ctiops", tmp_path / "restored"
@@ -62,8 +125,9 @@ def test_roundtrip_encryption_unicode_permissions_and_exclusive_output(tmp_path,
     assert (destination / "evidence/nested/근거.json").read_bytes() == b'{"source":"fixture"}'
     for value in (b"private-db-sentinel", b"private-ssh-sentinel", b"config/app.env"):
         assert value not in archive.read_bytes()
-    for path in [key, archive, destination, *destination.rglob("*")]:
-        assert stat.S_IMODE(path.stat().st_mode) == (0o700 if path.is_dir() else 0o600)
+    if os.name == "posix":
+        for path in [key, archive, destination, *destination.rglob("*")]:
+            assert stat.S_IMODE(path.stat().st_mode) == (0o700 if path.is_dir() else 0o600)
     encrypted = archive.read_bytes()
     with pytest.raises(ops.BackupError):
         ops.create(archive, key, **args)
@@ -114,7 +178,7 @@ def test_existing_restore_destination_is_never_overwritten(tmp_path, inputs, kin
     elif kind == "file":
         destination.write_bytes(b"untouched")
     else:
-        destination.symlink_to(args["env_file"])
+        symlink_or_skip(destination, args["env_file"])
     with pytest.raises(ops.BackupError):
         ops.restore(archive, key, destination)
     assert destination.exists()
@@ -193,18 +257,22 @@ def test_manifest_validation(tmp_path, inputs, damage):
 def test_unsafe_source_rejected(tmp_path, inputs, kind):
     key, args = inputs
     if kind == "key-mode":
+        if os.name != "posix":
+            pytest.skip("POSIX permission bits are unavailable on Windows")
         key.chmod(0o644)
     elif kind == "key-link":
         link = tmp_path / "link.key"
-        link.symlink_to(key)
+        symlink_or_skip(link, key)
         key = link
     elif kind == "file-link":
-        (args["ssh_directory"] / "link").symlink_to(args["env_file"])
+        symlink_or_skip(args["ssh_directory"] / "link", args["env_file"])
     elif kind == "directory-link":
         link = tmp_path / "ssh-link"
-        link.symlink_to(args["ssh_directory"], target_is_directory=True)
+        symlink_or_skip(link, args["ssh_directory"], target_is_directory=True)
         args["ssh_directory"] = link
     elif kind == "fifo":
+        if not hasattr(os, "mkfifo"):
+            pytest.skip("FIFO files are unavailable on this platform")
         os.mkfifo(args["ssh_directory"] / "fifo")
     else:
         os.link(key, args["ssh_directory"] / "recovery.key")

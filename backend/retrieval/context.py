@@ -192,6 +192,7 @@ def prepare(db, question, analyses):
             10,
             model_name=settings.embedding_model,
             cache_directory=settings.embedding_cache_directory,
+            min_similarity=settings.dense_min_similarity,
         )
         retrieval_version = f"dense/{settings.embedding_model}"
     else:

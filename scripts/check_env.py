@@ -1,5 +1,6 @@
 """Validate effective settings without echoing secret values or URLs."""
 
+import importlib.util
 import sys
 
 from pydantic import ValidationError
@@ -14,6 +15,16 @@ def main() -> int:
         url = make_url(settings.database_url)
         if url.drivername not in {"sqlite", "postgresql+psycopg"}:
             print("Configuration error: DATABASE_URL must use sqlite or postgresql+psycopg.")
+            return 1
+        if settings.retrieval_mode == "dense" and any(
+            importlib.util.find_spec(name) is None
+            for name in ("numpy", "torch", "sentence_transformers")
+        ):
+            print(
+                "Configuration error: dense retrieval dependencies are missing. "
+                "See docs/dense-retrieval.md for the dense or dense-cuda launch command.",
+                file=sys.stderr,
+            )
             return 1
     except ValidationError as exc:
         fields = ", ".join(".".join(map(str, item["loc"])) for item in exc.errors())

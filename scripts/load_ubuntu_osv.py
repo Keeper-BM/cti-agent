@@ -1,11 +1,17 @@
 """Load a reproducible sample of Ubuntu OSV CVE records."""
 
 import json
+import os
 import random
 import tarfile
 from pathlib import Path
 
-ARCHIVE = Path.home() / "Desktop/cti-agent-main/data/raw/ubuntu/official_osv/osv-all.tar.xz"
+ARCHIVE = Path(
+    os.environ.get(
+        "UBUNTU_OSV_ARCHIVE",
+        Path(__file__).resolve().parents[1] / "data/raw/ubuntu/official_osv/osv-all.tar.xz",
+    )
+).expanduser()
 
 YEARS = {2023, 2024, 2025, 2026}
 SAMPLE_SIZE = 300

@@ -183,7 +183,26 @@ def prepare(db, question, analyses):
                     }
                 )
     settings = get_settings()
-    if settings.retrieval_mode == "dense":
+    if settings.retrieval_mode == "langchain":
+        from backend.retrieval.langchain_adapter import ScopedBGERetriever
+
+        retriever = ScopedBGERetriever(
+            candidates=candidates,
+            limit=10,
+            model_name=settings.embedding_model,
+            cache_directory=settings.embedding_cache_directory,
+        )
+        documents = retriever.invoke(question)
+        candidates_by_id = {str(candidate["id"]): candidate for candidate in candidates}
+        ranked = [
+            (
+                candidates_by_id[document.metadata["candidate_id"]],
+                document.metadata["score"],
+            )
+            for document in documents
+        ]
+        retrieval_version = f"langchain/dense/{settings.embedding_model}"
+    elif settings.retrieval_mode == "dense":
         from backend.retrieval.dense import rank_dense
 
         ranked = rank_dense(

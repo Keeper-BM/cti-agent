@@ -21,6 +21,9 @@ dense = [
     "numpy>=1.26,<3",
     "sentence-transformers>=5,<6",
 ]
+langchain = [
+    "langchain-core>=0.3,<2",
+]
 
 [dependency-groups]
 dev = [

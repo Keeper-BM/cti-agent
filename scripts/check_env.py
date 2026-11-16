@@ -16,16 +16,17 @@ def main() -> int:
         if url.drivername not in {"sqlite", "postgresql+psycopg"}:
             print("Configuration error: DATABASE_URL must use sqlite or postgresql+psycopg.")
             return 1
-        if settings.retrieval_mode == "dense" and any(
-            importlib.util.find_spec(name) is None
-            for name in ("numpy", "torch", "sentence_transformers")
-        ):
-            print(
-                "Configuration error: dense retrieval dependencies are missing. "
-                "See docs/dense-retrieval.md for the dense or dense-cuda launch command.",
-                file=sys.stderr,
-            )
-            return 1
+        if settings.retrieval_mode in {"dense", "langchain"}:
+            modules = ["numpy", "torch", "sentence_transformers"]
+            if settings.retrieval_mode == "langchain":
+                modules.append("langchain_core")
+            if any(importlib.util.find_spec(name) is None for name in modules):
+                print(
+                    f"Configuration error: {settings.retrieval_mode} retrieval dependencies "
+                    "are missing. See docs/dense-retrieval.md for the launch command.",
+                    file=sys.stderr,
+                )
+                return 1
     except ValidationError as exc:
         fields = ", ".join(".".join(map(str, item["loc"])) for item in exc.errors())
         print(f"Configuration error: check these settings: {fields}.", file=sys.stderr)

@@ -61,6 +61,19 @@ uv run --frozen --extra dense python scripts/dev.py --retrieval-deps dense
 현재 Compose 이미지는 기본 TF-IDF 의존성으로 빌드됩니다. 위 선택 설치와 GPU 실행은
 로컬 개발 실행기에서 사용합니다.
 
+## LangChain과 함께 사용
+
+LangChain을 사용하려면 `.env`에서 `RETRIEVAL_MODE=langchain`을 설정하고 BGE와
+LangChain 의존성을 함께 지정합니다. 점수 기준 및 분석에 고정된 자료 범위는 BGE 검색과
+같습니다. Windows NVIDIA CUDA에서는 다음 명령을 사용합니다.
+
+```powershell
+uv run --frozen --extra dense-cuda --extra langchain python scripts/dev.py --retrieval-deps dense-cuda --langchain
+```
+
+macOS 또는 일반 설치에서는 `dense-cuda` 두 곳을 `dense`로 바꿉니다. 이후 `uv run`을
+별도로 실행할 때에도 동일한 extra를 지정해야 설치된 의존성이 유지됩니다.
+
 ## 검색 점수와 모델 캐시
 
 `DENSE_MIN_SIMILARITY`의 기본값 `0.45` 미만인 결과는 제외합니다. 질문에 명시된 CVE와
@@ -84,6 +97,8 @@ uv run --frozen --extra dense python scripts/dev.py --retrieval-deps dense
 $env:CTI_RUN_REAL_BGE = '1'
 # 이미 내려받은 모델을 쓰려면 선택적으로 지정: $env:CTI_TEST_BGE_MODEL = 'D:/path/to/bge-m3'
 uv run --frozen --extra dense-cuda pytest tests/integration/test_dense_retrieval_real.py
+# LangChain 통합까지 실제 모델로 시험하려면:
+uv run --frozen --extra dense-cuda --extra langchain pytest tests/integration/test_langchain_retrieval_real.py
 ```
 
 `scripts/evaluate_*.py`는 CUDA, MPS, CPU 순서로 장치를 고르고 `EMBEDDING_MODEL` 환경

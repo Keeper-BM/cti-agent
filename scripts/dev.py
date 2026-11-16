@@ -149,9 +149,13 @@ def wait_for(url: str, processes: Processes, timeout: float = 30) -> None:
     raise RuntimeError("Development server did not become ready. Check the process output above.")
 
 
-def uv_commands(uv: str, retrieval_deps: str | None) -> tuple[list[str], list[str]]:
+def uv_commands(
+    uv: str, retrieval_deps: str | None, langchain: bool = False
+) -> tuple[list[str], list[str]]:
     """Keep the selected optional retrieval dependencies in every uv invocation."""
     extra = ["--extra", retrieval_deps] if retrieval_deps else []
+    if langchain:
+        extra.extend(["--extra", "langchain"])
     return [uv, "sync", "--frozen", *extra], [uv, "run", "--frozen", *extra]
 
 
@@ -166,7 +170,7 @@ def develop(args: argparse.Namespace) -> None:
         check_port(args.api_port)
         check_port(args.web_port)
     processes = Processes()
-    sync_command, run_command = uv_commands(uv, args.retrieval_deps)
+    sync_command, run_command = uv_commands(uv, args.retrieval_deps, args.langchain)
     with run_lock():
         try:
             processes.run("configuration", [sys.executable, "scripts/init_env.py"])
@@ -242,6 +246,11 @@ def main() -> int:
         "--retrieval-deps",
         choices=("dense", "dense-cuda"),
         help="Keep the chosen optional BGE dependencies when starting API and Worker",
+    )
+    parser.add_argument(
+        "--langchain",
+        action="store_true",
+        help="Keep the optional LangChain dependencies along with the BGE dependencies",
     )
     args = parser.parse_args()
 

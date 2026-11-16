@@ -23,22 +23,31 @@ def test_checkout_lock_rejects_a_second_run_and_is_reusable_after_release(tmp_pa
 
 
 @pytest.mark.parametrize("extra", [None, "dense", "dense-cuda"])
-def test_launcher_keeps_the_requested_retrieval_extra_for_every_uv_command(extra):
-    sync, run = uv_commands("uv", extra)
+@pytest.mark.parametrize("langchain", [False, True])
+def test_launcher_keeps_the_requested_retrieval_extra_for_every_uv_command(extra, langchain):
+    sync, run = uv_commands("uv", extra, langchain)
     selection = ["--extra", extra] if extra else []
+    if langchain:
+        selection += ["--extra", "langchain"]
     assert sync == ["uv", "sync", "--frozen", *selection]
     assert run == ["uv", "run", "--frozen", *selection]
 
 
-def test_dense_configuration_reports_missing_dependencies(monkeypatch, capsys):
+@pytest.mark.parametrize(
+    ("mode", "missing"),
+    [("dense", "numpy"), ("langchain", "numpy"), ("langchain", "langchain_core")],
+)
+def test_retrieval_configuration_reports_missing_dependencies(monkeypatch, capsys, mode, missing):
     from scripts import check_env
 
     monkeypatch.setattr(
         check_env,
         "get_settings",
-        lambda: SimpleNamespace(database_url="sqlite:///test.db", retrieval_mode="dense"),
+        lambda: SimpleNamespace(database_url="sqlite:///test.db", retrieval_mode=mode),
     )
-    monkeypatch.setattr(check_env.importlib.util, "find_spec", lambda _name: None)
+    monkeypatch.setattr(
+        check_env.importlib.util, "find_spec", lambda name: None if name == missing else object()
+    )
 
     assert check_env.main() == 1
-    assert "dense retrieval dependencies are missing" in capsys.readouterr().err
+    assert f"{mode} retrieval dependencies are missing" in capsys.readouterr().err

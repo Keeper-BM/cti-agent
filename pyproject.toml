@@ -27,6 +27,9 @@ dense-cuda = [
     "sentence-transformers>=5,<6",
     "torch>=2.15,<2.16",
 ]
+langchain = [
+    "langchain-core>=0.3,<2",
+]
 
 [dependency-groups]
 dev = [

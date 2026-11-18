@@ -3,6 +3,7 @@
 import sys
 from types import ModuleType
 
+import pytest
 from sqlalchemy.orm import Session
 
 from backend.core.config import get_settings
@@ -67,4 +68,34 @@ def test_dense_retrieval_preserves_evidence_scope(
         assert calls[0]["limit"] == 10
         assert all(snapshot_id in snapshots for snapshot_id in calls[0]["candidate_snapshot_ids"])
 
+    get_settings.cache_clear()
+
+
+def test_dense_question_without_relevant_evidence_does_not_call_llm(
+    client, headers, engine, source_wire, wire, monkeypatch
+):
+    np = pytest.importorskip("numpy")
+    from backend.retrieval import dense
+    from backend.worker.runner import run_once
+
+    def unrelated_embeddings(texts, _model, _directory):
+        return np.array([[1.0]] + [[-1.0]] * (len(texts) - 1), dtype=np.float32)
+
+    monkeypatch.setattr(dense, "embed_texts", unrelated_embeddings)
+    monkeypatch.setenv("RETRIEVAL_MODE", "dense")
+    get_settings.cache_clear()
+    sources.execute(client, headers, engine, "ubuntu")
+    baseline = questions.analysis(client, headers, engine)
+
+    response = questions.ask(client, headers, [baseline["id"]], question="banana moonlight recipe")
+    assert response.status_code == 202, response.text
+    with Session(engine) as db:
+        context = db.get(QuestionRun, response.json()["id"]).input_payload
+        assert context["insufficient_evidence"]
+        assert not any(citation["id"].startswith("E") for citation in context["citations"])
+
+    run_once(engine)
+    result = client.get("/api/v1/questions/" + response.json()["id"], headers=headers).json()
+    assert result["result"]["status"] == "INSUFFICIENT_EVIDENCE"
+    assert wire["calls"] == []
     get_settings.cache_clear()

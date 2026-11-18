@@ -25,6 +25,8 @@ Ctrl+C 또는 종료 신호를 받으면 실행기가 시작한 프로세스와 
 
 `uv`가 PATH에 없고 로컬 `.tools/bin/uv`가 있으면 실행기가 해당 도구를 사용합니다. 실행 중 실제 서버 설정은 `scripts/check_env.py`가 검사하며 실행 환경 변수의 잘못된 값도 필드명으로 진단합니다.
 
+BGE 검색을 쓰는 경우 실행기의 `--retrieval-deps dense` 또는 `--retrieval-deps dense-cuda` 옵션과 같은 extra로 바깥 `uv run`도 실행해야 의존성이 유지됩니다. LangChain 검색에는 `--extra langchain`과 실행기 `--langchain` 옵션을 추가합니다. Windows CUDA와 macOS의 전체 명령 및 저장 공간 설정은 [BGE 검색 설정](dense-retrieval.md)에 있습니다.
+
 ## 환경 변수
 
 | 변수                       | 기본값·초기값              | 적용 범위                                              |

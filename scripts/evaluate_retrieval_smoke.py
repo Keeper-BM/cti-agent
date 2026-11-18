@@ -1,12 +1,15 @@
 """TF-IDF / BGE-M3 / Hybrid retrieval smoke test (synthetic data)."""
 
+import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import torch
 from sentence_transformers import SentenceTransformer
 
+from backend.retrieval.dense import select_device
 from backend.retrieval.search import rank, vector
 
 DOCUMENTS = [
@@ -37,7 +40,9 @@ QUESTIONS = [
 
 
 def main():
-    model = SentenceTransformer("BAAI/bge-m3", device="mps")
+    model = SentenceTransformer(
+        os.environ.get("EMBEDDING_MODEL", "BAAI/bge-m3"), device=select_device(torch)
+    )
     texts = [f"{cve}\n{text}" for _, cve, text in DOCUMENTS]
     embeddings = model.encode(texts, normalize_embeddings=True)
 

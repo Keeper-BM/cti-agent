@@ -36,6 +36,8 @@ uv run python scripts/dev.py
 
 웹은 `http://127.0.0.1:5173`, API 문서는 `http://127.0.0.1:8000/api/docs`입니다. `AUTH_MODE=token`을 선택하면 기존 개발용 토큰 연결도 사용할 수 있습니다. 비밀키는 `.env`와 서버의 키 디렉터리에만 둡니다. [상세 설정](docs/configuration.md), [계정과 복원](docs/operations.md).
 
+기본 검색은 TF-IDF입니다. 선택 기능인 BGE-M3 검색과 Windows NVIDIA CUDA·macOS 실행 방법은 [BGE 검색 설정](docs/dense-retrieval.md)을 참고하세요.
+
 Docker가 있는 Linux에서는 `docker compose up --build -d`로 PostgreSQL·API·Worker·웹을 시작합니다. 기본 웹 주소는 `http://127.0.0.1:8080`입니다. SQLite와 Compose 데이터는 서로 독립적입니다. 학교 API나 SSH 설정이 없어도 파일 입력·분석·이력·보고서는 사용할 수 있습니다.
 
 ## 시연 순서

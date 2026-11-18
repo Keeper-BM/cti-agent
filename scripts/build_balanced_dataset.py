@@ -1,13 +1,19 @@
 """Build a balanced Ubuntu OSV retrieval evaluation sample."""
 
 import json
+import os
 import random
 import tarfile
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = Path.home() / "Desktop/cti-agent-main/data/raw/ubuntu/official_osv/osv-all.tar.xz"
+ARCHIVE = Path(
+    os.environ.get(
+        "UBUNTU_OSV_ARCHIVE",
+        Path(__file__).resolve().parents[1] / "data/raw/ubuntu/official_osv/osv-all.tar.xz",
+    )
+).expanduser()
 OUTPUT = ROOT / "data/evaluation/ubuntu_osv_balanced_300.json"
 
 YEARS = (2023, 2024, 2025, 2026)

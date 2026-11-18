@@ -3,6 +3,7 @@
 
 import json
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -15,10 +16,11 @@ import torch
 import torch._dynamo
 from sentence_transformers import SentenceTransformer
 
+from backend.retrieval.dense import select_device
 from backend.retrieval.search import rank, vector
 
 DATA_DIR = ROOT / "data/evaluation"
-MODEL_NAME = "BAAI/bge-m3"
+MODEL_NAME = os.environ.get("EMBEDDING_MODEL", "BAAI/bge-m3")
 
 
 def build_text(record):
@@ -80,7 +82,7 @@ def main():
         for i, (record, text) in enumerate(zip(records, texts, strict=True), 1)
     ]
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    device = select_device(torch)
 
     print(f"문서: {len(records)}건")
     print(f"질문: {len(questions)}개")

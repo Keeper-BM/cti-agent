@@ -16,6 +16,7 @@ class ScopedBGERetriever(BaseRetriever):
     limit: int = 10
     model_name: str = "BAAI/bge-m3"
     cache_directory: str = ".data/embedding-cache"
+    min_similarity: float = Field(default=0.45, ge=-1.0, le=1.0)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -26,6 +27,7 @@ class ScopedBGERetriever(BaseRetriever):
             self.limit,
             model_name=self.model_name,
             cache_directory=self.cache_directory,
+            min_similarity=self.min_similarity,
         )
 
         return [

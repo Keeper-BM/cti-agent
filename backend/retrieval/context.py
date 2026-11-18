@@ -191,6 +191,7 @@ def prepare(db, question, analyses):
             limit=10,
             model_name=settings.embedding_model,
             cache_directory=settings.embedding_cache_directory,
+            min_similarity=settings.dense_min_similarity,
         )
         documents = retriever.invoke(question)
         candidates_by_id = {str(candidate["id"]): candidate for candidate in candidates}
@@ -211,6 +212,7 @@ def prepare(db, question, analyses):
             10,
             model_name=settings.embedding_model,
             cache_directory=settings.embedding_cache_directory,
+            min_similarity=settings.dense_min_similarity,
         )
         retrieval_version = f"dense/{settings.embedding_model}"
     else:

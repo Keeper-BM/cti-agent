@@ -1,4 +1,6 @@
-"""Real LangChain + BGE-M3 retrieval integration test."""
+"""Real LangChain + BGE-M3 retrieval integration test (explicit opt-in)."""
+
+import os
 
 import pytest
 from sqlalchemy.orm import Session
@@ -12,6 +14,10 @@ source_wire = sources.source_wire
 wire = questions.wire
 
 
+@pytest.mark.skipif(
+    os.getenv("CTI_RUN_REAL_BGE") != "1",
+    reason="Set CTI_RUN_REAL_BGE=1 to load the real model and run this optional test",
+)
 def test_real_langchain_bge_m3_question_api(
     client, headers, engine, source_wire, wire, monkeypatch, tmp_path
 ):
@@ -20,7 +26,8 @@ def test_real_langchain_bge_m3_question_api(
     pytest.importorskip("sentence_transformers")
 
     monkeypatch.setenv("RETRIEVAL_MODE", "langchain")
-    monkeypatch.setenv("EMBEDDING_MODEL", "BAAI/bge-m3")
+    model = os.getenv("CTI_TEST_BGE_MODEL", "BAAI/bge-m3")
+    monkeypatch.setenv("EMBEDDING_MODEL", model)
     monkeypatch.setenv(
         "EMBEDDING_CACHE_DIRECTORY",
         str(tmp_path / "bge-cache"),
@@ -43,7 +50,7 @@ def test_real_langchain_bge_m3_question_api(
         context = run.input_payload
         snapshots = set(db.get(AnalysisRun, baseline["id"]).source_snapshot_ids)
 
-        assert context["retrieval_version"] == "langchain/dense/BAAI/bge-m3"
+        assert context["retrieval_version"] == f"langchain/dense/{model}"
         assert context["facts"]
         assert not context["insufficient_evidence"]
 

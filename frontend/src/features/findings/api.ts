@@ -18,9 +18,12 @@ export const listAnalyses = (
   page: number,
   signal?: AbortSignal,
 ) =>
-  api.request<AnalysisList>(`/analyses?asset_id=${assetId}&limit=10&offset=${page * 10}`, {
-    signal,
-  });
+  api.request<AnalysisList>(
+    `/analyses?limit=10&offset=${page * 10}${assetId ? "&asset_id=" + encodeURIComponent(assetId) : ""}`,
+    {
+      signal,
+    },
+  );
 export const getAnalysis = (api: HttpClient, id: string, signal?: AbortSignal) =>
   api.request<Analysis>(`/analyses/${id}`, { signal });
 export const listFindings = (
@@ -30,3 +33,17 @@ export const listFindings = (
 ) => api.request<FindingList>(`/findings?${new URLSearchParams(filters)}`, { signal });
 export const getFinding = (api: HttpClient, id: string, signal?: AbortSignal) =>
   api.request<FindingDetail>(`/findings/${id}`, { signal });
+
+export type FindingGroup = components["schemas"]["FindingGroup"];
+export type Verdict = components["schemas"]["Verdict"];
+export const listFindingGroups = (
+  api: HttpClient,
+  analysis: string,
+  verdict: Verdict,
+  page: number,
+  signal?: AbortSignal,
+) =>
+  api.request<components["schemas"]["FindingGroupList"]>(
+    `/analyses/${analysis}/finding-groups?verdict=${verdict}&limit=5&offset=${page * 5}`,
+    { signal },
+  );

@@ -250,3 +250,25 @@ def test_question_keeps_affected_binary_as_cve_representative(
         facts = db.get(QuestionRun, queued["id"]).input_payload["facts"]
         assert len(facts) == 1 and facts[0]["package_name"] == "apache2-bin"
         assert facts[0]["verdict"] == "AFFECTED"
+
+
+def test_pinned_question_history_excludes_other_and_multi_analysis_answers(client, headers, engine):
+    first = analysis(client, headers, engine, "pinned")
+    second = analysis(client, headers, engine, "another")
+    ids = []
+    for scope in ([first["id"]], [first["id"], second["id"]], [second["id"]], [first["id"]]):
+        result = ask(client, headers, scope, question="CVE-2099-999999의 판정 근거가 있나요?")
+        assert result.status_code == 202, result.text
+        ids.append(result.json()["id"])
+        assert run_once(engine)
+    path = "/api/v1/questions"
+    assert client.get(path, headers=headers).json()["total"] == 4
+    for page, expected in enumerate((ids[-1], ids[0])):
+        res = client.get(
+            path, params={"analysis_id": first["id"], "offset": page, "limit": 1}, headers=headers
+        )
+        assert res.status_code == 200 and res.json()["total"] == 2
+        assert res.json()["items"][0]["id"] == expected
+    assert (
+        client.get(path, params={"analysis_id": str(uuid4())}, headers=headers).status_code == 404
+    )

@@ -5,7 +5,7 @@ import { useAction } from "../../shared/hooks/useAction";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
 import { listAssets } from "../assets/api";
 import { getAnalysis, listAnalyses } from "../findings/api";
-import { routeParam } from "../workflows/api";
+import { routeParam, workspaceLink } from "../workflows/api";
 import type { Analysis } from "../findings/api";
 import { getLLMStatus } from "../explanations/api";
 import { ReportPages, reportTime } from "../reports/ReportPreview";
@@ -31,53 +31,47 @@ export function QuestionsPage() {
     [api, initial],
   );
   const seed = usePollingQuery(api && initial ? seedLoad : null, null);
-  useEffect(() => {
-    if (seed.data) {
-      setAssetId(seed.data.asset_id);
-      setScope([seed.data]);
-    }
-  }, [seed.data]);
+  const selectedScope = initial ? (seed.data ? [seed.data] : []) : scope;
   const [question, setQuestion] = useState("");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState("");
-  const [poll, setPoll] = useState(true);
   const action = useAction();
   const key = useRef({ input: "", value: crypto.randomUUID() });
   const assetsLoad = useCallback(
     (signal: AbortSignal) => listAssets(api!, assetPage * 20, signal),
     [api, assetPage],
   );
-  const assets = usePollingQuery(api ? assetsLoad : null, null);
+  const assets = usePollingQuery(api && !initial ? assetsLoad : null, null);
   const analysesLoad = useCallback(
     (signal: AbortSignal) => listAnalyses(api!, assetId, analysisPage, signal),
     [api, assetId, analysisPage],
   );
-  const analyses = usePollingQuery(api && assetId ? analysesLoad : null, null);
+  const analyses = usePollingQuery(api && assetId && !initial ? analysesLoad : null, null);
   const historyLoad = useCallback(
-    (signal: AbortSignal) => listQuestions(api!, page, signal),
-    [api, page],
+    (signal: AbortSignal) => listQuestions(api!, page, initial, signal),
+    [api, page, initial],
   );
   const history = usePollingQuery(api ? historyLoad : null);
   const detailLoad = useCallback(
     (signal: AbortSignal) => getQuestion(api!, selectedId, signal),
     [api, selectedId],
   );
-  const detail = usePollingQuery(api && selectedId ? detailLoad : null, poll ? 3000 : null);
+  const detail = usePollingQuery(api && selectedId ? detailLoad : null, null);
   const configLoad = useCallback((signal: AbortSignal) => getLLMStatus(api!, signal), [api]);
   const config = usePollingQuery(api ? configLoad : null, null);
+  const status = detail.data?.job.status;
+  const refreshDetail = detail.refresh;
   useEffect(() => {
-    if (detail.data && ["SUCCEEDED", "FAILED"].includes(detail.data.job.status)) {
-      setPoll(false);
-      history.refresh();
-    }
-  }, [detail.data?.job.status, history.refresh]);
+    if (status !== "QUEUED" && status !== "RUNNING") return;
+    const timer = window.setInterval(refreshDetail, 3000);
+    return () => window.clearInterval(timer);
+  }, [status, refreshDetail]);
   function choose(id: string) {
     setSelectedId(id);
-    setPoll(true);
   }
   async function submit() {
     if (!api) return;
-    const ids = scope.map((a) => a.id).sort();
+    const ids = selectedScope.map((a) => a.id).sort();
     const input = JSON.stringify([ids, question.trim()]);
     if (key.current.input !== input) key.current = { input, value: crypto.randomUUID() };
     const ok = await action.run(async () => {
@@ -90,12 +84,6 @@ export function QuestionsPage() {
   }
   return (
     <>
-      <div className="inline-info">
-        <span className="info-icon">i</span>
-        <span>
-          선택한 분석 결과와 공식 자료를 기반으로 취약점 및 대응 절차에 대한 질의응답을 제공합니다.
-        </span>
-      </div>
       <Notice
         error={
           action.error ||
@@ -112,93 +100,112 @@ export function QuestionsPage() {
         <div className="panel-heading">
           <div>
             <h2>AI Q&amp;A</h2>
-            <p>질의 범위: 완료된 분석 최대 5개</p>
+            {initial && seed.data ? (
+              <p>
+                {seed.data.asset_name} ·{" "}
+                {reportTime(seed.data.completed_at ?? seed.data.created_at)} · 분석{" "}
+                {seed.data.id.slice(0, 8)}
+              </p>
+            ) : (
+              !initial && <p>완료된 분석을 최대 5개까지 함께 선택할 수 있습니다.</p>
+            )}
           </div>
+          {initial && seed.data && (
+            <a className="asset-open-link" href={workspaceLink(seed.data.asset_id, initial)}>
+              분석 결과 보기
+            </a>
+          )}
         </div>
-        <div className="report-form">
-          <label>
-            대상 자산
-            <select
-              value={assetId}
-              disabled={!api || action.pending}
-              onChange={(e) => {
-                setAssetId(e.target.value);
+        {!initial && (
+          <>
+            <div className="report-form">
+              <label>
+                대상 자산
+                <select
+                  value={assetId}
+                  disabled={!api || action.pending}
+                  onChange={(e) => {
+                    setAssetId(e.target.value);
+                    setAnalysisPage(0);
+                  }}
+                >
+                  <option value="">자산 선택</option>
+                  {assets.data?.items.map((a) => (
+                    <option key={a.id} value={a.id} disabled={!a.is_active}>
+                      {a.asset_name}
+                      {a.is_active ? "" : " (비활성)"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                분석 범위 추가
+                <select
+                  value=""
+                  disabled={!assetId || scope.length >= 5 || action.pending}
+                  onChange={(e) => {
+                    const a = analyses.data?.items.find((i) => i.id === e.target.value);
+                    if (a) setScope([...scope, a]);
+                  }}
+                >
+                  <option value="">완료된 분석 선택</option>
+                  {analyses.data?.items
+                    .filter(
+                      (a) => a.job.status === "SUCCEEDED" && !scope.some((s) => s.id === a.id),
+                    )
+                    .map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {reportTime(a.created_at)} · {a.id.slice(0, 8)}
+                        {a.is_synthetic ? " · 가상 입력" : ""}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            </div>
+            <ReportPages
+              page={assetPage}
+              total={assets.data?.total ?? 0}
+              size={20}
+              setPage={(p) => {
+                setAssetPage(p);
+                setAssetId("");
                 setAnalysisPage(0);
               }}
-            >
-              <option value="">자산 선택</option>
-              {assets.data?.items.map((a) => (
-                <option key={a.id} value={a.id} disabled={!a.is_active}>
-                  {a.asset_name}
-                  {a.is_active ? "" : " (비활성)"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            분석 범위 추가
-            <select
-              value=""
-              disabled={!assetId || scope.length >= 5 || action.pending}
-              onChange={(e) => {
-                const a = analyses.data?.items.find((i) => i.id === e.target.value);
-                if (a) setScope([...scope, a]);
-              }}
-            >
-              <option value="">완료된 분석 선택</option>
-              {analyses.data?.items
-                .filter((a) => a.job.status === "SUCCEEDED" && !scope.some((s) => s.id === a.id))
-                .map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {reportTime(a.created_at)} · {a.id.slice(0, 8)}
+              label="자산"
+            />
+            {!!assetId && (
+              <ReportPages
+                page={analysisPage}
+                total={analyses.data?.total ?? 0}
+                size={10}
+                setPage={setAnalysisPage}
+                label="분석"
+              />
+            )}
+            <ul className="question-scope">
+              {scope.map((a) => (
+                <li key={a.id}>
+                  <span>
+                    {a.asset_name} · {reportTime(a.created_at)}
                     {a.is_synthetic ? " · 가상 입력" : ""}
-                  </option>
-                ))}
-            </select>
-          </label>
-        </div>
-        <ReportPages
-          page={assetPage}
-          total={assets.data?.total ?? 0}
-          size={20}
-          setPage={(p) => {
-            setAssetPage(p);
-            setAssetId("");
-            setAnalysisPage(0);
-          }}
-          label="자산"
-        />
-        {!!assetId && (
-          <ReportPages
-            page={analysisPage}
-            total={analyses.data?.total ?? 0}
-            size={10}
-            setPage={setAnalysisPage}
-            label="분석"
-          />
-        )}
-        <ul className="question-scope">
-          {scope.map((a) => (
-            <li key={a.id}>
-              <span>
-                {a.asset_name} · {reportTime(a.created_at)}
-                {a.is_synthetic ? " · 가상 입력" : ""}
-              </span>
-              <button
-                className="secondary"
-                disabled={action.pending}
-                onClick={() => setScope(scope.filter((s) => s.id !== a.id))}
-                aria-label={`${a.asset_name} 분석 제외`}
-              >
-                제외
-              </button>
-            </li>
-          ))}
-        </ul>
-        {!scope.length && (
-          <p className="empty-description">
-            질의 대상 분석을 선택하세요. 완료된 분석이 없으면 취약점 분석 실행이 필요합니다.
-          </p>
+                  </span>
+                  <button
+                    className="secondary"
+                    disabled={action.pending}
+                    onClick={() => setScope(scope.filter((s) => s.id !== a.id))}
+                    aria-label={`${a.asset_name} 분석 제외`}
+                  >
+                    제외
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {!scope.length && (
+              <p className="empty-description">
+                질의 대상 분석을 선택하세요. 완료된 분석이 없으면 취약점 분석 실행이 필요합니다.
+              </p>
+            )}
+          </>
         )}
         <form
           className="question-form"
@@ -220,10 +227,6 @@ export function QuestionsPage() {
               placeholder="예: 선택한 CVE의 판정 근거와 권고 조치는 무엇인가요?"
             />
           </label>
-          <p className="ai-transmission">
-            질문·분석 결과·공식 근거 발췌를 학교 API에 전달합니다. 비밀번호나 API 키는 질문에
-            입력하지 마세요.
-          </p>
           {config.data && !config.data.configured && (
             <p className="ai-warning">{config.data.message} 기존 답변은 계속 확인할 수 있습니다.</p>
           )}
@@ -232,7 +235,7 @@ export function QuestionsPage() {
             disabled={
               !api ||
               !canWrite ||
-              !scope.length ||
+              !selectedScope.length ||
               question.trim().length < 5 ||
               action.pending ||
               !config.data?.configured
@@ -245,7 +248,7 @@ export function QuestionsPage() {
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <h2>질의 이력</h2>
+            <h2>{initial ? "이 분석의 질문" : "질의 이력"}</h2>
             <p>저장된 답변·분석 결과·참조 근거</p>
           </div>
         </div>
@@ -268,7 +271,7 @@ export function QuestionsPage() {
             </button>
           ))}
         </div>
-        {!history.data?.total && <p className="empty-description">저장된 질의가 없습니다.</p>}
+        {history.data?.total === 0 && <p className="empty-description">저장된 질의가 없습니다.</p>}
         <ReportPages
           page={page}
           total={history.data?.total ?? 0}

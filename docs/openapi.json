@@ -1047,6 +1047,23 @@
               "format": "uuid",
               "title": "Asset Id"
             }
+          },
+          {
+            "name": "analysis_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Analysis Id"
+            }
           }
         ],
         "responses": {
@@ -5314,6 +5331,165 @@
         }
       }
     },
+    "/api/v1/analyses/{analysis_id}/finding-groups": {
+      "get": {
+        "tags": [
+          "assessment"
+        ],
+        "summary": "Finding Groups",
+        "operationId": "finding_groups_api_v1_analyses__analysis_id__finding_groups_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Verdict"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 5,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindingGroupList"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
     "/api/v1/findings": {
       "get": {
         "tags": [
@@ -5375,6 +5551,23 @@
                 }
               ],
               "title": "Verdict"
+            }
+          },
+          {
+            "name": "cve_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cve Id"
             }
           },
           {
@@ -6370,6 +6563,25 @@
               ],
               "title": "Asset Id"
             }
+          },
+          {
+            "name": "analysis_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "이 분석 하나를 대상으로 한 질문",
+              "title": "Analysis Id"
+            },
+            "description": "이 분석 하나를 대상으로 한 질문"
           },
           {
             "name": "limit",
@@ -8498,6 +8710,18 @@
               }
             ],
             "title": "Report Id"
+          },
+          "workflow_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Id"
           }
         },
         "type": "object",
@@ -8508,7 +8732,8 @@
           "completed_at",
           "is_synthetic",
           "summary",
-          "report_id"
+          "report_id",
+          "workflow_id"
         ],
         "title": "AnalysisBrief"
       },
@@ -11737,6 +11962,54 @@
           "kev_snapshot"
         ],
         "title": "FindingDetail"
+      },
+      "FindingGroup": {
+        "properties": {
+          "cve_id": {
+            "type": "string",
+            "title": "Cve Id"
+          },
+          "package_count": {
+            "type": "integer",
+            "title": "Package Count"
+          },
+          "finding_count": {
+            "type": "integer",
+            "title": "Finding Count"
+          },
+          "representative": {
+            "$ref": "#/components/schemas/AssessmentFinding"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cve_id",
+          "package_count",
+          "finding_count",
+          "representative"
+        ],
+        "title": "FindingGroup"
+      },
+      "FindingGroupList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FindingGroup"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "FindingGroupList"
       },
       "FindingList": {
         "properties": {
@@ -15338,6 +15611,9 @@
             },
             "type": "array",
             "title": "History"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/WorkspaceSelection"
           }
         },
         "type": "object",
@@ -15348,9 +15624,40 @@
           "connection_checked_at",
           "inventory",
           "latest",
-          "history"
+          "history",
+          "selection"
         ],
         "title": "WorkspaceResponse"
+      },
+      "WorkspaceSelection": {
+        "properties": {
+          "workflow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkflowResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "workflow",
+          "analysis"
+        ],
+        "title": "WorkspaceSelection"
       }
     },
     "securitySchemes": {

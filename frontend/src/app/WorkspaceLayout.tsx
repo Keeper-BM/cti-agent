@@ -17,13 +17,14 @@ const icons = {
   audit: "jobs",
 } as const;
 const groups = [
-  { name: "워크스페이스", ids: ["workspace", "assets"] },
-  { name: "분석 도구", ids: ["sources", "findings", "questions", "reports"] },
+  { name: "워크스페이스", ids: ["assets", "workspace", "findings", "reports"] },
+  { name: "자료 및 도구", ids: ["sources", "questions"] },
   { name: "운영", ids: ["jobs", "example", "accounts", "audit"] },
 ];
 export function WorkspaceLayout({ route, children }: { route: Route; children: ReactNode }) {
   const { api, disconnect, user, isAdmin, mode } = useSession();
   const group = groups.find((g) => g.ids.includes(route.id));
+  const roleLabel = isAdmin ? "관리자" : user?.role === "VIEWER" ? "조회자" : "자산 담당자";
   function link(item: Route) {
     return (
       <a
@@ -51,7 +52,7 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
           {groups.map((g) => (
             <div className="nav-group" key={g.name}>
               <div className="workspace-label">{g.name}</div>
-              {visible.filter((r) => g.ids.includes(r.id)).map(link)}
+              {g.ids.flatMap((id) => visible.filter((r) => r.id === id)).map(link)}
             </div>
           ))}
         </nav>
@@ -62,13 +63,7 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
           <div>
             <strong>{user?.display_name ?? (api ? "개발 관리자" : "로그인 대기")}</strong>
             <small>
-              {api
-                ? isAdmin
-                  ? "관리자"
-                  : user?.role === "VIEWER"
-                    ? "조회자"
-                    : "자산 담당자"
-                : "CTI Agent"}
+              {api ? (user?.display_name === roleLabel ? user.username : roleLabel) : "CTI Agent"}
             </small>
           </div>
           {api && (
@@ -84,16 +79,13 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
       <div className="main-shell">
         <header className="topbar">
           <div className="breadcrumb">
-            <Icon name="scope" />
+            <span className="breadcrumb-brand">CTI Agent</span>
+            <span aria-hidden="true">/</span>
             <span>{group?.name}</span>
             <span aria-hidden="true">/</span>
             <strong>{route.title}</strong>
           </div>
           <div className="topbar-actions">
-            <span className={`connection ${api ? "online" : ""}`}>
-              <i />
-              {api ? "서버 연결됨" : "연결 대기"}
-            </span>
             {api && (
               <button className="mobile-logout" onClick={() => disconnect()} aria-label="로그아웃">
                 <Icon name="logout" />
@@ -102,7 +94,37 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
           </div>
         </header>
         <nav className="mobile-nav" aria-label="모바일 메뉴">
-          {visible.map(link)}
+          {groups[0].ids.flatMap((id) => visible.filter((r) => r.id === id)).map(link)}
+          <details
+            key={route.id}
+            className="mobile-more"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.currentTarget.open = false;
+                e.currentTarget.querySelector("summary")?.focus();
+              }
+            }}
+          >
+            <summary
+              aria-label="추가 메뉴"
+              className={groups[0].ids.includes(route.id) ? "" : "active"}
+            >
+              더보기
+              <Icon name="chevron" />
+            </summary>
+            <div
+              onClick={(e) => {
+                if ((e.target as Element).closest("a"))
+                  e.currentTarget.closest("details")!.open = false;
+              }}
+            >
+              {groups
+                .slice(1)
+                .flatMap((g) => g.ids)
+                .flatMap((id) => visible.filter((r) => r.id === id))
+                .map(link)}
+            </div>
+          </details>
         </nav>
         <main>
           <div className="page-content">

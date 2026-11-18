@@ -592,6 +592,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/analyses/{analysis_id}/finding-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Finding Groups */
+        get: operations["finding_groups_api_v1_analyses__analysis_id__finding_groups_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/findings": {
         parameters: {
             query?: never;
@@ -973,6 +990,8 @@ export interface components {
             };
             /** Report Id */
             report_id: string | null;
+            /** Workflow Id */
+            workflow_id: string | null;
         };
         /** AnalysisList */
         AnalysisList: {
@@ -2260,6 +2279,23 @@ export interface components {
             /** Related Records */
             related_records: components["schemas"]["RecordResponse"][];
             kev_snapshot: components["schemas"]["SnapshotResponse"] | null;
+        };
+        /** FindingGroup */
+        FindingGroup: {
+            /** Cve Id */
+            cve_id: string;
+            /** Package Count */
+            package_count: number;
+            /** Finding Count */
+            finding_count: number;
+            representative: components["schemas"]["AssessmentFinding"];
+        };
+        /** FindingGroupList */
+        FindingGroupList: {
+            /** Items */
+            items: components["schemas"]["FindingGroup"][];
+            /** Total */
+            total: number;
         };
         /** FindingList */
         FindingList: {
@@ -3582,6 +3618,12 @@ export interface components {
             latest: components["schemas"]["WorkflowResponse"] | null;
             /** History */
             history: components["schemas"]["AnalysisBrief"][];
+            selection: components["schemas"]["WorkspaceSelection"];
+        };
+        /** WorkspaceSelection */
+        WorkspaceSelection: {
+            workflow: components["schemas"]["WorkflowResponse"] | null;
+            analysis: components["schemas"]["AnalysisBrief"] | null;
         };
     };
     responses: never;
@@ -4393,7 +4435,9 @@ export interface operations {
     };
     workspace_api_v1_assets__asset_id__workspace_get: {
         parameters: {
-            query?: never;
+            query?: {
+                analysis_id?: string | null;
+            };
             header?: never;
             path: {
                 asset_id: string;
@@ -7646,12 +7690,120 @@ export interface operations {
             };
         };
     };
+    finding_groups_api_v1_analyses__analysis_id__finding_groups_get: {
+        parameters: {
+            query: {
+                verdict: components["schemas"]["Verdict"];
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                analysis_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FindingGroupList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_findings_api_v1_findings_get: {
         parameters: {
             query?: {
                 analysis_id?: string | null;
                 asset_id?: string | null;
                 verdict?: components["schemas"]["Verdict"] | null;
+                cve_id?: string | null;
                 processing_status?: components["schemas"]["ProcessingStatus"] | null;
                 actionable?: boolean;
                 search?: string;
@@ -8279,6 +8431,8 @@ export interface operations {
         parameters: {
             query?: {
                 asset_id?: string | null;
+                /** @description 이 분석 하나를 대상으로 한 질문 */
+                analysis_id?: string | null;
                 limit?: number;
                 offset?: number;
             };

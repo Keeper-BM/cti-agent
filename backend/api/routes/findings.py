@@ -15,6 +15,7 @@ from backend.api.schemas.findings import (
     AnalysisRequest,
     AnalysisResponse,
     FindingDetail,
+    FindingGroupList,
     FindingList,
 )
 from backend.assessment.service import pin_inputs
@@ -121,12 +122,81 @@ def get_analysis(analysis_id: UUID, db: Database):
     return analysis_response(find_analysis(analysis_id, db), db)
 
 
+def review_order():
+    return case(
+        {"URGENT_REVIEW": 0, "HIGH_REVIEW": 1},
+        value=FindingRecord.payload["remediation"]["priority"].as_string(),
+        else_=2,
+    )
+
+
+@router.get("/analyses/{analysis_id}/finding-groups", response_model=FindingGroupList)
+def finding_groups(
+    analysis_id: UUID,
+    verdict: Verdict,
+    db: Database,
+    limit: int = Query(5, ge=1, le=50),
+    offset: int = Query(0, ge=0),
+):
+    # Page whole CVEs within one verdict. A single CVE may have different package verdicts.
+    find_analysis(analysis_id, db)
+    conditions = (
+        FindingRecord.analysis_id == str(analysis_id),
+        FindingRecord.verdict == verdict,
+        FindingRecord.cve_id.is_not(None),
+    )
+    cve = FindingRecord.cve_id
+    groups = (
+        db.execute(
+            select(
+                cve.label("cve_id"),
+                func.count(func.distinct(FindingRecord.package_name)).label("package_count"),
+                func.count(FindingRecord.id).label("finding_count"),
+            )
+            .where(*conditions)
+            .group_by(cve)
+            .order_by(func.min(review_order()), cve)
+            .limit(limit)
+            .offset(offset)
+        )
+        .mappings()
+        .all()
+    )
+    total = db.scalar(select(func.count(func.distinct(cve))).where(*conditions))
+    if not groups:
+        return {"items": [], "total": total}
+    ranked = (
+        select(
+            FindingRecord.id,
+            func.row_number()
+            .over(
+                partition_by=cve,
+                order_by=(review_order(), FindingRecord.package_name, FindingRecord.id),
+            )
+            .label("position"),
+        )
+        .where(*conditions, cve.in_([g["cve_id"] for g in groups]))
+        .subquery()
+    )
+    chosen = db.scalars(
+        select(FindingRecord).where(
+            FindingRecord.id.in_(select(ranked.c.id).where(ranked.c.position == 1))
+        )
+    )
+    representatives = {row.cve_id: row.payload for row in chosen}
+    return {
+        "items": [{**g, "representative": representatives[g["cve_id"]]} for g in groups],
+        "total": total,
+    }
+
+
 @router.get("/findings", response_model=FindingList)
 def list_findings(
     db: Database,
     analysis_id: UUID | None = None,
     asset_id: UUID | None = None,
     verdict: Verdict | None = None,
+    cve_id: str | None = Query(None, max_length=40),
     processing_status: ProcessingStatus | None = None,
     actionable: bool = False,
     search: str = Query("", max_length=200),
@@ -141,6 +211,8 @@ def list_findings(
         conditions.append(FindingRecord.asset_id == str(asset_id))
     if verdict:
         conditions.append(FindingRecord.verdict == verdict)
+    if cve_id is not None:
+        conditions.append(FindingRecord.cve_id == cve_id.upper())
     if actionable:
         conditions.append(FindingRecord.verdict.in_(["AFFECTED", "NEEDS_REVIEW"]))
     if processing_status:
@@ -173,17 +245,7 @@ def list_findings(
         .where(*conditions)
         .order_by(
             priority,
-            *(
-                [
-                    case(
-                        {"URGENT_REVIEW": 0, "HIGH_REVIEW": 1},
-                        value=FindingRecord.payload["remediation"]["priority"].as_string(),
-                        else_=2,
-                    )
-                ]
-                if actionable
-                else []
-            ),
+            *([review_order()] if actionable else []),
             func.coalesce(FindingRecord.cve_id, ""),
             func.coalesce(FindingRecord.package_name, ""),
             FindingRecord.id,

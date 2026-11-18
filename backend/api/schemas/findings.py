@@ -42,6 +42,18 @@ class FindingList(BaseModel):
     total: int
 
 
+class FindingGroup(BaseModel):
+    cve_id: str
+    package_count: int
+    finding_count: int
+    representative: AssessmentFinding
+
+
+class FindingGroupList(BaseModel):
+    items: list[FindingGroup]
+    total: int
+
+
 class FindingDetail(AssessmentFinding):
     related_records: list[RecordResponse]
     kev_snapshot: SnapshotResponse | None

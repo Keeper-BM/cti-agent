@@ -3,10 +3,18 @@ import type { components } from "../../api/schema";
 
 export type Question = components["schemas"]["QuestionDetail"];
 export type QuestionResult = components["schemas"]["QuestionResult"];
-export const listQuestions = (api: HttpClient, page: number, signal?: AbortSignal) =>
-  api.request<components["schemas"]["QuestionList"]>(`/questions?limit=10&offset=${page * 10}`, {
-    signal,
-  });
+export const listQuestions = (
+  api: HttpClient,
+  page: number,
+  analysis: string,
+  signal?: AbortSignal,
+) =>
+  api.request<components["schemas"]["QuestionList"]>(
+    `/questions?limit=10&offset=${page * 10}${analysis ? "&analysis_id=" + encodeURIComponent(analysis) : ""}`,
+    {
+      signal,
+    },
+  );
 export const getQuestion = (api: HttpClient, id: string, signal?: AbortSignal) =>
   api.request<Question>(`/questions/${id}`, { signal });
 export const askQuestion = (

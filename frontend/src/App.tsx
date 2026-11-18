@@ -14,14 +14,16 @@ import { WorkflowPage } from "./features/workflows/WorkflowPage";
 
 // 공통 세션·레이아웃과 기능별 페이지를 조합한다.
 export default function App() {
-  const route = useRoute();
+  const { route, hash, params } = useRoute();
   const pages = {
-    workspace: <WorkflowPage />,
-    assets: <AssetsPage />,
+    workspace: (
+      <WorkflowPage asset={params.get("asset") ?? ""} analysis={params.get("analysis") ?? ""} />
+    ),
+    assets: <AssetsPage key={hash} />,
     sources: <SourcesPage />,
-    findings: <FindingsPage />,
-    questions: <QuestionsPage />,
-    reports: <ReportsPage />,
+    findings: <FindingsPage key={hash} />,
+    questions: <QuestionsPage key={hash} />,
+    reports: <ReportsPage key={hash} />,
     jobs: <JobsPage />,
     example: <ExamplePage />,
     accounts: <AccountsPage />,

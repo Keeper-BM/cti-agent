@@ -94,6 +94,7 @@ def create(
 def listing(
     db: Database,
     asset_id: UUID | None = None,
+    analysis_id: UUID | None = Query(None, description="이 분석 하나를 대상으로 한 질문"),
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ):
@@ -106,6 +107,15 @@ def listing(
             )
         ]
     )
+    if analysis_id:
+        find_analysis(analysis_id, db)
+        # JSON positions use the same scalar comparison on SQLite and PostgreSQL.
+        filters.extend(
+            [
+                QuestionRun.analysis_ids[0].as_string() == str(analysis_id),
+                QuestionRun.analysis_ids[1].as_string().is_(None),
+            ]
+        )
     rows = db.scalars(
         select(QuestionRun)
         .options(defer(QuestionRun.input_payload), defer(QuestionRun.result))

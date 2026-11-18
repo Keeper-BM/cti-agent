@@ -1,64 +1,60 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export const routes = [
   {
     id: "workspace",
-    title: "분석 워크스페이스",
-    description: "패키지 수집부터 대응 보고서까지, 선택한 자산의 분석을 관리합니다.",
+    title: "분석 실행",
+    description: "선택한 서버의 패키지를 공식 보안 자료와 대조하고 대응 보고서를 만듭니다.",
   },
   {
     id: "assets",
-    title: "자산 현황",
-    description: "서버 자산 등록 및 패키지 수집 관리",
+    title: "자산",
+    description: "서버를 등록하고 연결 설정과 패키지 수집 기록을 관리합니다.",
+  },
+  {
+    id: "findings",
+    title: "분석 이력",
+    description: "자산별로 저장된 판정과 당시 사용한 근거를 확인합니다.",
+  },
+  {
+    id: "reports",
+    title: "보고서",
+    description: "분석별 대응 보고서를 열거나 파일로 내려받습니다.",
   },
   {
     id: "sources",
     title: "보안 자료",
-    description: "공식 CVE 자료 수집 및 출처별 갱신 이력",
-  },
-  {
-    id: "findings",
-    title: "취약점 분석",
-    description: "자산별 취약점 판정 및 근거 분석",
+    description: "공식 출처별 수집 범위와 자료 갱신 이력을 확인합니다.",
   },
   {
     id: "questions",
-    title: "취약점 인사이트",
-    description: "분석 결과·공식 근거 기반 AI 질의응답",
-  },
-  {
-    id: "reports",
-    title: "대응 보고서",
-    description: "취약점 분석·대응 보고서 생성 및 이력 관리",
+    title: "AI 질문",
+    description: "선택한 분석 결과와 공식 근거를 바탕으로 질문합니다.",
   },
   {
     id: "jobs",
     title: "작업 내역",
-    description: "수집·분석·생성 작업의 처리 상태 및 오류",
+    description: "수집·분석·생성 작업의 진행 상태와 오류를 확인합니다.",
   },
   {
     id: "example",
     title: "시험 예제",
-    description: "가상 입력 기반 취약점 판정 및 근거 예제",
+    description: "가상 입력으로 취약점 판정과 근거를 확인합니다.",
   },
-  { id: "accounts", title: "계정·권한", description: "사용자 계정 및 자산 접근 권한 관리" },
-  { id: "audit", title: "운영 기록", description: "접근·변경·작업 처리 감사 기록" },
+  { id: "accounts", title: "계정·권한", description: "사용자 계정과 자산 접근 권한을 관리합니다." },
+  { id: "audit", title: "운영 기록", description: "접근·변경·작업 처리 기록을 확인합니다." },
 ] as const;
 
 export type Route = (typeof routes)[number];
 
-function readRoute(): Route {
-  return (
-    routes.find((route) => window.location.hash.split("?")[0] === `#/${route.id}`) ?? routes[0]
-  );
+function subscribe(update: () => void) {
+  window.addEventListener("hashchange", update);
+  return () => window.removeEventListener("hashchange", update);
 }
 
 export function useRoute() {
-  const [route, setRoute] = useState(readRoute);
-  useEffect(() => {
-    const changed = () => setRoute(readRoute());
-    window.addEventListener("hashchange", changed);
-    return () => window.removeEventListener("hashchange", changed);
-  }, []);
-  return route;
+  const hash = useSyncExternalStore(subscribe, () => window.location.hash);
+  const [path, query] = hash.split("?");
+  const route = routes.find((item) => path === "#/" + item.id) ?? routes[0];
+  return { route, hash, params: new URLSearchParams(query) };
 }

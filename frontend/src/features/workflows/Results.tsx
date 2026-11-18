@@ -1,282 +1,422 @@
-import { useCallback, useState, Fragment } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { HttpClient } from "../../api/client";
 import { Icon } from "../../shared/components/Icon";
 import { Notice } from "../../shared/components/Notice";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
-import { useAction } from "../../shared/hooks/useAction";
-import type { HttpClient } from "../../api/client";
-import { listFindings, type Finding } from "../findings/api";
-import { downloadReport } from "../reports/api";
+import {
+  listFindings,
+  listFindingGroups,
+  type Finding,
+  type FindingGroup,
+  type Verdict,
+} from "../findings/api";
 import { count, shortTime, type Brief } from "./api";
 
-const verdicts: Record<string, string> = {
+const labels: Record<Verdict, string> = {
   AFFECTED: "영향 있음",
   NEEDS_REVIEW: "추가 확인 필요",
   FIXED: "수정 기준 충족",
   NOT_AFFECTED: "영향 없음",
-  OUT_OF_SCOPE: "지원 범위 밖",
-  NO_MATCHING_RECORD: "대조 자료 없음",
-  NOT_INSTALLED: "입력 목록에 없음",
-  PARTIAL_COLLECTION: "일부 수집",
-  COLLECTION_FAILED: "수집 실패",
 };
-const metrics = [
-  { key: "AFFECTED", icon: "alert", tone: "red" },
-  { key: "NEEDS_REVIEW", icon: "scope", tone: "amber" },
-  { key: "FIXED", icon: "shield", tone: "teal" },
-] as const;
-
-export function FindingsList({
-  api,
-  analysisId,
-  filter,
+const verdictOrder: Verdict[] = ["AFFECTED", "NEEDS_REVIEW", "FIXED", "NOT_AFFECTED"];
+const pageSize = 5;
+function Pager({
+  page,
+  total,
+  setPage,
+  unit,
 }: {
-  api: HttpClient;
-  analysisId: string;
-  filter: string;
+  page: number;
+  total: number;
+  setPage: (n: number) => void;
+  unit: string;
 }) {
-  const [page, setPage] = useState(0);
-  const [open, setOpen] = useState("");
-  const load = useCallback(
-    (signal: AbortSignal) =>
-      listFindings(
-        api,
-        {
-          analysis_id: analysisId,
-          limit: "5",
-          offset: String(page * 5),
-          ...(filter === "actionable"
-            ? { actionable: "true" }
-            : filter === "outside"
-              ? { processing_status: "OUT_OF_SCOPE" }
-              : filter === "all"
-                ? { processing_status: "EVALUATED" }
-                : { verdict: filter }),
-        },
-        signal,
-      ),
-    [api, analysisId, page, filter],
-  );
-  const result = usePollingQuery(load, null);
+  return total > pageSize ? (
+    <div className="work-pager">
+      <span>
+        {unit} {count(total)}
+        {unit === "CVE" ? "개" : "건"} · {page + 1} / {Math.ceil(total / pageSize)}
+      </span>
+      <button disabled={!page} onClick={() => setPage(page - 1)}>
+        이전
+      </button>
+      <button disabled={(page + 1) * pageSize >= total} onClick={() => setPage(page + 1)}>
+        다음
+      </button>
+    </div>
+  ) : null;
+}
+function ComparedVersions({ finding: f }: { finding: Finding }) {
+  const source = f.comparison_basis === "SOURCE";
+  const installed = source
+    ? f.installed_version
+    : (f.binary_version ?? (f.comparison_basis === "BINARY" ? f.installed_version : null));
   return (
-    <div className="find-list">
-      <Notice error={result.error} />
-      <div className="work-table" role="table" aria-label="패키지별 판정 결과">
-        <div className="work-tr work-th" role="row">
-          <span role="columnheader">패키지 / CVE</span>
-          <span role="columnheader">대조 버전</span>
-          <span role="columnheader">최종 판단</span>
-          <span role="columnheader" className="sr-only">
-            상세 근거
-          </span>
-        </div>
-        {result.data?.items.map((f) => (
-          <Fragment key={f.finding_id}>
-            <div role="row" className={`work-tr ${open === f.finding_id ? "expanded" : ""}`}>
-              <span role="cell">
-                <b>{f.package_name ?? "패키지 미확인"}</b>
-                <small>{f.cve_id ?? "CVE 미지정"}</small>
-              </span>
-              <span role="cell" className="version-cell">
-                <samp>{f.installed_version ?? f.binary_version ?? "미확인"}</samp>
-                <small>수정 {f.fixed_version ?? "기준 없음"}</small>
-              </span>
-              <span role="cell">
-                <span className={`decision ${f.verdict?.toLowerCase() ?? "neutral"}`}>
-                  {verdicts[f.verdict ?? f.processing_status] ?? f.processing_status}
-                </span>
-              </span>
-              <span role="cell">
-                <button
-                  className="row-toggle"
-                  aria-expanded={open === f.finding_id}
-                  aria-label={`${f.package_name} ${f.cve_id ?? ""} 근거 ${open === f.finding_id ? "닫기" : "보기"}`}
-                  onClick={() => setOpen(open === f.finding_id ? "" : f.finding_id)}
-                >
-                  <Icon name="chevron" />
-                </button>
-              </span>
-            </div>
-            {open === f.finding_id && (
-              <div role="row">
-                <div role="cell" className="row-evidence">
-                  <Evidence finding={f} />
-                </div>
-              </div>
-            )}
-          </Fragment>
-        ))}
+    <dl className="compared-versions">
+      <div>
+        <dt>{source ? "설치 소스 버전" : "설치 바이너리 버전"}</dt>
+        <dd>
+          <samp>{installed ?? "미확인"}</samp>
+        </dd>
       </div>
-      {result.data?.items.length === 0 && (
-        <p className="quiet-empty">이 분류에 해당하는 결과가 없습니다.</p>
-      )}
-      {!result.data && !result.error && (
-        <p className="quiet-empty" role="status">
-          판정 결과를 불러오는 중…
-        </p>
-      )}
-      {result.data && result.data.total > 5 && (
-        <div className="work-pager">
-          <span>
-            전체 {count(result.data.total)}건 · {page + 1} / {Math.ceil(result.data.total / 5)}
-          </span>
-          <button
-            disabled={!page}
-            onClick={() => {
-              setPage(page - 1);
-              setOpen("");
-            }}
-          >
-            이전
-          </button>
-          <button
-            disabled={(page + 1) * 5 >= result.data.total}
-            onClick={() => {
-              setPage(page + 1);
-              setOpen("");
-            }}
-          >
-            다음
-          </button>
+      <div>
+        <dt>공식 수정 기준</dt>
+        <dd>
+          <samp>{f.fixed_version ?? "기준 미제공"}</samp>
+        </dd>
+      </div>
+    </dl>
+  );
+}
+function FindingEvidence({ finding: f }: { finding: Finding }) {
+  return (
+    <div className="finding-evidence">
+      {f.reasons?.length ? (
+        <div>
+          <h4>판정 근거</h4>
+          <ul>
+            {f.reasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {f.remediation?.steps.length ? (
+        <div>
+          <h4>권고 조치</h4>
+          <ol>
+            {f.remediation.steps.map((s, i) => (
+              <li key={i}>
+                <b>{s.title}</b> · {s.description}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+      {f.limitations?.length ? (
+        <div>
+          <h4>판정 범위</h4>
+          <ul>
+            {f.limitations.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {!!f.evidence_refs?.length && (
+        <div className="evidence-links">
+          {f.evidence_refs.map((e, i) => (
+            <a href={e.url} key={e.document_version_id + ":" + i} target="_blank" rel="noreferrer">
+              {e.source} 공식 근거
+              <Icon name="external" />
+            </a>
+          ))}
         </div>
       )}
     </div>
   );
 }
-function Evidence({ finding: f }: { finding: Finding }) {
+
+function PriorityFinding({ api, analysis }: { api: HttpClient; analysis: Brief }) {
+  const load = useCallback(
+    (signal: AbortSignal) => listFindingGroups(api, analysis.id, "AFFECTED", 0, signal),
+    [api, analysis.id],
+  );
+  const query = usePollingQuery(load, null);
+  const [open, setOpen] = useState(false);
+  const f = query.data?.items[0]?.representative;
+  const action = f?.remediation?.steps[0];
+  const reason = f?.reasons?.at(-1);
   return (
-    <>
-      <strong>판정 근거</strong>
-      {f.reasons?.map((reason) => (
-        <p key={reason}>{reason}</p>
-      ))}
-      {f.remediation && (
+    <article className="work-card priority-finding">
+      <div className="lead-label">
+        <Icon name="alert" />
+        <span>영향 있음 · {count(analysis.summary.AFFECTED)}건</span>
+        {analysis.summary.AFFECTED > 1 && <span className="lead-selection">우선 대응 항목</span>}
+      </div>
+      {f ? (
         <>
-          <strong>권고 조치</strong>
-          {f.remediation.steps.slice(0, 2).map((s) => (
-            <p key={s.title}>
-              {s.title} · {s.description}
+          <div className="lead-heading">
+            <h3>{f.cve_id}</h3>
+            <span className="package-name">{f.package_name ?? "패키지 미확인"}</span>
+          </div>
+          {reason && <p className="reason-line">{reason}</p>}
+          <ComparedVersions finding={f} />
+          {action && (
+            <div className="first-action">
+              <Icon name="shield" />
+              <div>
+                <h4>{action.title}</h4>
+                <p>{action.description}</p>
+              </div>
+            </div>
+          )}
+          <button className="evidence-button" aria-expanded={open} onClick={() => setOpen(!open)}>
+            {open ? "판정 근거 닫기" : "판정 근거 보기"}
+            <Icon name="chevron" />
+          </button>
+          {open && <FindingEvidence finding={f} />}
+        </>
+      ) : (
+        <>
+          <Notice error={query.error} />
+          {!query.error && (
+            <p className="aside-empty">
+              {query.data
+                ? "판정 목록에서 패키지 근거를 확인하세요."
+                : "영향이 확인된 패키지를 불러오는 중…"}
             </p>
-          ))}
+          )}
         </>
       )}
-      {(f.evidence_refs ?? []).map((e) => (
-        <a key={e.document_version_id} href={e.url} target="_blank" rel="noreferrer">
-          {e.source} 공식 근거 <Icon name="external" />
-        </a>
-      ))}
-    </>
+    </article>
   );
 }
-export function Results({
+
+function PackageEvidence({
+  finding: f,
+  expanded = false,
+}: {
+  finding: Finding;
+  expanded?: boolean;
+}) {
+  return (
+    <div className="package-evidence">
+      <details open={expanded || undefined}>
+        <summary>
+          <span>
+            <b>{f.package_name ?? "패키지 미확인"}</b>
+            {f.architecture && <small>{f.architecture}</small>}
+          </span>
+          <span className="summary-action">
+            패키지 근거
+            <Icon name="chevron" />
+          </span>
+        </summary>
+        <ComparedVersions finding={f} />
+        <FindingEvidence finding={f} />
+      </details>
+    </div>
+  );
+}
+
+function PackageRows({
   api,
   analysis,
-  previous,
+  verdict,
+  group,
 }: {
   api: HttpClient;
-  analysis: Brief;
-  previous: boolean;
+  analysis: string;
+  verdict: Verdict;
+  group?: FindingGroup;
 }) {
-  const [filter, setFilter] = useState("actionable");
-  const [outside, setOutside] = useState(false);
-  const action = useAction();
+  const [page, setPage] = useState(0);
+  const single = group?.finding_count === 1;
+  const load = useCallback(
+    (signal: AbortSignal) =>
+      listFindings(
+        api,
+        {
+          analysis_id: analysis,
+          limit: String(pageSize),
+          offset: String(page * pageSize),
+          ...(group ? { verdict, cve_id: group.cve_id } : { processing_status: "OUT_OF_SCOPE" }),
+        },
+        signal,
+      ),
+    [api, analysis, group?.cve_id, verdict, page],
+  );
+  const query = usePollingQuery(single ? null : load, null);
+  const items = single ? [group!.representative] : query.data?.items;
+  return (
+    <div className="group-packages">
+      <Notice error={query.error} />
+      {!items && !query.error && <p role="status">패키지 근거를 불러오는 중…</p>}
+      {items?.map((f) => (
+        <PackageEvidence key={f.finding_id} finding={f} expanded={single} />
+      ))}
+      {query.data && <Pager page={page} total={query.data.total} setPage={setPage} unit="결과" />}
+    </div>
+  );
+}
+
+function Groups({
+  api,
+  analysis,
+  verdict,
+}: {
+  api: HttpClient;
+  analysis: string;
+  verdict: Verdict;
+}) {
+  const [page, setPage] = useState(0);
+  const [open, setOpen] = useState("");
+  const load = useCallback(
+    (signal: AbortSignal) => listFindingGroups(api, analysis, verdict, page, signal),
+    [api, analysis, verdict, page],
+  );
+  const query = usePollingQuery(load, null);
+  return (
+    <div className="group-results">
+      <Notice error={query.error} />
+      {query.data ? (
+        <>
+          {query.data.total > 0 ? (
+            <>
+              <div className="group-count">
+                <span>CVE</span>
+                <strong>{count(query.data.total)}개</strong>
+              </div>
+              <ul className="group-list">
+                {query.data.items.map((g) => (
+                  <li key={g.cve_id}>
+                    <button
+                      className="group-row"
+                      aria-label={g.cve_id + (open === g.cve_id ? " 근거 닫기" : " 근거 보기")}
+                      aria-expanded={open === g.cve_id}
+                      onClick={() => setOpen(open === g.cve_id ? "" : g.cve_id)}
+                    >
+                      <span className="group-title">
+                        <b>{g.cve_id}</b>
+                        <small>
+                          {g.package_count === 1 && g.representative.package_name
+                            ? g.representative.package_name
+                            : "관련 패키지 " + count(g.package_count) + "개"}
+                          {g.finding_count > g.package_count && " · 결과 " + g.finding_count + "건"}
+                        </small>
+                      </span>
+                      <span className="summary-action">
+                        {open === g.cve_id ? "근거 닫기" : "근거 보기"}
+                        <Icon name="chevron" />
+                      </span>
+                    </button>
+                    {open === g.cve_id && (
+                      <PackageRows api={api} analysis={analysis} verdict={verdict} group={g} />
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <Pager
+                page={page}
+                total={query.data.total}
+                setPage={(n) => {
+                  setPage(n);
+                  setOpen("");
+                }}
+                unit="CVE"
+              />
+            </>
+          ) : (
+            <p className="quiet-empty">이 판정에 해당하는 CVE가 없습니다.</p>
+          )}
+        </>
+      ) : (
+        !query.error && (
+          <p role="status" className="quiet-empty">
+            CVE를 불러오는 중…
+          </p>
+        )
+      )}
+    </div>
+  );
+}
+
+export function Results({ api, analysis }: { api: HttpClient; analysis: Brief }) {
   const totals = analysis.summary;
-  const out = totals.OUT_OF_SCOPE ?? 0;
-  async function download() {
-    if (!analysis.report_id) return;
-    const id = analysis.report_id;
-    await action.run(async () => {
-      const text = await downloadReport(api, id);
-      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `cti-report-${id}.md`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }, "보고서 다운로드를 요청했습니다.");
-  }
+  const grouped = useRef<HTMLElement>(null);
+  const [filter, setFilter] = useState<Verdict>(() =>
+    totals.NEEDS_REVIEW ? "NEEDS_REVIEW" : (verdictOrder.find((v) => totals[v]) ?? "AFFECTED"),
+  );
+  const [outside, setOutside] = useState(false);
+  const metrics = verdictOrder.filter((v) => v !== "NOT_AFFECTED" || (totals[v] ?? 0) > 0);
+  const evaluated = verdictOrder.reduce((n, v) => n + (totals[v] ?? 0), 0);
   return (
     <>
       <div className="result-heading">
-        <div>
-          <h2>{previous ? "이전 분석 결과" : "분석 결과"}</h2>
+        <div className="result-date">
+          {" "}
+          <h2>분석 결과</h2>
           <span>
-            {shortTime(analysis.completed_at)} 기준 · 패키지와 CVE 조합별 집계
-            {analysis.is_synthetic ? " · 가상 입력" : ""}
+            <time dateTime={analysis.completed_at}>{shortTime(analysis.completed_at)}</time> 기준
           </span>
         </div>
-        {analysis.report_id && (
-          <button
-            className="button-link download-link"
-            disabled={action.pending}
-            onClick={download}
-          >
-            <Icon name="download" />
-            보고서 다운로드
-          </button>
-        )}
+        <div className="result-links">
+          {" "}
+          <a href={"#/questions?analysis=" + analysis.id}>
+            <Icon name="insights" />이 분석에 질문
+          </a>
+        </div>
       </div>
-      <Notice error={action.error} success={action.notice} />
-      <div className="result-metrics">
-        {metrics.map((m) => (
+      {totals.AFFECTED > 0 ? (
+        <PriorityFinding api={api} analysis={analysis} />
+      ) : (
+        <div className="summary-note">
+          <Icon name="shield" />
+          <div>
+            <strong>
+              {evaluated
+                ? "평가 범위에서 영향이 확인된 항목은 0건입니다."
+                : "최종 판정된 패키지·CVE 조합이 없습니다."}
+            </strong>
+            {totals.NEEDS_REVIEW > 0 && (
+              <p>추가 확인이 필요한 조합 {count(totals.NEEDS_REVIEW)}건의 근거를 확인하세요.</p>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="work-card result-metrics" role="group" aria-label="판정별 패키지·CVE 조합 수">
+        {metrics.map((v) => (
           <button
-            className={`metric-tile ${m.tone}`}
-            key={m.key}
-            aria-pressed={filter === m.key}
-            onClick={() => setFilter(filter === m.key ? "actionable" : m.key)}
+            key={v}
+            className={"metric metric-" + v.toLowerCase()}
+            onClick={() => {
+              setFilter(v);
+              grouped.current?.scrollIntoView({ block: "start" });
+            }}
+            aria-pressed={filter === v}
           >
             <span>
-              <i>
-                <Icon name={m.icon} />
-              </i>
-              {verdicts[m.key]}
+              <i />
+              {labels[v]}
             </span>
-            <b>
-              {count(totals[m.key] ?? 0)}
+            <strong>
+              {count(totals[v] ?? 0)}
               <small>건</small>
-            </b>
+            </strong>
           </button>
         ))}
       </div>
-      <section className="work-card priority-card">
-        <div className="card-top">
-          <h3>우선 조치 항목</h3>
+      <p className="metric-note">평가한 패키지·CVE 조합 {count(evaluated)}건</p>
+      <section ref={grouped} className="work-card grouped-findings">
+        <div className="card-heading">
+          <h2>CVE별 판정</h2>
           <label className="filter-select">
             <span className="sr-only">결과 분류</span>
-            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-              <option value="actionable">조치 대상</option>
-              {metrics.map((m) => (
-                <option key={m.key} value={m.key}>
-                  {verdicts[m.key]}
+            <select value={filter} onChange={(e) => setFilter(e.target.value as Verdict)}>
+              {metrics.map((v) => (
+                <option key={v} value={v}>
+                  {labels[v]}
                 </option>
               ))}
-              <option value="all">평가된 결과 전체</option>
             </select>
           </label>
         </div>
-        <FindingsList key={filter} api={api} analysisId={analysis.id} filter={filter} />
-        {out > 0 && (
+        <Groups key={filter} api={api} analysis={analysis.id} verdict={filter} />
+        {(totals.OUT_OF_SCOPE ?? 0) > 0 && (
           <div className="outside-block">
             <button aria-expanded={outside} onClick={() => setOutside(!outside)}>
-              지원 범위 밖 <b>{count(out)}건</b>
+              지원 범위 밖 <b>{count(totals.OUT_OF_SCOPE)}건</b>
               <Icon name="chevron" />
             </button>
-            {outside && <FindingsList api={api} analysisId={analysis.id} filter="outside" />}
+            {outside && <PackageRows api={api} analysis={analysis.id} verdict={filter} />}
           </div>
         )}
         <div className="result-links">
-          <a href={`#/findings?analysis=${analysis.id}`}>
+          <a href={"#/findings?analysis=" + analysis.id}>
             <Icon name="findings" />
             전체 분석 근거
           </a>
-          <a href={`#/questions?analysis=${analysis.id}`}>
-            <Icon name="insights" />이 분석에 질문
-          </a>
-          {analysis.report_id && (
-            <a href={`#/reports?analysis=${analysis.id}&report=${analysis.report_id}`}>
-              <Icon name="reports" />
-              보고서 보기
-            </a>
-          )}
         </div>
       </section>
     </>

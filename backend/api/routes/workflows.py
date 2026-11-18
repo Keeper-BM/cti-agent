@@ -4,7 +4,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Header
-from sqlalchemy import select
+from sqlalchemy import and_, case, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import load_only
 
@@ -164,7 +164,7 @@ def get_workflow(asset_id: UUID, run_id: UUID, db: Database):
 
 
 @router.get("/workspace", response_model=WorkspaceResponse)
-def workspace(asset_id: UUID, db: Database):
+def workspace(asset_id: UUID, db: Database, analysis_id: UUID | None = None):
     asset = find_asset(asset_id, db)
     profile = latest_profile(db, asset.id)
     state, checked = ("configured" if profile else "unconfigured"), None
@@ -209,37 +209,74 @@ def workspace(asset_id: UUID, db: Database):
         .order_by(AssetWorkflow.created_at.desc(), AssetWorkflow.id.desc())
         .limit(1)
     )
-    report_id = (
+    manual_report = (
         select(ReportRun.id)
         .where(ReportRun.analysis_id == AnalysisRun.id, ReportRun.completed_at.is_not(None))
         .order_by(ReportRun.completed_at.desc(), ReportRun.id.desc())
         .limit(1)
+        .correlate(AnalysisRun)
         .scalar_subquery()
     )
-    history = (
-        db.execute(
-            select(
-                AnalysisRun.id,
-                AnalysisRun.inventory_id,
-                AnalysisRun.os_release,
-                AnalysisRun.completed_at,
-                AnalysisRun.is_synthetic,
-                AnalysisRun.summary,
-                report_id.label("report_id"),
-            )
-            .where(AnalysisRun.asset_id == asset.id, AnalysisRun.completed_at.is_not(None))
-            .order_by(AnalysisRun.completed_at.desc(), AnalysisRun.id.desc())
-            .limit(8)
-        )
-        .mappings()
-        .all()
+    # An automated run owns its report even if another report is generated later.
+    report_id = case(
+        (AssetWorkflow.id.is_(None), manual_report),
+        (AssetWorkflow.status == "COMPLETED", AssetWorkflow.report_id),
+        else_=None,
     )
+    briefs = (
+        select(
+            AnalysisRun.id,
+            AnalysisRun.inventory_id,
+            AnalysisRun.os_release,
+            AnalysisRun.completed_at,
+            AnalysisRun.is_synthetic,
+            AnalysisRun.summary,
+            report_id.label("report_id"),
+            AssetWorkflow.id.label("workflow_id"),
+        )
+        .outerjoin(
+            AssetWorkflow,
+            and_(
+                AssetWorkflow.analysis_id == AnalysisRun.id,
+                AssetWorkflow.asset_id == AnalysisRun.asset_id,
+            ),
+        )
+        .where(AnalysisRun.asset_id == asset.id, AnalysisRun.completed_at.is_not(None))
+        .order_by(AnalysisRun.completed_at.desc(), AnalysisRun.id.desc())
+    )
+    history = db.execute(briefs.limit(8)).mappings().all()
+    chosen = history[0] if history else None
+    viewed = None
+    if analysis_id:
+        chosen = (
+            db.execute(briefs.where(AnalysisRun.id == str(analysis_id))).mappings().one_or_none()
+        )
+        if chosen is None:
+            raise AppError(
+                "ANALYSIS_NOT_FOUND", "이 자산의 완료된 분석 기록을 찾을 수 없습니다.", 404
+            )
+    elif run and (
+        run.status == "RUNNING"
+        or not chosen
+        or (run.finished_at or run.created_at) >= chosen["completed_at"]
+    ):
+        viewed = run
+        chosen = next((row for row in history if row["id"] == run.analysis_id), None)
+        if chosen is None and run.analysis_id:
+            chosen = (
+                db.execute(briefs.where(AnalysisRun.id == run.analysis_id)).mappings().one_or_none()
+            )
+    if viewed is None and chosen and chosen["workflow_id"]:
+        viewed = db.get(AssetWorkflow, chosen["workflow_id"])
+    latest = response(db, run) if run else None
+    selected_run = latest if viewed is run else (response(db, viewed) if viewed else None)
     return {
         "asset": asset,
         "profile_id": profile.id if profile else None,
         "connection_status": state,
         "connection_checked_at": iso(checked) if checked else None,
         "inventory": inventory,
-        "latest": response(db, run) if run else None,
+        "latest": latest,
         "history": history,
+        "selection": {"workflow": selected_run, "analysis": chosen},
     }

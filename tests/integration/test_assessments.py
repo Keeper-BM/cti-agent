@@ -262,3 +262,36 @@ def test_finding_priority_is_global_stable_and_preserves_search_and_filters(
     assert ids(query(processing_status="OUT_OF_SCOPE")["items"]) == [11]
     assert query(search="not-present")["total"] == 0
     assert {item["finding_id"]: item for item in all_items} == original
+
+
+def test_cve_groups_page_before_packages_and_expand_exact_verdict(
+    client, headers, engine, source_wire
+):
+    advisories = source_wire["ubuntu"]["vulns"]
+    advisories.append({**copy.deepcopy(advisories[0]), "id": "UBUNTU-" + CVE + "0"})
+    execute(client, headers, engine, "ubuntu")
+    pkg = SAMPLE["packages"][0]
+    inv = inventory(client, headers, packages=[pkg, {**pkg, "binary_name": "apache2-bin"}])
+    analysis = enqueue(client, headers, inv)["id"]
+    assert run_once(engine)
+    path = f"/api/v1/analyses/{analysis}/finding-groups"
+    params = {"verdict": "NEEDS_REVIEW", "limit": 1}
+    groups = client.get(path, params=params, headers=headers).json()
+    assert groups["total"] == 2
+    group = groups["items"][0]
+    assert (group["cve_id"], group["package_count"], group["finding_count"]) == (CVE, 2, 2)
+    assert group["representative"]["package_name"] == "apache2"
+    more = client.get(path, params={**params, "offset": 1}, headers=headers).json()
+    assert more["items"][0]["cve_id"] == CVE + "0"
+    detail = client.get(
+        "/api/v1/findings",
+        params={"analysis_id": analysis, "verdict": "NEEDS_REVIEW", "cve_id": CVE.lower()},
+        headers=headers,
+    ).json()
+    assert detail["total"] == 2
+    assert {f["package_name"] for f in detail["items"]} == {"apache2", "apache2-bin"}
+    assert all(f["cve_id"] == CVE for f in detail["items"])
+    assert client.get(path, params={"verdict": "AFFECTED"}, headers=headers).json() == {
+        "items": [],
+        "total": 0,
+    }

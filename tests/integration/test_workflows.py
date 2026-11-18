@@ -8,6 +8,7 @@ from backend.worker.runner import recover_interrupted_jobs, run_once
 from tests.integration import test_assessments as assessments
 from tests.integration import test_auth as auth
 from tests.integration import test_collections as collections
+from tests.integration import test_reports as reports
 from tests.integration import test_sources as sources
 
 lab = collections.lab
@@ -147,3 +148,55 @@ def test_roles_and_revocation_apply_to_the_whole_workflow(client, engine, accoun
     auth.login(client, "operator")
     assert client.get(target).status_code == 404
     assert client.get(f"/api/v1/assets/{aid}/workflows/{run['id']}").status_code == 404
+
+
+def test_workspace_pins_run_report_and_hides_old_results_while_running(
+    client, headers, engine, source_wire
+):
+    inv = assessments.inventory(client, headers)
+    aid = inv["asset_id"]
+    path = f"/api/v1/assets/{aid}/workspace"
+    body = {"inventory_id": inv["inventory_id"]}
+    start(client, headers, aid, body)
+    first, _ = finish(client, headers, engine, aid)
+    assert first["status"] == "COMPLETED"
+    copy = reports.enqueue(client, headers, {"analysis_id": first["analysis_id"]})
+    assert run_once(engine)
+    assert copy["id"] != first["report_id"]
+    new = start(client, headers, aid, body, "second").json()
+    live = client.get(path, headers=headers).json()
+    assert live["selection"]["workflow"]["id"] == new["id"]
+    assert live["selection"]["analysis"] is None
+    historic = client.get(
+        path, params={"analysis_id": first["analysis_id"]}, headers=headers
+    ).json()
+    assert historic["latest"]["id"] == new["id"]
+    assert historic["selection"]["workflow"] == first
+    assert historic["selection"]["analysis"]["report_id"] == first["report_id"]
+    assert historic["selection"]["analysis"]["workflow_id"] == first["id"]
+    other = assessments.inventory(client, headers, "other-asset")
+    assert (
+        client.get(
+            f"/api/v1/assets/{other['asset_id']}/workspace",
+            params={"analysis_id": first["analysis_id"]},
+            headers=headers,
+        ).status_code
+        == 404
+    )
+
+
+def test_manual_history_can_be_opened_beyond_recent_page(client, headers, engine):
+    inv = assessments.inventory(client, headers)
+    first = assessments.enqueue(client, headers, inv)
+    assert run_once(engine)
+    report = reports.enqueue(client, headers, {"analysis_id": first["id"]})
+    assert run_once(engine)
+    for _ in range(8):
+        assessments.enqueue(client, headers, inv)
+        assert run_once(engine)
+    path = f"/api/v1/assets/{inv['asset_id']}/workspace"
+    view = client.get(path, headers=headers, params={"analysis_id": first["id"]}).json()
+    assert first["id"] not in [row["id"] for row in view["history"]]
+    assert view["selection"]["workflow"] is None
+    assert view["selection"]["analysis"]["id"] == first["id"]
+    assert view["selection"]["analysis"]["report_id"] == report["id"]

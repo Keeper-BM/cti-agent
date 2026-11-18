@@ -61,6 +61,12 @@ class AnalysisBrief(TimestampResponse):
     is_synthetic: bool
     summary: dict[str, int]
     report_id: UUID | None
+    workflow_id: UUID | None
+
+
+class WorkspaceSelection(BaseModel):
+    workflow: WorkflowResponse | None
+    analysis: AnalysisBrief | None
 
 
 class WorkspaceResponse(BaseModel):
@@ -71,6 +77,7 @@ class WorkspaceResponse(BaseModel):
     inventory: InventoryBrief | None
     latest: WorkflowResponse | None
     history: list[AnalysisBrief]
+    selection: WorkspaceSelection
 
 
 class ConnectionCheck(TimestampResponse):

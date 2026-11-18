@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Icon } from "../../shared/components/Icon";
+import { routeParam, workspaceLink, reportLink } from "../workflows/api";
 import { useSession } from "../../app/session";
 import { Notice } from "../../shared/components/Notice";
 import { useAction } from "../../shared/hooks/useAction";
@@ -16,6 +18,11 @@ const states: Record<string, string> = {
 };
 
 export function ReportsPage() {
+  const report = routeParam("report");
+  return report ? <ReportReader id={report} /> : <ReportLibrary />;
+}
+
+function ReportLibrary() {
   const { api, canWrite } = useSession();
   const [initialId] = useState(
     () => new URLSearchParams(window.location.hash.split("?")[1] ?? "").get("analysis") ?? "",
@@ -26,12 +33,7 @@ export function ReportsPage() {
   const [analysisPage, setAnalysisPage] = useState(0);
   const [includeAI, setIncludeAI] = useState(false);
   const [historyPage, setHistoryPage] = useState(0);
-  const [reportId, setReportId] = useState(
-    () => new URLSearchParams(window.location.hash.split("?")[1] ?? "").get("report") ?? "",
-  );
-  const [pollDetail, setPollDetail] = useState(true);
   const action = useAction();
-  const downloadAction = useAction();
   const key = useRef({ input: "", value: crypto.randomUUID() });
   const seedLoad = useCallback(
     (signal: AbortSignal) => getAnalysis(api!, initialId, signal),
@@ -64,27 +66,11 @@ export function ReportsPage() {
     [api, assetId, historyPage],
   );
   const history = usePollingQuery(api ? historyLoad : null);
-  const detailLoad = useCallback(
-    (signal: AbortSignal) => getReport(api!, reportId, signal),
-    [api, reportId],
-  );
-  const detail = usePollingQuery(api && reportId ? detailLoad : null, pollDetail ? 3000 : null);
-  useEffect(() => {
-    if (detail.data && ["SUCCEEDED", "FAILED"].includes(detail.data.job.status)) {
-      setPollDetail(false);
-      history.refresh();
-    }
-  }, [detail.data?.job.status, history.refresh]);
-  function chooseReport(id: string) {
-    setReportId(id);
-    setPollDetail(true);
-  }
   function chooseAsset(id: string) {
     setAssetId(id);
     setAnalysisId("");
     setAnalysisPage(0);
     setHistoryPage(0);
-    setReportId("");
   }
   async function generate() {
     if (!api) return;
@@ -92,34 +78,14 @@ export function ReportsPage() {
     if (key.current.input !== input) key.current = { input, value: crypto.randomUUID() };
     const ok = await action.run(async () => {
       const result = await createReport(api, analysisId, includeAI, key.current.value);
-      chooseReport(result.id);
+      window.location.hash = reportLink(result.id);
       setHistoryPage(0);
       history.refresh();
     }, "보고서 생성 요청이 접수되었습니다.");
     if (ok) key.current = { input: "", value: crypto.randomUUID() };
   }
-  async function download() {
-    if (!api || !detail.data) return;
-    const id = detail.data.id;
-    await downloadAction.run(async () => {
-      const text = await downloadReport(api, id);
-      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `cti-report-${id}.md`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }, "Markdown 보고서 다운로드 완료");
-  }
   return (
     <>
-      <div className="inline-info">
-        <span className="info-icon">i</span>
-        <span>
-          완료된 분석 한 건을 보고서로 저장합니다. 이후 자료 갱신·재분석·AI 재생성은 기존 보고서를
-          변경하지 않습니다.
-        </span>
-      </div>
       <Notice
         error={
           action.error ||
@@ -127,65 +93,33 @@ export function ReportsPage() {
           analyses.error ||
           chosen.error ||
           seed.error ||
-          history.error ||
-          detail.error
+          history.error
         }
         success={action.notice}
       />
-      <section className="panel report-create">
-        <div className="panel-heading">
-          <div>
-            <h2>보고서 생성</h2>
-            <p>대상 분석 및 AI Summary 포함 여부 설정</p>
-          </div>
-        </div>
-        <div className="report-form">
-          <label>
-            보고서 대상 자산
-            <select
-              value={assetId}
-              disabled={!api || action.pending}
-              onChange={(e) => chooseAsset(e.target.value)}
-            >
-              <option value="">자산 선택 · 아래 이력은 전체 자산</option>
-              {assetId &&
-                !assets.data?.items.some((a) => a.id === assetId) &&
-                seed.data?.asset_id === assetId && (
-                  <option value={assetId}>{seed.data.asset_name}</option>
-                )}
-              {assets.data?.items.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.asset_name}
-                  {a.is_active ? "" : " (비활성 · 이전 분석 사용)"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            완료된 분석 선택
-            <select
-              value={analysisId}
-              disabled={!assetId || action.pending}
-              onChange={(e) => setAnalysisId(e.target.value)}
-            >
-              <option value="">대상 분석 선택</option>
-              {analysisId &&
-                !analyses.data?.items.some((a) => a.id === analysisId) &&
-                seed.data?.id === analysisId && (
-                  <option value={analysisId}>
-                    {reportTime(seed.data.created_at)} · {analysisId.slice(0, 8)}
-                  </option>
-                )}
-              {analyses.data?.items.map((a) => (
-                <option key={a.id} value={a.id} disabled={a.job.status !== "SUCCEEDED"}>
-                  {reportTime(a.created_at)} · {a.id.slice(0, 8)} ·{" "}
-                  {a.job.status === "SUCCEEDED" ? "분석 완료" : a.job.status}
-                  {a.is_synthetic ? " · 가상 입력" : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+      <div className="report-asset-filter">
+        {" "}
+        <label>
+          대상 자산
+          <select
+            value={assetId}
+            disabled={!api || action.pending}
+            onChange={(e) => chooseAsset(e.target.value)}
+          >
+            <option value="">전체 자산</option>
+            {assetId &&
+              !assets.data?.items.some((a) => a.id === assetId) &&
+              seed.data?.asset_id === assetId && (
+                <option value={assetId}>{seed.data.asset_name}</option>
+              )}
+            {assets.data?.items.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.asset_name}
+                {a.is_active ? "" : " (비활성 · 이전 분석 사용)"}
+              </option>
+            ))}
+          </select>
+        </label>
         {(assets.data?.total ?? 0) > 20 && (
           <ReportPages
             label="보고서 자산 선택"
@@ -198,60 +132,94 @@ export function ReportsPage() {
             }}
           />
         )}
-        {(analyses.data?.total ?? 0) > 10 && (
-          <ReportPages
-            label="보고서 분석 선택"
-            page={analysisPage}
-            total={analyses.data?.total ?? 0}
-            size={10}
-            setPage={(p) => {
-              setAnalysisPage(p);
-              setAnalysisId("");
-            }}
-          />
-        )}
-        <div className="report-options">
-          <label className="report-checkbox">
-            <input
-              type="checkbox"
-              checked={includeAI}
-              disabled={action.pending}
-              onChange={(e) => setIncludeAI(e.target.checked)}
+      </div>
+      {canWrite && (
+        <details className="panel create-fold" open={!!initialId || undefined}>
+          <summary>
+            새 보고서 생성
+            <Icon name="chevron" />
+          </summary>
+          <div className="report-form">
+            <label>
+              완료된 분석 선택
+              <select
+                value={analysisId}
+                disabled={!assetId || action.pending}
+                onChange={(e) => setAnalysisId(e.target.value)}
+              >
+                <option value="">대상 분석 선택</option>
+                {analysisId &&
+                  !analyses.data?.items.some((a) => a.id === analysisId) &&
+                  seed.data?.id === analysisId && (
+                    <option value={analysisId}>
+                      {reportTime(seed.data.created_at)} · {analysisId.slice(0, 8)}
+                    </option>
+                  )}
+                {analyses.data?.items.map((a) => (
+                  <option key={a.id} value={a.id} disabled={a.job.status !== "SUCCEEDED"}>
+                    {reportTime(a.created_at)} · {a.id.slice(0, 8)} ·{" "}
+                    {a.job.status === "SUCCEEDED" ? "분석 완료" : a.job.status}
+                    {a.is_synthetic ? " · 가상 입력" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {(analyses.data?.total ?? 0) > 10 && (
+            <ReportPages
+              label="보고서 분석 선택"
+              page={analysisPage}
+              total={analyses.data?.total ?? 0}
+              size={10}
+              setPage={(p) => {
+                setAnalysisPage(p);
+                setAnalysisId("");
+              }}
             />
-            <span>
-              AI Summary 포함
-              <small>
-                각 결과의 최신 저장 요약을 포함합니다. 추가 생성 요청은 발생하지 않습니다.
-              </small>
-            </span>
-          </label>
-          <button
-            className="primary"
-            disabled={
-              !api ||
-              !analysisId ||
-              !canWrite ||
-              action.pending ||
-              chosen.data?.id !== analysisId ||
-              chosen.data?.job.status !== "SUCCEEDED"
-            }
-            onClick={generate}
-          >
-            {action.pending ? "요청 중…" : "보고서 생성"}
-          </button>
-        </div>
-        {chosen.data && (
-          <p className="report-selected-analysis">
-            선택 분석: {chosen.data.asset_name} · Ubuntu {chosen.data.os_release} · 결과{" "}
-            {chosen.data.summary?.TOTAL ?? 0}건{chosen.data.is_synthetic ? " · 가상 입력" : ""}
-          </p>
-        )}
-        {assetId && analyses.data?.total === 0 && (
-          <p className="report-selected-analysis">
-            완료된 분석이 없습니다. <a href="#/findings">취약점 분석 실행</a>
-          </p>
-        )}
-      </section>
+          )}
+          <div className="report-options">
+            <label className="report-checkbox">
+              <input
+                type="checkbox"
+                checked={includeAI}
+                disabled={action.pending}
+                onChange={(e) => setIncludeAI(e.target.checked)}
+              />
+              <span>
+                AI Summary 포함
+                <small>
+                  각 결과의 최신 저장 요약을 포함합니다. 추가 생성 요청은 발생하지 않습니다.
+                </small>
+              </span>
+            </label>
+            <button
+              className="primary"
+              disabled={
+                !api ||
+                !analysisId ||
+                !canWrite ||
+                action.pending ||
+                chosen.data?.id !== analysisId ||
+                chosen.data?.job.status !== "SUCCEEDED"
+              }
+              onClick={generate}
+            >
+              {action.pending ? "요청 중…" : "보고서 생성"}
+            </button>
+          </div>
+          {chosen.data && (
+            <p className="report-selected-analysis">
+              선택한 분석 · {chosen.data.asset_name} · Ubuntu {chosen.data.os_release} · 결과{" "}
+              {chosen.data.summary?.TOTAL ?? 0}건{chosen.data.is_synthetic ? " · 가상 입력" : ""}
+            </p>
+          )}
+          {assetId && analyses.data?.total === 0 && (
+            <p className="report-selected-analysis">
+              완료된 분석이 없습니다. <a href="#/workspace">분석 실행</a>
+            </p>
+          )}
+        </details>
+      )}
       <section className="panel report-history">
         <div className="panel-heading">
           <div>
@@ -268,10 +236,11 @@ export function ReportsPage() {
           )}
           {history.data?.items.map((r) => (
             <button
-              className={`analysis-history-item ${r.id === reportId ? "selected" : ""}`}
+              className="analysis-history-item"
               key={r.id}
-              aria-pressed={r.id === reportId}
-              onClick={() => chooseReport(r.id)}
+              onClick={() => {
+                window.location.hash = reportLink(r.id);
+              }}
             >
               <span>
                 <strong>
@@ -301,14 +270,72 @@ export function ReportsPage() {
           />
         )}
       </section>
+    </>
+  );
+}
+
+function ReportReader({ id }: { id: string }) {
+  const { api } = useSession();
+  const downloadAction = useAction();
+  const detailLoad = useCallback((signal: AbortSignal) => getReport(api!, id, signal), [api, id]);
+  const detail = usePollingQuery(api ? detailLoad : null, null);
+  const status = detail.data?.job.status;
+  useEffect(() => {
+    if (status !== "QUEUED" && status !== "RUNNING") return;
+    const timer = window.setInterval(detail.refresh, 3000);
+    return () => window.clearInterval(timer);
+  }, [status, detail.refresh]);
+  async function download() {
+    if (!api || !detail.data) return;
+    const id = detail.data.id;
+    await downloadAction.run(async () => {
+      const text = await downloadReport(api, id);
+      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `cti-report-${id}.md`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, "Markdown 보고서 다운로드 완료");
+  }
+  return (
+    <>
+      <div className="reader-navigation">
+        <a href="#/reports">
+          <Icon name="reports" />
+          보고서 목록
+        </a>
+        {detail.data && (
+          <a href={workspaceLink(detail.data.asset_id, detail.data.analysis_id)}>
+            이 분석의 결과
+            <Icon name="arrow" />
+          </a>
+        )}
+      </div>
+      <Notice error={detail.error} />
+      {!detail.data && !detail.error && (
+        <p className="quiet-empty" role="status">
+          보고서를 불러오는 중…
+        </p>
+      )}
       {detail.data && (
         <section className="panel report-document">
-          <div className="panel-heading">
+          <header className="panel-heading report-cover">
             <div>
-              <h2>보고서 미리보기</h2>
+              <h2>{detail.data.asset_name} 대응 보고서</h2>
               <p>
-                {detail.data.id.slice(0, 8)} · {states[detail.data.job.status]}
+                {states[detail.data.job.status]} · 분석 {detail.data.analysis_id.slice(0, 8)}
               </p>
+              {detail.data.content && (
+                <p className="report-frozen">
+                  Ubuntu {detail.data.content.os.version_id} · 분석 완료{" "}
+                  {reportTime(detail.data.content.analysis_completed_at)}
+                  <br />
+                  자료 고정 {reportTime(detail.data.content.frozen_at)}
+                  {detail.data.content.generated_at &&
+                    " · 생성 " + reportTime(detail.data.content.generated_at)}
+                </p>
+              )}
             </div>
             <button
               className="primary"
@@ -321,7 +348,7 @@ export function ReportsPage() {
             >
               {downloadAction.pending ? "파일 준비 중…" : "Markdown 다운로드"}
             </button>
-          </div>
+          </header>
           <Notice error={downloadAction.error} success={downloadAction.notice} />
           {detail.data.job.status === "FAILED" && (
             <p className="report-job-note" role="alert">

@@ -131,30 +131,9 @@ export function ReportPreview({ content }: { content: ReportContent }) {
   const finding = content.findings.find((f) => f.finding_id === findingId);
   return (
     <div className="report-preview" aria-label="저장된 보고서 미리보기">
-      <header className="report-cover">
-        <span className="report-eyebrow">CTI AGENT · 대응 보고서</span>
-        <h2>{content.asset_name}</h2>
-        <p>
-          Ubuntu {content.os.version_id} · 분석 완료 {reportTime(content.analysis_completed_at)}
-        </p>
-        <p className="report-frozen">
-          자료 고정 {reportTime(content.frozen_at)} · 생성{" "}
-          {content.generated_at ? reportTime(content.generated_at) : "처리 중"}
-        </p>
-      </header>
       {content.is_synthetic && (
         <div className="report-synthetic">가상 입력 보고서 · 실제 서버의 보안 상태가 아닙니다.</div>
       )}
-      <div className="report-intro">
-        <p>
-          버전 비교와 영향 판정은 별도 항목입니다. 최종 판단에는 적용 조건과 추가 확인 사유가
-          반영됩니다.
-        </p>
-        <p>
-          보고서 전체를 저장했습니다. 아래 검색·페이지 이동은 미리보기에만 적용되며 다운로드
-          파일에는 전체 내용이 포함됩니다.
-        </p>
-      </div>
       <section className="report-section">
         <h3>분석 요약</h3>
         <div className="report-stats">

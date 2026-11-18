@@ -1,3 +1,4 @@
+import { Icon } from "../../shared/components/Icon";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { HttpClient } from "../../api/client";
 import { useSession } from "../../app/session";
@@ -104,14 +105,16 @@ export function FindingsPage() {
   const { api } = useSession();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [initial] = useState(() => routeParam("analysis"));
+  const [initialAsset] = useState(() => routeParam("asset"));
   const scopedLoad = useCallback(
     async (signal: AbortSignal) => {
+      if (!initial) return getAsset(api!, initialAsset, signal);
       const analysis = await getAnalysis(api!, initial, signal);
       return getAsset(api!, analysis.asset_id, signal);
     },
-    [api, initial],
+    [api, initial, initialAsset],
   );
-  const seed = usePollingQuery(api && initial ? scopedLoad : null, null);
+  const seed = usePollingQuery(api && (initial || initialAsset) ? scopedLoad : null, null);
   useEffect(() => {
     if (seed.data) setAsset(seed.data);
   }, [seed.data]);
@@ -123,18 +126,11 @@ export function FindingsPage() {
   const assets = usePollingQuery(api ? load : null, null);
   return (
     <>
-      <div className="inline-info">
-        <span className="info-icon">i</span>
-        <span>
-          Ubuntu 22.04·24.04의 Apache2·MySQL 패키지를 공식 기준과 대조합니다. 버전 비교와 최종
-          판단은 구분됩니다.
-        </span>
-      </div>
       <Notice error={assets.error || seed.error} />
       <section className="panel analysis-select">
         <div>
-          <h2>분석 대상 자산</h2>
-          <p>저장한 패키지 입력 이력을 선택해 분석합니다.</p>
+          <h2>자산별 이력</h2>
+          <p>확인할 서버를 선택하세요.</p>
         </div>
         <label>
           자산 선택
@@ -176,6 +172,7 @@ export function FindingsPage() {
           </p>
         )}
       </section>
+      {api && !asset && !initial && !initialAsset && <RecentAnalyses api={api} />}
       {api && asset && (
         <AnalysisWorkspace
           key={asset.id}
@@ -185,6 +182,55 @@ export function FindingsPage() {
         />
       )}
     </>
+  );
+}
+
+function RecentAnalyses({ api }: { api: HttpClient }) {
+  const [page, setPage] = useState(0);
+  const fetch = useCallback(
+    (signal: AbortSignal) => listAnalyses(api, "", page, signal),
+    [api, page],
+  );
+  const query = usePollingQuery(fetch, null);
+  return (
+    <section className="panel">
+      <div className="panel-heading">
+        <h2>최근 분석 기록</h2>
+      </div>
+      <Notice error={query.error} />
+      <div className="analysis-history">
+        {query.data?.items.map((a) => (
+          <a
+            key={a.id}
+            className="analysis-history-item history-entry"
+            href={
+              a.job.status === "SUCCEEDED"
+                ? "#/workspace?asset=" + a.asset_id + "&analysis=" + a.id
+                : "#/findings?analysis=" + a.id
+            }
+          >
+            <span>
+              <strong>{a.asset_name}</strong>
+              <small>
+                {formatKst(a.created_at)} · {a.id.slice(0, 8)}
+                {a.is_synthetic ? " · 가상 입력" : ""}
+              </small>
+            </span>
+            <span className={"badge " + a.job.status.toLowerCase()}>{labels[a.job.status]}</span>
+          </a>
+        ))}
+        {query.data?.total === 0 && <p>저장된 분석 기록이 없습니다.</p>}
+      </div>
+      {(query.data?.total ?? 0) > 10 && (
+        <Pages
+          label="전체 분석 이력"
+          page={page}
+          total={query.data!.total}
+          size={10}
+          setPage={setPage}
+        />
+      )}
+    </section>
   );
 }
 
@@ -237,63 +283,12 @@ function AnalysisWorkspace({
         error={action.error || inventories.error || history.error || selected.error}
         success={action.notice}
       />
-      <section className="panel analysis-select">
-        <div>
-          <h2>패키지 정보 선택</h2>
-          <p>
-            이미 저장한 기준본으로 개별 분석합니다. 자료 갱신부터 보고서까지 실행하려면{" "}
-            <a href={`#/workspace?asset=${asset.id}`}>분석 워크스페이스</a>를 사용하세요.
-          </p>
-        </div>
-        <label>
-          패키지 입력 이력
-          <select value={inventoryId} onChange={(e) => setInventoryId(e.target.value)}>
-            <option value="">분석 대상 입력 선택</option>
-            {inventories.data?.items.map((i) => (
-              <option key={i.inventory_id} value={i.inventory_id}>
-                {formatKst(i.collected_at)} · Ubuntu {i.os_release} · {i.package_count}개 ·{" "}
-                {i.inventory_id.slice(0, 8)}
-                {i.is_synthetic ? " · 가상 입력" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          className="primary"
-          disabled={!chosenInventory || action.pending || !asset.is_active || !canWrite}
-          onClick={analyse}
-        >
-          {action.pending ? "요청 중…" : "분석 실행"}
-        </button>
-        {(inventories.data?.total ?? 0) > 10 && (
-          <Pages
-            label="패키지 입력"
-            page={inventoryPage}
-            total={inventories.data?.total ?? 0}
-            size={10}
-            setPage={(p) => {
-              setInventoryPage(p);
-              setInventoryId("");
-            }}
-          />
-        )}
-        {chosenInventory && (
-          <p className="analysis-input-note">
-            입력 시각 {formatKst(chosenInventory.ingested_at)} ·{" "}
-            {chosenInventory.collection_status === "COMPLETE" ? "전체 목록으로 선언" : "부분 입력"}
-            {chosenInventory.is_synthetic ? " · 가상 데이터는 실제 서버 결과와 구분됩니다." : ""}
-          </p>
-        )}
-        {!asset.is_active && (
-          <p className="analysis-input-note">비활성 자산은 이전 결과만 조회할 수 있습니다.</p>
-        )}
-        {inventories.data?.total === 0 && (
-          <p>
-            <a href="#/assets">자산 현황</a>에서 이 자산의 패키지를 SSH로 가져오거나 JSON 파일을
-            입력하세요.
-          </p>
-        )}
-      </section>
+      {selected.data && (
+        <AnalysisResults key={selected.data.id} api={api} analysis={selected.data} />
+      )}
+      {selected.data?.job.status === "SUCCEEDED" && (
+        <ComparisonPanel key={`compare-${selected.data.id}`} analysis={selected.data} />
+      )}
       <section className="panel">
         <div className="panel-heading">
           <div>
@@ -314,7 +309,11 @@ function AnalysisWorkspace({
             <button
               key={a.id}
               className={`analysis-history-item ${analysisId === a.id ? "selected" : ""}`}
-              onClick={() => setAnalysisId(a.id)}
+              onClick={() => {
+                if (a.job.status === "SUCCEEDED")
+                  window.location.hash = "#/workspace?asset=" + asset.id + "&analysis=" + a.id;
+                else setAnalysisId(a.id);
+              }}
               aria-pressed={analysisId === a.id}
             >
               <span>
@@ -338,12 +337,71 @@ function AnalysisWorkspace({
           />
         )}
       </section>
-      {selected.data && (
-        <AnalysisResults key={selected.data.id} api={api} analysis={selected.data} />
-      )}
-      {selected.data?.job.status === "SUCCEEDED" && (
-        <ComparisonPanel key={`compare-${selected.data.id}`} analysis={selected.data} />
-      )}
+      <details className="panel create-fold">
+        <summary>
+          저장된 자료로 개별 분석
+          <Icon name="chevron" />
+        </summary>
+        <div className="analysis-select">
+          <div>
+            <h2>패키지 정보 선택</h2>
+            <p>
+              이미 저장한 기준본으로 개별 분석합니다. 자료 갱신부터 보고서까지 실행하려면{" "}
+              <a href={`#/workspace?asset=${asset.id}`}>분석 워크스페이스</a>를 사용하세요.
+            </p>
+          </div>
+          <label>
+            패키지 입력 이력
+            <select value={inventoryId} onChange={(e) => setInventoryId(e.target.value)}>
+              <option value="">분석 대상 입력 선택</option>
+              {inventories.data?.items.map((i) => (
+                <option key={i.inventory_id} value={i.inventory_id}>
+                  {formatKst(i.collected_at)} · Ubuntu {i.os_release} · {i.package_count}개 ·{" "}
+                  {i.inventory_id.slice(0, 8)}
+                  {i.is_synthetic ? " · 가상 입력" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="primary"
+            disabled={!chosenInventory || action.pending || !asset.is_active || !canWrite}
+            onClick={analyse}
+          >
+            {action.pending ? "요청 중…" : "분석 실행"}
+          </button>
+          {(inventories.data?.total ?? 0) > 10 && (
+            <Pages
+              label="패키지 입력"
+              page={inventoryPage}
+              total={inventories.data?.total ?? 0}
+              size={10}
+              setPage={(p) => {
+                setInventoryPage(p);
+                setInventoryId("");
+              }}
+            />
+          )}
+          {chosenInventory && (
+            <p className="analysis-input-note">
+              입력 시각 {formatKst(chosenInventory.ingested_at)} ·{" "}
+              {chosenInventory.collection_status === "COMPLETE"
+                ? "전체 목록으로 선언"
+                : "부분 입력"}
+              {chosenInventory.is_synthetic ? " · 가상 데이터는 실제 서버 결과와 구분됩니다." : ""}
+            </p>
+          )}
+          {!asset.is_active && (
+            <p className="analysis-input-note">비활성 자산은 이전 결과만 조회할 수 있습니다.</p>
+          )}
+          {inventories.data?.total === 0 && (
+            <p>
+              <a href="#/assets">자산 현황</a>에서 이 자산의 패키지를 SSH로 가져오거나 JSON 파일을
+              입력하세요.
+            </p>
+          )}
+        </div>
+      </details>
     </>
   );
 }

@@ -4,8 +4,11 @@ import type { components } from "../../api/schema";
 export type Workspace = components["schemas"]["WorkspaceResponse"];
 export type Workflow = components["schemas"]["WorkflowResponse"];
 export type Brief = components["schemas"]["AnalysisBrief"];
-export const getWorkspace = (api: HttpClient, id: string, signal?: AbortSignal) =>
-  api.request<Workspace>(`/assets/${id}/workspace`, { signal });
+export const getWorkspace = (api: HttpClient, id: string, analysis: string, signal?: AbortSignal) =>
+  api.request<Workspace>(
+    `/assets/${id}/workspace${analysis ? "?analysis_id=" + encodeURIComponent(analysis) : ""}`,
+    { signal },
+  );
 export const startWorkflow = (api: HttpClient, id: string, inventory: string | null, key: string) =>
   api.request<Workflow>(`/assets/${id}/workflows`, {
     method: "POST",
@@ -39,3 +42,27 @@ export const shortTime = (value: string) =>
     hourCycle: "h23",
     timeZone: "Asia/Seoul",
   }).format(new Date(value));
+
+export function workspaceLink(asset: string, analysis?: string) {
+  const query = new URLSearchParams({ asset });
+  if (analysis) query.set("analysis", analysis);
+  return "#/workspace?" + query;
+}
+
+export function reportLink(id: string) {
+  return "#/reports?report=" + encodeURIComponent(id);
+}
+
+export const sourceStates = {
+  UPDATED: "갱신",
+  CACHED: "저장본 사용",
+  FAILED: "실패",
+  RUNNING: "조회 중",
+  QUEUED: "대기",
+} as const;
+
+export function sourceCounts(sources: Workflow["sources"]) {
+  const counts = { UPDATED: 0, CACHED: 0, FAILED: 0, RUNNING: 0, QUEUED: 0 };
+  for (const source of sources) counts[source.status]++;
+  return counts;
+}

@@ -18,13 +18,15 @@ from backend.api.schemas.collections import (
     SSHProfileState,
     SSHSettingsResponse,
 )
+from backend.api.schemas.workflows import ConnectionCheck
 from backend.auth.access import check_admin
 from backend.collectors.ssh_config import allowed_targets, check_target, key_aliases, key_path
-from backend.collectors.ssh_protocol import COLLECTOR_VERSION
+from backend.collectors.ssh_transport import run_ssh_commands
 from backend.core.audit import audit
 from backend.core.config import get_settings
 from backend.core.errors import AppError
-from backend.models.tables import CollectionRun, Job, SSHProfile
+from backend.models.tables import CollectionRun, Job, SSHProfile, utcnow
+from backend.workflows.queue import queue_collection
 
 router = APIRouter(tags=["collections"])
 
@@ -89,6 +91,33 @@ def save_profile(asset_id: UUID, payload: SSHProfileInput, db: Database):
     return profile
 
 
+@router.post("/assets/{asset_id}/ssh-profile/{profile_id}/check", response_model=ConnectionCheck)
+def check_profile(asset_id: UUID, profile_id: UUID, db: Database):
+    asset = find_asset(asset_id, db)
+    profile = db.get(SSHProfile, str(profile_id))
+    if not profile or profile.asset_id != asset.id:
+        raise AppError("SSH_PROFILE_NOT_FOUND", "연결 설정을 찾을 수 없습니다.", 404)
+    if not asset.is_active:
+        raise AppError("ASSET_INACTIVE", "비활성 자산입니다.", 409)
+    try:
+        # The pinned transport authenticates and closes without running a command.
+        run_ssh_commands(profile, get_settings(), {})
+    except AppError as exc:
+        audit(
+            db,
+            "ssh_profile.checked",
+            asset_id=asset.id,
+            target_id=profile.id,
+            outcome="FAILED",
+            details={"code": exc.code},
+        )
+        db.commit()
+        raise
+    audit(db, "ssh_profile.checked", asset_id=asset.id, target_id=profile.id)
+    db.commit()
+    return {"verified": True, "checked_at": utcnow()}
+
+
 @router.post("/assets/{asset_id}/collections", response_model=CollectionResponse, status_code=202)
 def create_collection(
     asset_id: UUID,
@@ -116,23 +145,8 @@ def create_collection(
     profile = db.get(SSHProfile, str(payload.profile_id))
     if profile is None or profile.asset_id != str(asset_id):
         raise AppError("SSH_PROFILE_NOT_FOUND", "이 자산의 SSH 연결 설정을 찾을 수 없습니다.", 404)
-    config = get_settings()
-    check_target(config, profile.host, profile.port)
-    key_path(config, profile.key_alias)
-    if db.scalar(select(CollectionRun.id).where(CollectionRun.active_slot == str(asset_id))):
-        raise AppError("COLLECTION_BUSY", "이 자산을 수집 중입니다. 완료 후 다시 요청하세요.", 409)
-    job = Job(kind="SSH_COLLECTION", asset_id=str(asset_id), idempotency_key=idempotency_key)
     try:
-        db.add(job)
-        db.flush()
-        run = CollectionRun(
-            job_id=job.id,
-            asset_id=str(asset_id),
-            profile_id=profile.id,
-            active_slot=str(asset_id),
-            collector_version=COLLECTOR_VERSION,
-        )
-        db.add(run)
+        run = queue_collection(db, asset, profile, idempotency_key)
         db.commit()
     except IntegrityError:
         db.rollback()

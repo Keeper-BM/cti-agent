@@ -26,7 +26,9 @@ export function ReportsPage() {
   const [analysisPage, setAnalysisPage] = useState(0);
   const [includeAI, setIncludeAI] = useState(false);
   const [historyPage, setHistoryPage] = useState(0);
-  const [reportId, setReportId] = useState("");
+  const [reportId, setReportId] = useState(
+    () => new URLSearchParams(window.location.hash.split("?")[1] ?? "").get("report") ?? "",
+  );
   const [pollDetail, setPollDetail] = useState(true);
   const action = useAction();
   const downloadAction = useAction();

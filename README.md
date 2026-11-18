@@ -42,6 +42,8 @@ Docker가 있는 Linux에서는 `docker compose up --build -d`로 PostgreSQL·AP
 
 ## 시연 순서
 
+새 [분석 워크스페이스](docs/analysis-workspace.md)는 등록된 서버 하나를 선택해 패키지 수집, 공식 자료 갱신, 판정, Markdown 보고서 생성을 한 번에 실행합니다. 아래의 개별 화면에서도 같은 입력과 근거를 조회할 수 있습니다.
+
 1. 로그인 → **자산 현황**에서 서버 선택
 2. **서버 패키지 가져오기** 또는 JSON·CSV 입력
 3. SSH 기록에서 **공식 파일 검증**, 완료 후 새 패키지 기록 선택

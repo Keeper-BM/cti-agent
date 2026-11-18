@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 
 export const routes = [
   {
+    id: "workspace",
+    title: "분석 워크스페이스",
+    description: "패키지 수집부터 대응 보고서까지, 선택한 자산의 분석을 관리합니다.",
+  },
+  {
     id: "assets",
     title: "자산 현황",
     description: "서버 자산 등록 및 패키지 수집 관리",
@@ -44,8 +49,7 @@ export type Route = (typeof routes)[number];
 
 function readRoute(): Route {
   return (
-    routes.find((route) => window.location.hash.split("?")[0] === `#/${route.id}`) ??
-    routes.find((route) => route.id === "assets")!
+    routes.find((route) => window.location.hash.split("?")[0] === `#/${route.id}`) ?? routes[0]
   );
 }
 

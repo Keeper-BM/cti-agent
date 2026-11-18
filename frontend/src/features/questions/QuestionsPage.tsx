@@ -4,7 +4,8 @@ import { Notice } from "../../shared/components/Notice";
 import { useAction } from "../../shared/hooks/useAction";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
 import { listAssets } from "../assets/api";
-import { listAnalyses } from "../findings/api";
+import { getAnalysis, listAnalyses } from "../findings/api";
+import { routeParam } from "../workflows/api";
 import type { Analysis } from "../findings/api";
 import { getLLMStatus } from "../explanations/api";
 import { ReportPages, reportTime } from "../reports/ReportPreview";
@@ -24,6 +25,18 @@ export function QuestionsPage() {
   const [assetPage, setAssetPage] = useState(0);
   const [analysisPage, setAnalysisPage] = useState(0);
   const [scope, setScope] = useState<Analysis[]>([]);
+  const [initial] = useState(() => routeParam("analysis"));
+  const seedLoad = useCallback(
+    (signal: AbortSignal) => getAnalysis(api!, initial, signal),
+    [api, initial],
+  );
+  const seed = usePollingQuery(api && initial ? seedLoad : null, null);
+  useEffect(() => {
+    if (seed.data) {
+      setAssetId(seed.data.asset_id);
+      setScope([seed.data]);
+    }
+  }, [seed.data]);
   const [question, setQuestion] = useState("");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState("");
@@ -86,6 +99,7 @@ export function QuestionsPage() {
       <Notice
         error={
           action.error ||
+          seed.error ||
           assets.error ||
           analyses.error ||
           history.error ||

@@ -11,6 +11,7 @@ class TimestampResponse(BaseModel):
 
     @field_validator(
         "created_at",
+        "last_analysis_at",
         "updated_at",
         "started_at",
         "finished_at",

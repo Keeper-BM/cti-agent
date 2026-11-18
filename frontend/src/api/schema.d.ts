@@ -159,6 +159,57 @@ export interface paths {
         patch: operations["update_asset_api_v1_assets__asset_id__patch"];
         trace?: never;
     };
+    "/api/v1/assets/{asset_id}/workflows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Workflow */
+        post: operations["start_workflow_api_v1_assets__asset_id__workflows_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/{asset_id}/workflows/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workflow */
+        get: operations["get_workflow_api_v1_assets__asset_id__workflows__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/{asset_id}/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Workspace */
+        get: operations["workspace_api_v1_assets__asset_id__workspace_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/users": {
         parameters: {
             query?: never;
@@ -275,6 +326,23 @@ export interface paths {
         /** Save Profile */
         put: operations["save_profile_api_v1_assets__asset_id__ssh_profile_put"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/{asset_id}/ssh-profile/{profile_id}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Profile */
+        post: operations["check_profile_api_v1_assets__asset_id__ssh_profile__profile_id__check_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -878,6 +946,34 @@ export interface components {
             /** Runtime Condition */
             runtime_condition?: "apache-http2-cve-2024-27316/1.0" | null;
         };
+        /** AnalysisBrief */
+        AnalysisBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Inventory Id
+             * Format: uuid
+             */
+            inventory_id: string;
+            /** Os Release */
+            os_release: string | null;
+            /**
+             * Completed At
+             * Format: date-time
+             */
+            completed_at: string;
+            /** Is Synthetic */
+            is_synthetic: boolean;
+            /** Summary */
+            summary: {
+                [key: string]: number;
+            };
+            /** Report Id */
+            report_id: string | null;
+        };
         /** AnalysisList */
         AnalysisList: {
             /** Items */
@@ -1178,9 +1274,59 @@ export interface components {
         /** AssetList */
         AssetList: {
             /** Items */
-            items: components["schemas"]["AssetResponse"][];
+            items: components["schemas"]["AssetListItem"][];
             /** Total */
             total: number;
+        };
+        /** AssetListItem */
+        AssetListItem: {
+            /** Asset Name */
+            asset_name: string;
+            /** Host */
+            host?: string | null;
+            /** Expected Release */
+            expected_release?: ("22.04" | "24.04") | null;
+            /** @default UNKNOWN */
+            exposure: components["schemas"]["Exposure"];
+            /** Exposure Source */
+            exposure_source: string;
+            /** @default UNKNOWN */
+            criticality: components["schemas"]["Criticality"];
+            /** Owner Display Name */
+            owner_display_name?: string | null;
+            /**
+             * Collection Method
+             * @default MANUAL
+             * @constant
+             */
+            collection_method: "MANUAL";
+            /**
+             * Schema Version
+             * @default 1.0
+             * @constant
+             */
+            schema_version: "1.0";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Ssh Configured */
+            ssh_configured: boolean;
+            /** Last Analysis At */
+            last_analysis_at: string | null;
         };
         /** AssetPatch */
         AssetPatch: {
@@ -1644,6 +1790,16 @@ export interface components {
             before: components["schemas"]["AssessmentFinding"][];
             /** After */
             after: components["schemas"]["AssessmentFinding"][];
+        };
+        /** ConnectionCheck */
+        ConnectionCheck: {
+            /** Verified */
+            verified: boolean;
+            /**
+             * Checked At
+             * Format: date-time
+             */
+            checked_at: string;
         };
         /** Coverage */
         Coverage: {
@@ -2155,6 +2311,25 @@ export interface components {
             origin_evidence_ref?: string | null;
             /** Origin Description */
             origin_description?: string | null;
+        };
+        /** InventoryBrief */
+        InventoryBrief: {
+            /**
+             * Inventory Id
+             * Format: uuid
+             */
+            inventory_id: string;
+            /** Package Count */
+            package_count: number;
+            /** Os Release */
+            os_release: string | null;
+            /** Is Synthetic */
+            is_synthetic: boolean;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
         };
         /** InventoryImport */
         InventoryImport: {
@@ -3304,6 +3479,110 @@ export interface components {
             /** Completed At */
             completed_at: string | null;
         };
+        /** WorkflowRequest */
+        WorkflowRequest: {
+            /** Inventory Id */
+            inventory_id?: string | null;
+        };
+        /** WorkflowResponse */
+        WorkflowResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Asset Id
+             * Format: uuid
+             */
+            asset_id: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "ssh" | "saved";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "RUNNING" | "FAILED" | "COMPLETED";
+            /**
+             * Stage
+             * @enum {string}
+             */
+            stage: "inventory" | "sources" | "analysis" | "report";
+            /** Inventory Id */
+            inventory_id: string | null;
+            /** Package Count */
+            package_count: number | null;
+            /** Verification Note */
+            verification_note: string | null;
+            /** Collected At */
+            collected_at: string | null;
+            /** Is Synthetic */
+            is_synthetic: boolean | null;
+            /** Analysis Id */
+            analysis_id: string | null;
+            /** Report Id */
+            report_id: string | null;
+            /** Sources */
+            sources: components["schemas"]["WorkflowSource"][];
+            /** Timeline */
+            timeline: {
+                [key: string]: string;
+            };
+            /** Warnings */
+            warnings: string[];
+            /** Error */
+            error: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+        };
+        /** WorkflowSource */
+        WorkflowSource: {
+            /** Source */
+            source: string;
+            /** Scope */
+            scope: string;
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "QUEUED" | "RUNNING" | "UPDATED" | "CACHED" | "FAILED";
+            /** Records */
+            records?: number | null;
+            /** Captured At */
+            captured_at?: string | null;
+            /** Snapshot Id */
+            snapshot_id?: string | null;
+        };
+        /** WorkspaceResponse */
+        WorkspaceResponse: {
+            asset: components["schemas"]["AssetResponse"];
+            /** Profile Id */
+            profile_id: string | null;
+            /**
+             * Connection Status
+             * @enum {string}
+             */
+            connection_status: "unconfigured" | "configured" | "verified" | "failed";
+            /** Connection Checked At */
+            connection_checked_at: string | null;
+            inventory: components["schemas"]["InventoryBrief"] | null;
+            latest: components["schemas"]["WorkflowResponse"] | null;
+            /** History */
+            history: components["schemas"]["AnalysisBrief"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -3484,6 +3763,7 @@ export interface operations {
             query?: {
                 limit?: number;
                 offset?: number;
+                recent_analysis_first?: boolean;
             };
             header?: never;
             path?: never;
@@ -3813,6 +4093,322 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssetResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    start_workflow_api_v1_assets__asset_id__workflows_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "idempotency-key": string;
+            };
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_workflow_api_v1_assets__asset_id__workflows__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkflowResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    workspace_api_v1_assets__asset_id__workspace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -4859,6 +5455,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SSHProfileResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    check_profile_api_v1_assets__asset_id__ssh_profile__profile_id__check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+                profile_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionCheck"];
                 };
             };
             /** @description Unauthorized */
@@ -6953,6 +7653,7 @@ export interface operations {
                 asset_id?: string | null;
                 verdict?: components["schemas"]["Verdict"] | null;
                 processing_status?: components["schemas"]["ProcessingStatus"] | null;
+                actionable?: boolean;
                 search?: string;
                 limit?: number;
                 offset?: number;

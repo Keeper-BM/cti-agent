@@ -87,6 +87,34 @@ class SourceRun(Base):
     parameters: Mapped[dict] = mapped_column(JSON)
 
 
+class AssetWorkflow(Base):
+    __tablename__ = "asset_workflows"
+    __table_args__ = (
+        UniqueConstraint("asset_id", "request_key", name="uq_workflow_request"),
+        Index("ix_workflow_asset_created", "asset_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"))
+    requested_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    request_key: Mapped[str] = mapped_column(String(100))
+    active_slot: Mapped[str | None] = mapped_column(String(36), unique=True)
+    mode: Mapped[str] = mapped_column(String(12))
+    status: Mapped[str] = mapped_column(String(16), default="RUNNING")
+    stage: Mapped[str] = mapped_column(String(16), default="inventory")
+    inventory_id: Mapped[str | None] = mapped_column(ForeignKey("inventory_snapshots.inventory_id"))
+    collection_id: Mapped[str | None] = mapped_column(ForeignKey("collection_runs.id"))
+    analysis_id: Mapped[str | None] = mapped_column(ForeignKey("analyses.id"))
+    report_id: Mapped[str | None] = mapped_column(ForeignKey("reports.id"))
+    sources: Mapped[list] = mapped_column(JSON, default=list)
+    enriched: Mapped[bool] = mapped_column(Boolean, default=False)
+    timeline: Mapped[dict] = mapped_column(JSON, default=dict)
+    warnings: Mapped[list] = mapped_column(JSON, default=list)
+    error: Mapped[str | None] = mapped_column(String(600))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class SecuritySnapshot(Base):
     __tablename__ = "security_snapshots"
     __table_args__ = (

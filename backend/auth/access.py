@@ -10,6 +10,7 @@ from backend.models.tables import (
     AnalysisRun,
     Asset,
     AssetGrant,
+    AssetWorkflow,
     AuditEvent,
     CollectionRun,
     ComparisonRun,
@@ -69,6 +70,7 @@ def scope_queries(execute):
     )
     for model in (
         InventoryRecord,
+        AssetWorkflow,
         AnalysisRun,
         FindingRecord,
         ReportRun,
@@ -155,15 +157,19 @@ def audit_new_jobs(db, _context):
 
 
 def authorize_job(db, job):
-    if not job.requested_by:
+    authorize_actor(db, job.requested_by, job.asset_id, job.kind)
+
+
+def authorize_actor(db, requested_by, asset_id, kind):
+    if not requested_by:
         return
-    user = db.get(User, job.requested_by)
+    user = db.get(User, requested_by)
     if not user or not user.is_active or user.role == "VIEWER":
         raise AppError(
             "JOB_ACCESS_REVOKED", "요청자의 실행 권한이 변경되어 작업을 중단했습니다.", 403
         )
     if user.role != "ADMIN":
-        if job.asset_id is None and job.kind != "SYSTEM_CHECK":
+        if asset_id is None and kind != "SYSTEM_CHECK":
             raise AppError("JOB_ACCESS_REVOKED", "관리자 권한이 필요한 작업입니다.", 403)
-        if job.asset_id and not db.get(AssetGrant, (user.id, job.asset_id)):
+        if asset_id and not db.get(AssetGrant, (user.id, asset_id)):
             raise AppError("JOB_ACCESS_REVOKED", "자산 권한이 변경되어 작업을 중단했습니다.", 403)

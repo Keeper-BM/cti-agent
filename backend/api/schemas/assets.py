@@ -83,6 +83,11 @@ class AssetResponse(TimestampResponse, AssetCreate):
     updated_at: datetime
 
 
+class AssetListItem(AssetResponse):
+    ssh_configured: bool
+    last_analysis_at: datetime | None
+
+
 class AssetList(BaseModel):
-    items: list[AssetResponse]
+    items: list[AssetListItem]
     total: int

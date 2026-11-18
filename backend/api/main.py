@@ -26,6 +26,7 @@ from backend.api.routes import (
     reports,
     sources,
     verifications,
+    workflows,
 )
 from backend.api.schemas.common import CapabilitiesResponse, ErrorResponse, FeatureFlags
 from backend.core.audit import audit
@@ -141,6 +142,7 @@ def create_app() -> FastAPI:
             db.execute(text("SELECT version_num FROM alembic_version"))
             db.execute(text("SELECT id FROM assets LIMIT 1"))
             db.execute(text("SELECT id FROM jobs LIMIT 1"))
+            db.execute(text("SELECT id FROM asset_workflows LIMIT 1"))
             db.execute(text("SELECT inventory_id FROM inventory_snapshots LIMIT 1"))
             db.execute(text("SELECT id FROM security_snapshots LIMIT 1"))
             db.execute(text("SELECT id FROM analyses LIMIT 1"))
@@ -170,6 +172,7 @@ def create_app() -> FastAPI:
         },
     )
     protected.include_router(assets.router)
+    protected.include_router(workflows.router)
     protected.include_router(auth.router)
     protected.include_router(collections.router)
     protected.include_router(verifications.router)

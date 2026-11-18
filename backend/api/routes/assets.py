@@ -8,15 +8,39 @@ from backend.api.dependencies import Database
 from backend.api.schemas.assets import AssetCreate, AssetList, AssetPatch, AssetResponse
 from backend.core.audit import audit
 from backend.core.errors import AppError
-from backend.models.tables import Asset
+from backend.models.tables import AnalysisRun, Asset, SSHProfile
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
 
 @router.get("", response_model=AssetList)
-def list_assets(db: Database, limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)):
-    items = db.scalars(select(Asset).order_by(Asset.created_at.desc()).limit(limit).offset(offset))
-    return {"items": list(items), "total": db.scalar(select(func.count()).select_from(Asset))}
+def list_assets(
+    db: Database,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    recent_analysis_first: bool = False,
+):
+    ordering = [Asset.created_at.desc(), Asset.id]
+    last = (
+        select(func.max(AnalysisRun.completed_at))
+        .where(AnalysisRun.asset_id == Asset.id)
+        .scalar_subquery()
+    )
+    configured = select(SSHProfile.id).where(SSHProfile.asset_id == Asset.id).exists()
+    if recent_analysis_first:
+        ordering = [Asset.is_active.desc(), last.desc().nulls_last(), *ordering]
+    rows = db.execute(
+        select(Asset, configured, last).order_by(*ordering).limit(limit).offset(offset)
+    )
+    items = [
+        {
+            **AssetResponse.model_validate(asset).model_dump(),
+            "ssh_configured": ssh,
+            "last_analysis_at": analyzed,
+        }
+        for asset, ssh, analyzed in rows
+    ]
+    return {"items": items, "total": db.scalar(select(func.count()).select_from(Asset))}
 
 
 @router.post("", response_model=AssetResponse, status_code=201)

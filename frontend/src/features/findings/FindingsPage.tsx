@@ -4,7 +4,8 @@ import { useSession } from "../../app/session";
 import { Notice } from "../../shared/components/Notice";
 import { useAction } from "../../shared/hooks/useAction";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
-import { listAssets } from "../assets/api";
+import { getAsset, listAssets } from "../assets/api";
+import { routeParam } from "../workflows/api";
 import type { Asset } from "../assets/api";
 import { listInventories } from "../inventories/api";
 import { ExplanationPanel } from "../explanations/ExplanationPanel";
@@ -102,6 +103,18 @@ function Pages({
 export function FindingsPage() {
   const { api } = useSession();
   const [asset, setAsset] = useState<Asset | null>(null);
+  const [initial] = useState(() => routeParam("analysis"));
+  const scopedLoad = useCallback(
+    async (signal: AbortSignal) => {
+      const analysis = await getAnalysis(api!, initial, signal);
+      return getAsset(api!, analysis.asset_id, signal);
+    },
+    [api, initial],
+  );
+  const seed = usePollingQuery(api && initial ? scopedLoad : null, null);
+  useEffect(() => {
+    if (seed.data) setAsset(seed.data);
+  }, [seed.data]);
   const [page, setPage] = useState(0);
   const load = useCallback(
     (signal: AbortSignal) => listAssets(api!, page * 20, signal),
@@ -117,7 +130,7 @@ export function FindingsPage() {
           판단은 구분됩니다.
         </span>
       </div>
-      <Notice error={assets.error} />
+      <Notice error={assets.error || seed.error} />
       <section className="panel analysis-select">
         <div>
           <h2>분석 대상 자산</h2>
@@ -133,6 +146,9 @@ export function FindingsPage() {
             }
           >
             <option value="">자산을 선택하세요</option>
+            {asset && !assets.data?.items.some((a) => a.id === asset.id) && (
+              <option value={asset.id}>{asset.asset_name}</option>
+            )}
             {assets.data?.items.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.asset_name}
@@ -160,17 +176,32 @@ export function FindingsPage() {
           </p>
         )}
       </section>
-      {api && asset && <AnalysisWorkspace key={asset.id} api={api} asset={asset} />}
+      {api && asset && (
+        <AnalysisWorkspace
+          key={asset.id}
+          api={api}
+          asset={asset}
+          initial={asset.id === seed.data?.id ? initial : ""}
+        />
+      )}
     </>
   );
 }
 
-function AnalysisWorkspace({ api, asset }: { api: HttpClient; asset: Asset }) {
+function AnalysisWorkspace({
+  api,
+  asset,
+  initial,
+}: {
+  api: HttpClient;
+  asset: Asset;
+  initial: string;
+}) {
   const { canWrite } = useSession();
   const [inventoryId, setInventoryId] = useState("");
   const [inventoryPage, setInventoryPage] = useState(0);
   const [historyPage, setHistoryPage] = useState(0);
-  const [analysisId, setAnalysisId] = useState("");
+  const [analysisId, setAnalysisId] = useState(initial);
   const action = useAction();
   const requestKey = useRef({ inventory: "", key: crypto.randomUUID() });
   const inventoryLoad = useCallback(
@@ -209,7 +240,10 @@ function AnalysisWorkspace({ api, asset }: { api: HttpClient; asset: Asset }) {
       <section className="panel analysis-select">
         <div>
           <h2>패키지 정보 선택</h2>
-          <p>요청 시점의 저장된 보안 자료로 분석하며, 외부 자료를 자동 수집하지 않습니다.</p>
+          <p>
+            이미 저장한 기준본으로 개별 분석합니다. 자료 갱신부터 보고서까지 실행하려면{" "}
+            <a href={`#/workspace?asset=${asset.id}`}>분석 워크스페이스</a>를 사용하세요.
+          </p>
         </div>
         <label>
           패키지 입력 이력

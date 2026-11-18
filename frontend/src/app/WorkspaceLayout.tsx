@@ -1,39 +1,31 @@
-import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { ConnectionPanel } from "../shared/components/ConnectionPanel";
 import { Icon } from "../shared/components/Icon";
-import { routes } from "./navigation";
-import type { Route } from "./navigation";
+import { routes, type Route } from "./navigation";
 import { useSession } from "./session";
 
 const icons = {
+  workspace: "workflow",
   assets: "assets",
-  sources: "reports",
+  sources: "database",
   findings: "findings",
   questions: "insights",
   reports: "reports",
-  jobs: "jobs",
+  jobs: "activity",
   example: "example",
-  accounts: "assets",
+  accounts: "users",
   audit: "jobs",
 } as const;
-
+const groups = [
+  { name: "워크스페이스", ids: ["workspace", "assets"] },
+  { name: "분석 도구", ids: ["sources", "findings", "questions", "reports"] },
+  { name: "운영", ids: ["jobs", "example", "accounts", "audit"] },
+];
 export function WorkspaceLayout({ route, children }: { route: Route; children: ReactNode }) {
   const { api, disconnect, user, isAdmin, mode } = useSession();
-  const mobileNav = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const nav = mobileNav.current;
-    const active = nav?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (!nav || !active || nav.clientWidth === 0) return;
-    const bounds = nav.getBoundingClientRect();
-    const item = active.getBoundingClientRect();
-    if (item.left < bounds.left || item.right > bounds.right) {
-      nav.scrollLeft += item.left - bounds.left - 12;
-    }
-  }, [route.id]);
-  const links = routes
-    .filter((item) => item.id !== "audit" || isAdmin)
-    .map((item) => (
+  const group = groups.find((g) => g.ids.includes(route.id));
+  function link(item: Route) {
+    return (
       <a
         key={item.id}
         className={`nav-link ${route.id === item.id ? "selected" : ""}`}
@@ -43,44 +35,74 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
         <Icon name={icons[item.id]} className="nav-icon" />
         <span className="nav-text">{item.title}</span>
       </a>
-    ));
+    );
+  }
+  const visible = routes.filter((r) => r.id !== "audit" || isAdmin);
   return (
-    <div className="shell">
+    <div className="shell design-shell">
       <aside className="sidebar">
-        <a className="brand" href="#/assets" aria-label="CTI Agent 자산 현황으로 이동">
-          <img className="brand-symbol" src="/cti-mark.svg?v=2" alt="" aria-hidden="true" />
+        <a className="brand" href="#/workspace" aria-label="CTI Agent 분석 워크스페이스">
+          <img className="brand-symbol" src="/cti-mark.svg" alt="" />
           <span className="brand-name">
-            CTI Agent<small>THREAT INTELLIGENCE</small>
+            CTI Agent<small>Threat Intelligence</small>
           </span>
         </a>
-        <div className="workspace-label">메뉴</div>
         <nav className="sidebar-nav" aria-label="주 메뉴">
-          {links}
+          {groups.map((g) => (
+            <div className="nav-group" key={g.name}>
+              <div className="workspace-label">{g.name}</div>
+              {visible.filter((r) => g.ids.includes(r.id)).map(link)}
+            </div>
+          ))}
         </nav>
-        <div className="sidebar-footer">
-          <span className={`status-dot ${api ? "online" : ""}`} />
-          <span>{api ? "API 연결됨" : "API 연결 대기"}</span>
-          <span className="sidebar-version">v0.1</span>
+        <div className="side-account">
+          <span className="user-emblem">
+            <Icon name="users" />
+          </span>
+          <div>
+            <strong>{user?.display_name ?? (api ? "개발 관리자" : "로그인 대기")}</strong>
+            <small>
+              {api
+                ? isAdmin
+                  ? "관리자"
+                  : user?.role === "VIEWER"
+                    ? "조회자"
+                    : "자산 담당자"
+                : "CTI Agent"}
+            </small>
+          </div>
+          {api && (
+            <button
+              onClick={() => disconnect()}
+              aria-label={mode === "accounts" ? "로그아웃" : "연결 해제"}
+            >
+              <Icon name="logout" />
+            </button>
+          )}
         </div>
       </aside>
       <div className="main-shell">
         <header className="topbar">
           <div className="breadcrumb">
-            <span>CTI Agent</span>
+            <Icon name="scope" />
+            <span>{group?.name}</span>
             <span aria-hidden="true">/</span>
             <strong>{route.title}</strong>
           </div>
           <div className="topbar-actions">
-            <span className="environment">{user ? user.display_name : "개발 환경"}</span>
+            <span className={`connection ${api ? "online" : ""}`}>
+              <i />
+              {api ? "서버 연결됨" : "연결 대기"}
+            </span>
             {api && (
-              <button className="topbar-disconnect" onClick={() => disconnect()}>
-                {mode === "accounts" ? "로그아웃" : "연결 해제"}
+              <button className="mobile-logout" onClick={() => disconnect()} aria-label="로그아웃">
+                <Icon name="logout" />
               </button>
             )}
           </div>
         </header>
-        <nav ref={mobileNav} className="mobile-nav" aria-label="모바일 메뉴">
-          {links}
+        <nav className="mobile-nav" aria-label="모바일 메뉴">
+          {visible.map(link)}
         </nav>
         <main>
           <div className="page-content">
@@ -89,16 +111,22 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
                 <h1>{route.title}</h1>
                 <p className="intro">{route.description}</p>
               </div>
-              <span className={`connection ${api ? "online" : ""}`}>
-                <i />
-                {api ? "API 연결됨" : "연결 대기"}
-              </span>
+              {route.id === "workspace" && api && isAdmin && (
+                <a className="button-link register-link" href="#/assets?new=1">
+                  <Icon name="plus" />
+                  자산 등록
+                </a>
+              )}
             </div>
             <ConnectionPanel />
-            <div key={route.id}>{children}</div>
+            {api && (
+              <div key={route.id} className="page-body">
+                {children}
+              </div>
+            )}
             <footer className="page-footer">
               <span>CTI Agent</span>
-              <span>시각은 한국 시간 기준</span>
+              <span>한국 표준시 (KST)</span>
             </footer>
           </div>
         </main>

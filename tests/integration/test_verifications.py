@@ -25,7 +25,7 @@ def verification_lab(client, headers, engine, tmp_path, monkeypatch):
     monkeypatch.setenv("SSH_ALLOWED_TARGETS", "127.0.0.1:2222")
     monkeypatch.setenv("SSH_KEY_DIRECTORY", str(tmp_path))
     get_settings.cache_clear()
-    monkeypatch.setattr("backend.api.routes.verifications.gpg_executable", lambda config: "test")
+    monkeypatch.setattr("backend.verification.queue.gpg_executable", lambda config: "test")
     asset = client.post(
         "/api/v1/assets",
         headers=headers,

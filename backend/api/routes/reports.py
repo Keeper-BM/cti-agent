@@ -1,7 +1,7 @@
 """Create frozen reports, browse history and download stored UTF-8 Markdown."""
 
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Header, Query
 from fastapi.responses import Response
@@ -12,9 +12,8 @@ from sqlalchemy.orm import defer
 from backend.api.dependencies import Database
 from backend.api.schemas.reports import ReportDetail, ReportList, ReportRequest, ReportResponse
 from backend.core.errors import AppError
-from backend.models.tables import AnalysisRun, Job, ReportRun, utcnow
-from backend.reports.contracts import TEMPLATE_VERSION
-from backend.reports.snapshot import digest, freeze_report
+from backend.models.tables import AnalysisRun, Job, ReportRun
+from backend.workflows.queue import queue_report
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -58,30 +57,8 @@ def create_report(
         raise AppError("ANALYSIS_NOT_FOUND", "보고서로 만들 분석을 찾을 수 없습니다.", 404)
     if not analysis.completed_at or db.get(Job, analysis.job_id).status != "SUCCEEDED":
         raise AppError("ANALYSIS_NOT_COMPLETED", "완료된 분석만 보고서로 만들 수 있습니다.", 409)
-    report_id, frozen_at = uuid4(), utcnow()
-    content = freeze_report(db, analysis, report_id, frozen_at, payload.include_ai_explanations)
-    pinned = content.model_dump(mode="json")
-    input_hash = digest(pinned)
-    job = Job(kind="REPORT", asset_id=analysis.asset_id, idempotency_key=idempotency_key)
     try:
-        db.add(job)
-        db.flush()
-        report = ReportRun(
-            id=str(report_id),
-            job_id=job.id,
-            analysis_id=analysis.id,
-            asset_id=analysis.asset_id,
-            asset_name=content.asset_name,
-            is_synthetic=content.is_synthetic,
-            include_ai_explanations=payload.include_ai_explanations,
-            explanation_count=len(content.explanations),
-            finding_count=len(content.findings),
-            template_version=TEMPLATE_VERSION,
-            input_sha256=input_hash,
-            input_payload=pinned,
-            created_at=frozen_at,
-        )
-        db.add(report)
+        report = queue_report(db, analysis, payload.include_ai_explanations, idempotency_key)
         db.commit()
     except IntegrityError:
         db.rollback()

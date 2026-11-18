@@ -128,6 +128,7 @@ def list_findings(
     asset_id: UUID | None = None,
     verdict: Verdict | None = None,
     processing_status: ProcessingStatus | None = None,
+    actionable: bool = False,
     search: str = Query("", max_length=200),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -140,6 +141,8 @@ def list_findings(
         conditions.append(FindingRecord.asset_id == str(asset_id))
     if verdict:
         conditions.append(FindingRecord.verdict == verdict)
+    if actionable:
+        conditions.append(FindingRecord.verdict.in_(["AFFECTED", "NEEDS_REVIEW"]))
     if processing_status:
         conditions.append(FindingRecord.processing_status == processing_status)
     if search.strip():
@@ -170,6 +173,17 @@ def list_findings(
         .where(*conditions)
         .order_by(
             priority,
+            *(
+                [
+                    case(
+                        {"URGENT_REVIEW": 0, "HIGH_REVIEW": 1},
+                        value=FindingRecord.payload["remediation"]["priority"].as_string(),
+                        else_=2,
+                    )
+                ]
+                if actionable
+                else []
+            ),
             func.coalesce(FindingRecord.cve_id, ""),
             func.coalesce(FindingRecord.package_name, ""),
             FindingRecord.id,

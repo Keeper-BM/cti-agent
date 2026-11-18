@@ -37,13 +37,17 @@ from backend.sources.contracts import SecurityRecord
 from backend.sources.service import current_snapshot_ids
 
 
-def pin_inputs(db: Session, record: InventoryRecord, job: Job) -> AnalysisRun:
+def pin_inputs(db: Session, record: InventoryRecord, job: Job, *, snapshot_ids=None) -> AnalysisRun:
     inventory = InventorySnapshot.model_validate(record.payload)
     asset = db.get(Asset, record.asset_id)
     current = list(
         db.scalars(
             select(SecuritySnapshot)
-            .where(SecuritySnapshot.id.in_(current_snapshot_ids()))
+            .where(
+                SecuritySnapshot.id.in_(
+                    current_snapshot_ids() if snapshot_ids is None else snapshot_ids
+                )
+            )
             .order_by(SecuritySnapshot.source_id, SecuritySnapshot.scope_key)
         )
     )
@@ -76,7 +80,12 @@ def pin_inputs(db: Session, record: InventoryRecord, job: Job) -> AnalysisRun:
     if len(selected) > 2000:
         raise AppError("ANALYSIS_SOURCE_LIMIT", "분석에 사용할 자료 기준본이 너무 많습니다.", 422)
     warnings = [
-        "분석은 요청 시점에 저장된 자료를 사용합니다. 실시간 조회나 악용 가능성 검증은 아닙니다."
+        "이 실행에서 확인한 공식 자료의 기준본을 고정해 분석했습니다."
+        if snapshot_ids is not None
+        else (
+            "분석은 요청 시점에 저장된 자료를 사용합니다. "
+            "실시간 조회나 악용 가능성 검증은 아닙니다."
+        )
     ]
     if inventory.is_synthetic:
         warnings.append("가상 패키지 입력을 분석한 시험 결과입니다. 실제 서버 상태가 아닙니다.")
@@ -90,7 +99,7 @@ def pin_inputs(db: Session, record: InventoryRecord, job: Job) -> AnalysisRun:
         )
     if asset.expected_release and asset.expected_release != inventory.os.version_id:
         warnings.append("자산의 예상 OS와 입력 OS가 다릅니다. 확정 판정을 제한합니다.")
-    for package in sorted(PACKAGES):
+    for package in sorted(PACKAGES if snapshot_ids is None else ()):
         if not any(s.scope_key == f"{inventory.os.version_id}:{package}" for s in ubuntu):
             warnings.append(
                 f"Ubuntu {inventory.os.version_id} / {package} 자료가 저장되어 있지 않습니다."

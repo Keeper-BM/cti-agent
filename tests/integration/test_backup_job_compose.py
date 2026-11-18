@@ -75,7 +75,7 @@ def test_backup_job_cli_restores_real_database_and_preserves_previous_runs(
         files.restore(archive, key, tmp_path / "recovered")
         dump = tmp_path / "recovered/evidence/database.dump"
         metadata = verify(dump)
-        require(metadata.database.revision == "0011", "Missing migration state")
+        require(metadata.database.revision == "0012", "Missing migration state")
         stack.db.sql(stack.source, "INSERT INTO backup_job_probe(value) VALUES ('newer');")
         restore(stack.db, dump, stack.target)
         stack.databases.append(stack.target)

@@ -6,7 +6,8 @@ import { Notice } from "../../shared/components/Notice";
 import { formatKst } from "../../shared/format";
 import { useAction } from "../../shared/hooks/useAction";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
-import { createAsset, editAsset, listAssets, setAssetActive } from "./api";
+import { createAsset, editAsset, getAsset, listAssets, setAssetActive } from "./api";
+import { routeParam } from "../workflows/api";
 import type { Asset, AssetCreate } from "./api";
 import { InventoryPanel } from "../inventories/InventoryPanel";
 import { CollectionPanel } from "../collections/CollectionPanel";
@@ -16,8 +17,9 @@ const exposureLabels = { PUBLIC: "외부 공개", INTERNAL: "내부", UNKNOWN: "
 export function AssetsPage() {
   const { api, isAdmin, canWrite } = useSession();
   const [page, setPage] = useState(0);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(() => isAdmin && routeParam("new") === "1");
+  const [selectedId, setSelectedId] = useState<string | null>(() => routeParam("asset") || null);
+  const [setup, setSetup] = useState(() => routeParam("setup") === "ssh");
   const [detailOpen, setDetailOpen] = useState(false);
   const [collected, setCollected] = useState<{ assetId: string; inventoryId: string } | null>(null);
   const onCollected = useCallback((assetId: string, inventoryId: string) => {
@@ -33,7 +35,19 @@ export function AssetsPage() {
   const action = useAction();
   const assets = query.data?.items ?? [];
   const total = query.data?.total;
-  const selected = assets.find((asset) => asset.id === selectedId);
+  const onPage = assets.find((asset) => asset.id === selectedId);
+  const selectedLoad = useCallback(
+    (signal: AbortSignal) => getAsset(api!, selectedId!, signal),
+    [api, selectedId],
+  );
+  const extra = usePollingQuery(api && selectedId && !onPage ? selectedLoad : null, null);
+  const selected = onPage ?? (extra.data?.id === selectedId ? extra.data : null);
+  useEffect(() => {
+    if (setup && selected) {
+      document.getElementById("collection-title")?.scrollIntoView({ block: "start" });
+      setSetup(false);
+    }
+  }, [setup, selected]);
 
   useEffect(() => {
     if (selectedId && detailOpen) detailRef.current?.focus({ preventScroll: true });
@@ -59,11 +73,16 @@ export function AssetsPage() {
       criticality: "UNKNOWN",
       collection_method: "MANUAL",
     };
-    if (await action.run(() => createAsset(api, payload), "자산을 등록했습니다.")) {
+    if (
+      await action.run(async () => {
+        const added = await createAsset(api, payload);
+        setSelectedId(added.id);
+        setSetup(true);
+      }, "자산을 등록했습니다. SSH 연결 설정을 저장한 뒤 연결을 확인하세요.")
+    ) {
       form.reset();
       setShowForm(false);
       setPage(0);
-      setSelectedId(null);
       query.refresh();
     }
   }
@@ -71,7 +90,11 @@ export function AssetsPage() {
   return (
     <>
       <Notice
-        error={action.error || (query.error && `${query.error} 최신 목록을 확인하지 못했습니다.`)}
+        error={
+          action.error ||
+          extra.error ||
+          (query.error && `${query.error} 최신 목록을 확인하지 못했습니다.`)
+        }
         success={action.notice}
       />
       <div className="inline-info">
@@ -176,7 +199,8 @@ export function AssetsPage() {
                     <th>자산 이름</th>
                     <th>IP / 호스트명</th>
                     <th>예상 Ubuntu</th>
-                    <th>노출 범위</th>
+                    <th>SSH 연결 설정</th>
+                    <th>마지막 분석</th>
                     <th>상태</th>
                     <th>
                       <span className="sr-only">관리</span>
@@ -206,7 +230,16 @@ export function AssetsPage() {
                       </td>
                       <td className="mono">{asset.host || "미등록"}</td>
                       <td>{asset.expected_release || "미확정"}</td>
-                      <td>{exposureLabels[asset.exposure]}</td>
+                      <td>
+                        <span
+                          className={`profile-flag ${asset.ssh_configured ? "configured" : ""}`}
+                        >
+                          {asset.ssh_configured ? "설정됨" : "미설정"}
+                        </span>
+                      </td>
+                      <td>
+                        {asset.last_analysis_at ? formatKst(asset.last_analysis_at) : "분석 전"}
+                      </td>
                       <td>
                         <span className={`badge ${asset.is_active ? "active" : "inactive"}`}>
                           <i />
@@ -231,6 +264,9 @@ export function AssetsPage() {
                         >
                           {asset.is_active ? "비활성화" : "활성화"}
                         </button>
+                        <a className="asset-open-link" href={`#/workspace?asset=${asset.id}`}>
+                          분석 열기 <Icon name="arrow" />
+                        </a>
                       </td>
                     </tr>
                   ))}
@@ -258,6 +294,9 @@ export function AssetsPage() {
                   </button>
                 </div>
                 <h3 id="asset-detail-title">{selected.asset_name}</h3>
+                <a className="button-link" href={`#/workspace?asset=${selected.id}`}>
+                  분석 워크스페이스 <Icon name="arrow" />
+                </a>
                 <p className="detail-sub">등록된 자산 정보</p>
                 <dl className="detail-list">
                   <div>

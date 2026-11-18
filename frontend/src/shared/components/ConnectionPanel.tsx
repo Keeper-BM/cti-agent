@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSession } from "../../app/session";
 import { Notice } from "./Notice";
+import { Icon } from "./Icon";
 
 export function ConnectionPanel() {
   const { api, connect, signIn, mode, loading, connectionError } = useSession();
@@ -22,11 +23,32 @@ export function ConnectionPanel() {
     );
   if (mode === "accounts")
     return (
-      <section className="connect-panel" aria-labelledby="login-heading">
+      <section className="connect-panel design-login" aria-labelledby="login-heading">
         <div className="connect-copy">
           <div>
-            <h2 id="login-heading">로그인</h2>
-            <p>계정에 부여된 자산 및 분석 권한으로 접속합니다.</p>
+            <span className="login-symbol">
+              <Icon name="shield" />
+            </span>
+            <h2 id="login-heading">워크스페이스 로그인</h2>
+            <p>계정에 등록된 자산과 최근 분석 결과를 확인하세요.</p>
+            <ol className="login-sequence" aria-label="분석 순서">
+              <li>
+                <Icon name="package" />
+                패키지 수집
+              </li>
+              <li>
+                <Icon name="database" />
+                공식 자료
+              </li>
+              <li>
+                <Icon name="findings" />
+                판정 근거
+              </li>
+              <li>
+                <Icon name="reports" />
+                대응 보고서
+              </li>
+            </ol>
           </div>
         </div>
         <form
@@ -46,7 +68,7 @@ export function ConnectionPanel() {
           }}
         >
           <label>
-            <span className="sr-only">로그인 이름</span>
+            <span>로그인 이름</span>
             <input
               name="username"
               autoComplete="username"
@@ -59,7 +81,7 @@ export function ConnectionPanel() {
             />
           </label>
           <label>
-            <span className="sr-only">비밀번호</span>
+            <span>비밀번호</span>
             <input
               name="password"
               type="password"

@@ -5,6 +5,7 @@ import { useSession } from "../../app/session";
 import { Notice } from "../../shared/components/Notice";
 import { formatKst } from "../../shared/format";
 import { useAction } from "../../shared/hooks/useAction";
+import { checkProfile } from "../workflows/api";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
 import type { Asset } from "../assets/api";
 import {
@@ -176,6 +177,21 @@ export function CollectionPanel({
               </strong>
               <span>인증키 {savedProfile.key_alias} · 저장된 연결 설정</span>
             </div>
+            <button
+              className="secondary"
+              disabled={!asset.is_active || !canWrite || busy}
+              onClick={() =>
+                action.run(
+                  () => checkProfile(api, asset.id, savedProfile.id),
+                  "등록한 호스트 키와 SSH 계정 인증을 확인했습니다.",
+                )
+              }
+            >
+              SSH 연결 확인
+            </button>
+            <a className="button-link" href={`#/workspace?asset=${asset.id}`}>
+              분석 화면
+            </a>
             <button
               className="secondary"
               disabled={busy || !asset.is_active || !isAdmin}

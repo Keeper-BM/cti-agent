@@ -14,13 +14,9 @@ from backend.api.schemas.verifications import (
     VerificationRequest,
     VerificationResponse,
 )
-from backend.collectors.ssh_config import check_target, key_path
-from backend.core.config import get_settings
 from backend.core.errors import AppError
-from backend.models.contracts import InventorySnapshot
-from backend.models.tables import CollectionRun, InventoryRecord, Job, SSHProfile, VerificationRun
-from backend.verification.archive import gpg_executable
-from backend.verification.contracts import PACKAGES, VERSION
+from backend.models.tables import InventoryRecord, Job, VerificationRun
+from backend.verification.queue import queue_verification
 
 router = APIRouter(tags=["verifications"])
 
@@ -61,40 +57,8 @@ def create_verification(
     row = db.get(InventoryRecord, str(payload.inventory_id))
     if not row or row.asset_id != str(asset_id):
         raise AppError("INVENTORY_NOT_FOUND", "이 자산의 패키지 기록을 찾을 수 없습니다.", 404)
-    inventory = InventorySnapshot.model_validate(row.payload)
-    origin = db.scalar(select(CollectionRun).where(CollectionRun.inventory_id == row.inventory_id))
-    if origin is None:
-        origin = db.scalar(
-            select(VerificationRun).where(VerificationRun.verified_inventory_id == row.inventory_id)
-        )
-    if not origin or inventory.is_synthetic or inventory.collection_method != "SSH":
-        raise AppError(
-            "VERIFICATION_SOURCE_REQUIRED",
-            "실제 SSH 수집 기록만 공식 파일 검증을 요청할 수 있습니다.",
-            422,
-        )
-    if not any(
-        p.binary_name in PACKAGES and p.install_status == "installed" for p in inventory.packages
-    ):
-        raise AppError("VERIFICATION_OUT_OF_SCOPE", "검증할 Apache2·MySQL 패키지가 없습니다.", 422)
-    config = get_settings()
-    gpg_executable(config)
-    profile = db.get(SSHProfile, origin.profile_id)
-    check_target(config, profile.host, profile.port)
-    key_path(config, profile.key_alias)
-    job = Job(kind="VERIFICATION", asset_id=str(asset_id), idempotency_key=idempotency_key)
     try:
-        db.add(job)
-        db.flush()
-        run = VerificationRun(
-            job_id=job.id,
-            asset_id=str(asset_id),
-            inventory_id=row.inventory_id,
-            profile_id=profile.id,
-            active_slot=str(asset_id),
-            verifier_version=VERSION,
-        )
-        db.add(run)
+        run = queue_verification(db, row, idempotency_key)
         db.commit()
     except IntegrityError:
         db.rollback()

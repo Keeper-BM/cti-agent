@@ -10,11 +10,13 @@ import { ReportsPage } from "./features/reports/ReportsPage";
 import { SourcesPage } from "./features/sources/SourcesPage";
 import { AccountsPage } from "./features/accounts/AccountsPage";
 import { AuditPage } from "./features/accounts/AuditPage";
+import { WorkflowPage } from "./features/workflows/WorkflowPage";
 
 // 공통 세션·레이아웃과 기능별 페이지를 조합한다.
 export default function App() {
   const route = useRoute();
   const pages = {
+    workspace: <WorkflowPage />,
     assets: <AssetsPage />,
     sources: <SourcesPage />,
     findings: <FindingsPage />,

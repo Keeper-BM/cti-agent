@@ -120,7 +120,8 @@ TEST_HTTPS_DEPLOYMENT=1 .venv/bin/python -m pytest tests/integration/test_https_
 ```
 
 Linux에서 브라우저 OS 라이브러리가 없으면 Playwright의 `install --with-deps chromium` 준비가 필요합니다.
-새 `.github/workflows/https-acceptance.yml`은 Linux에서 별도 실행하며 다른 팀원의 CI 단계를 변경하지 않습니다.
+새 `.github/workflows/https-acceptance.yml`은 Ubuntu 24.04에서 별도 실행하며 다른 팀원의 CI 단계를 변경하지 않습니다.
+고정한 Playwright와의 호환성을 위해 이동하는 `ubuntu-latest` 대신 OS 버전도 고정합니다.
 명시적으로 시험을 켜지 않으면 3개 시험은 skip입니다. 이 시험을 운영 프로젝트 대상으로 실행하는 옵션은 없습니다.
 
 - HTTPS 포트만 공개되고 token/false 설정이 계정/Secure 설정으로 덮어써지는지 검사합니다.

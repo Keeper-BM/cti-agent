@@ -95,6 +95,20 @@ Nginx→API→DB 전 구간 암호화나 다중 조직·접속 제한 정책을 
 로그인 실패 제한도 기존 정책을 사용합니다. API가 프록시 주소로 요청을 집계할 수 있으므로,
 이번 시험을 사용자별 실제 접속 IP 전달·분산 속도 제한 검증으로 해석하지 않습니다.
 
+## 관리자 비밀번호 복구
+
+배포 호스트에서 대상 관리자 이름을 확인하고 아래 명령을 실행합니다. 마지막 인자는 복구할
+계정의 로그인 이름이며, 새 비밀번호는 터미널의 숨김 프롬프트에 입력합니다.
+
+```bash
+docker compose --env-file .env -f compose.yaml -f compose.https.yaml exec api \
+  python -m scripts.manage_users --reset-password admin
+```
+
+복구 후 해당 계정으로 열어 둔 브라우저에서 보호된 화면을 새로고침하고 새 비밀번호로
+로그인합니다. 관리자 감사 이력에서 `password.recovered`의 대상 ID와 성공 상태를 확인합니다.
+이 명령은 기존 역할과 활성 상태를 유지하며 해당 계정의 모든 세션을 취소합니다.
+
 ## 인증서 갱신과 장애 처리
 
 새 키·체인을 검증한 뒤 마운트된 디렉터리에 두 파일을 모두 배치합니다. 디렉터리를 통째로
@@ -134,7 +148,7 @@ TEST_HTTPS_DEPLOYMENT=1 .venv/bin/python -m pytest tests/integration/test_https_
 Linux에서 브라우저 OS 라이브러리가 없으면 Playwright의 `install --with-deps chromium` 준비가 필요합니다.
 새 `.github/workflows/https-acceptance.yml`은 Ubuntu 24.04에서 별도 실행하며 다른 팀원의 CI 단계를 변경하지 않습니다.
 고정한 Playwright와의 호환성을 위해 이동하는 `ubuntu-latest` 대신 OS 버전도 고정합니다.
-명시적으로 시험을 켜지 않으면 4개 시험은 skip입니다. 이 시험을 운영 프로젝트 대상으로 실행하는 옵션은 없습니다.
+명시적으로 시험을 켜지 않으면 5개 시험은 skip입니다. 이 시험을 운영 프로젝트 대상으로 실행하는 옵션은 없습니다.
 
 - HTTPS 포트만 공개되고 token/false 설정이 계정/Secure 설정으로 덮어써지는지 검사합니다.
 - 신뢰하지 않는 CA·틀린 호스트명 거부, TLS 1.2/1.3 연결, 평문 HTTP 거부를 실제 TLS 소켓으로 확인합니다.

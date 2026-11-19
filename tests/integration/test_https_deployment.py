@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import secrets
 import socket
 import ssl
 import subprocess
@@ -32,6 +33,60 @@ def https_stack(tmp_path_factory):
         yield stack
     finally:
         stack.close()
+
+
+def test_admin_password_recovery_revokes_only_target_sessions(https_stack):
+    stack = https_stack
+    with stack.client() as first, stack.client() as second, stack.client() as viewer:
+        admin = login(first, "https-admin", stack.password)
+        login(second, "https-admin", stack.password)
+        viewer_password = secrets.token_urlsafe(32)
+        request(
+            first,
+            "POST",
+            "/admin/users",
+            201,
+            json={
+                "username": "recovery-viewer",
+                "password": viewer_password,
+                "display_name": "Recovery viewer",
+                "role": "VIEWER",
+            },
+        )
+        viewer_user = login(viewer, "recovery-viewer", viewer_password)
+        old_password = stack.password
+        new_password = secrets.token_urlsafe(32)
+        stack.manage_account("https-admin", new_password, "--reset-password")
+        stack.password = new_password
+
+        for session in (first, second):
+            request(session, "GET", "/auth/me", 401)
+        require(
+            request(viewer, "GET", "/auth/me").json()["user"]["id"] == viewer_user["id"],
+            "Another account lost its session",
+        )
+        request(
+            first,
+            "POST",
+            "/auth/login",
+            401,
+            json={"username": "https-admin", "password": old_password},
+        )
+        recovered = login(first, "https-admin", new_password)
+        require(
+            recovered["id"] == admin["id"] and recovered["role"] == "ADMIN",
+            "Recovered administrator identity differs",
+        )
+        events = request(first, "GET", "/audit", params={"limit": 100}).json()["items"]
+        require(
+            any(
+                e["action"] == "password.recovered"
+                and e["outcome"] == "SUCCESS"
+                and e["target_id"] == admin["id"]
+                for e in events
+            ),
+            "Missing administrator recovery audit event",
+        )
 
 
 def test_tls_trust_cookie_roles_csrf_expiry_and_logout(https_stack, record_testsuite_property):

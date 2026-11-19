@@ -149,21 +149,27 @@ class HTTPSStack:
         self.port = int(address.rsplit(":", 1)[1])
         self.url = "https://" + address
         self.context = ssl.create_default_context(cafile=str(self.directory / "ca.pem"))
-        bootstrap = (
-            "import json,sys; from backend.auth.passwords import hash_password; "
-            "from backend.core.database import get_engine; from backend.models.tables import User; "
-            "from sqlalchemy.orm import Session; password=json.load(sys.stdin)['password']; "
-            "db=Session(get_engine()); db.add(User(username='https-admin',"
-            "display_name='HTTPS administrator',role='ADMIN',"
-            "password_hash=hash_password(password))); "
-            "db.commit(); db.close()"
-        )
-        command(
-            [*self.compose, "exec", "-T", "api", "python", "-c", bootstrap],
-            input=json.dumps({"password": self.password}).encode(),
-        )
+        self.manage_account("https-admin", self.password, "--display-name", "HTTPS administrator")
         self.db = ComposePostgres(self.project, self.env_file)
         self.db.compose = self.compose
+
+    def manage_account(self, username, password, *options):
+        command(
+            [
+                *self.compose,
+                "exec",
+                "-T",
+                "api",
+                "python",
+                "-m",
+                "scripts.manage_users",
+                username,
+                "--password-file",
+                "/dev/stdin",
+                *options,
+            ],
+            input=(password + "\n").encode(),
+        )
 
     def client(self):
         return httpx.Client(base_url=self.url, verify=self.context, timeout=20, trust_env=False)

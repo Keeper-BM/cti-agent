@@ -72,6 +72,18 @@ curl --fail https://cti.example.org:8443/api/v1/readiness
 curl --fail --cacert /secure/cti-ca.pem https://cti.example.org:8443/api/v1/readiness
 ```
 
+클라이언트 위치에서 다음 명령을 실행하면 실제 제공된 서버 인증서의 신뢰 체인과 호스트명,
+남은 유효기간, 같은 연결의 API 준비 응답을 한 번에 확인할 수 있습니다.
+
+```bash
+python -m scripts.check_https https://cti.example.org:8443 --min-days 14
+```
+
+사설 CA는 `--ca-file /secure/cti-ca.pem`으로 지정합니다. 기본 만료 여유는 14일이며
+`--min-days 0`도 현재 시점의 인증서 유효성을 검사합니다. 성공하면 종료 코드 0과 UTC 만료
+시각을 출력합니다. 인증서 검증 실패, 만료 여유 부족, 연결 실패, 리디렉션 또는 API가
+준비되지 않은 경우 비정상 종료합니다. 루프백에서 실행하면 해당 호스트의 접속 경로만 검증됩니다.
+
 인증서 오류를 피하려고 `curl -k`나 클라이언트 검증 해제를 운영 절차에 넣지 않습니다.
 실제 브라우저에서 인증서 경고 없이 로그인 → 페이지 새로고침 → 부여된 자산/보고서 조회 →
 로그아웃을 확인합니다. 운영자·조회자가 다른 자산과 관리자 기능에 접근할 수 없는지도 확인합니다.
@@ -122,7 +134,7 @@ TEST_HTTPS_DEPLOYMENT=1 .venv/bin/python -m pytest tests/integration/test_https_
 Linux에서 브라우저 OS 라이브러리가 없으면 Playwright의 `install --with-deps chromium` 준비가 필요합니다.
 새 `.github/workflows/https-acceptance.yml`은 Ubuntu 24.04에서 별도 실행하며 다른 팀원의 CI 단계를 변경하지 않습니다.
 고정한 Playwright와의 호환성을 위해 이동하는 `ubuntu-latest` 대신 OS 버전도 고정합니다.
-명시적으로 시험을 켜지 않으면 3개 시험은 skip입니다. 이 시험을 운영 프로젝트 대상으로 실행하는 옵션은 없습니다.
+명시적으로 시험을 켜지 않으면 4개 시험은 skip입니다. 이 시험을 운영 프로젝트 대상으로 실행하는 옵션은 없습니다.
 
 - HTTPS 포트만 공개되고 token/false 설정이 계정/Secure 설정으로 덮어써지는지 검사합니다.
 - 신뢰하지 않는 CA·틀린 호스트명 거부, TLS 1.2/1.3 연결, 평문 HTTP 거부를 실제 TLS 소켓으로 확인합니다.

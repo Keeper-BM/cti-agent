@@ -1,10 +1,12 @@
 """Opt-in HTTPS/real-browser acceptance; creates and removes its own Compose project."""
 
 import hashlib
+import json
 import os
 import socket
 import ssl
 import subprocess
+import sys
 import time
 from contextlib import ExitStack
 
@@ -303,3 +305,34 @@ def test_certificate_reload_and_secure_session_survive_api_recreation(https_stac
             "HTTPS session/data lost after recreate",
         )
         request(client, "POST", "/auth/logout")
+
+
+def test_client_https_readiness_command(https_stack):
+    stack = https_stack
+
+    def run(*options):
+        return subprocess.run(
+            [sys.executable, "-m", "scripts.check_https", stack.url, *options],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+
+    untrusted = run("--min-days", "0")
+    assert untrusted.returncode == 1 and "certificate verification failed" in untrusted.stderr
+    trusted = ["--ca-file", str(stack.directory / "ca.pem")]
+    result = run(*trusted, "--min-days", "0")
+    assert result.returncode == 0 and json.loads(result.stdout)["status"] == "ready"
+    # The fixture's leaf lasts one day, below the operator's two-day warning threshold.
+    warning = run(*trusted, "--min-days", "2")
+    assert warning.returncode == 1 and "expires before" in warning.stderr
+
+    # The same trusted TLS listener must fail the probe when API readiness is unavailable.
+    command([*stack.compose, "stop", "api"])
+    try:
+        with stack.client() as client:
+            assert client.get("/").status_code == 200
+        unavailable = run(*trusted, "--min-days", "0")
+        assert unavailable.returncode == 1 and not unavailable.stdout
+    finally:
+        command([*stack.compose, "up", "-d", "--no-deps", "--wait", "api"])

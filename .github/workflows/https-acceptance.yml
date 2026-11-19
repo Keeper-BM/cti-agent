@@ -1,0 +1,46 @@
+name: HTTPS account acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  https-accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.0"
+          enable-cache: true
+      - run: uv sync --frozen
+      # Browser testing stays isolated from the application's dependency manifest.
+      - run: uv pip install --python .venv/bin/python playwright==1.58.0
+      - run: .venv/bin/python -m playwright install --with-deps chromium
+      - run: .venv/bin/python -m pytest tests/integration/test_https_deployment.py -v --tb=short
+        env:
+          TEST_HTTPS_DEPLOYMENT: "1"
+      - name: Remove only this runner's HTTPS acceptance projects
+        if: always()
+        shell: bash
+        run: |
+          docker ps -aq --filter 'label=com.docker.compose.project' | while read -r container; do
+            project=$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' "$container")
+            if [[ "$project" =~ ^cti-https-[a-f0-9]{12}$ ]]; then
+              docker rm -f "$container"
+            fi
+          done
+          for kind in volume network; do
+            docker "$kind" ls -q --filter 'label=com.docker.compose.project' | while read -r item; do
+              project=$(docker "$kind" inspect -f '{{index .Labels "com.docker.compose.project"}}' "$item")
+              if [[ "$project" =~ ^cti-https-[a-f0-9]{12}$ ]]; then
+                docker "$kind" rm "$item"
+              fi
+            done
+          done

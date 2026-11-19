@@ -1,0 +1,28 @@
+# Docker Compose >= 2.24.4; apply after compose.yaml.
+services:
+  api:
+    environment:
+      AUTH_MODE: accounts
+      SESSION_COOKIE_SECURE: "true"
+  worker:
+    environment:
+      AUTH_MODE: accounts
+      SESSION_COOKIE_SECURE: "true"
+  web:
+    ports: !override
+      - "${HTTPS_BIND_ADDRESS:-127.0.0.1}:${HTTPS_PORT:-8443}:8443"
+    group_add:
+      - "${TLS_READ_GID:?Set the group allowed to read the TLS private key}"
+    volumes:
+      - type: bind
+        source: ./infra/https/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${TLS_DIRECTORY:?Provide an existing certificate directory}
+        target: /run/cti-tls
+        read_only: true
+        bind:
+          create_host_path: false

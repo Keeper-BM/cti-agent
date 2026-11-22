@@ -15,7 +15,7 @@ import {
   type Workflow,
 } from "./api";
 import { Results } from "./Results";
-import { RunRail } from "./RunRail";
+import { RunRail, StageSpotlight, useRunReplay } from "./RunRail";
 import { Sources, History } from "./WorkflowContext";
 
 const connectionLabels = {
@@ -129,7 +129,10 @@ function Console({
   const mode = input ?? (data?.profile_id ? "ssh" : "saved");
   const available = mode === "saved" ? !!data?.inventory : !!data?.profile_id;
   const assetInfo = data?.asset ?? assets?.items.find((item) => item.id === id);
-  const report = selected?.report_id;
+  const replay = useRunReplay(run);
+  const isReplaying = replay.index !== null;
+  const showingStage = busy || isReplaying;
+  const report = showingStage || sending ? null : selected?.report_id;
   const legacy = !!selected && !run;
   const release = selected
     ? selected.os_release
@@ -196,57 +199,59 @@ function Console({
               </div>
             </div>
           </div>
-          <div className="asset-actions">
-            {pinned ? (
-              <a className="button-link secondary-link" href={workspaceLink(id)}>
-                {data?.latest?.status === "RUNNING" ? "진행 중인 실행 보기" : "최신 실행 보기"}
-              </a>
-            ) : (
-              canWrite &&
-              data &&
-              (available ? (
-                <button
-                  className={report ? "button-link secondary-link" : "button-link primary-link"}
-                  disabled={locked || sending || !assetInfo?.is_active}
-                  onClick={start}
-                >
-                  <Icon
-                    name={
-                      locked
-                        ? "activity"
-                        : selected || run?.status === "FAILED"
-                          ? "refresh"
-                          : "play"
-                    }
-                  />
-                  {locked
-                    ? "분석 진행 중"
-                    : sending
-                      ? "요청 중…"
-                      : selected || run?.status === "FAILED"
-                        ? "다시 분석"
-                        : "분석 시작"}
-                </button>
-              ) : (
-                <a className="button-link secondary-link" href={`#/assets?asset=${id}&setup=ssh`}>
-                  수집 설정
+          {!isReplaying && (
+            <div className="asset-actions">
+              {pinned ? (
+                <a className="button-link secondary-link" href={workspaceLink(id)}>
+                  {data?.latest?.status === "RUNNING" ? "진행 중인 실행 보기" : "최신 실행 보기"}
                 </a>
-              ))
-            )}
-            {report && (
-              <a className="button-link primary-link" href={reportLink(report)}>
-                <Icon name="reports" />
-                대응 보고서 보기
-                <Icon name="arrow" />
-              </a>
-            )}
-            {selected && !run && !report && canWrite && (
-              <a className="button-link primary-link" href={"#/reports?analysis=" + selected.id}>
-                <Icon name="reports" />
-                보고서 생성
-              </a>
-            )}
-          </div>
+              ) : (
+                canWrite &&
+                data &&
+                (available ? (
+                  <button
+                    className={report ? "button-link secondary-link" : "button-link primary-link"}
+                    disabled={locked || sending || !assetInfo?.is_active}
+                    onClick={start}
+                  >
+                    <Icon
+                      name={
+                        locked
+                          ? "activity"
+                          : selected || run?.status === "FAILED"
+                            ? "refresh"
+                            : "play"
+                      }
+                    />
+                    {locked
+                      ? "분석 진행 중"
+                      : sending
+                        ? "요청 중…"
+                        : selected || run?.status === "FAILED"
+                          ? "다시 분석"
+                          : "분석 시작"}
+                  </button>
+                ) : (
+                  <a className="button-link secondary-link" href={`#/assets?asset=${id}&setup=ssh`}>
+                    수집 설정
+                  </a>
+                ))
+              )}
+              {report && (
+                <a className="button-link primary-link report-entrance" href={reportLink(report)}>
+                  <Icon name="reports" />
+                  대응 보고서 보기
+                  <Icon name="arrow" />
+                </a>
+              )}
+              {selected && !run && !report && canWrite && (
+                <a className="button-link primary-link" href={"#/reports?analysis=" + selected.id}>
+                  <Icon name="reports" />
+                  보고서 생성
+                </a>
+              )}
+            </div>
+          )}
         </div>
         <div className="asset-tools">
           <div className="asset-connection">
@@ -269,7 +274,7 @@ function Console({
             )}
           </div>
           <div className="display-tools">
-            {!pinned && canWrite && data && (
+            {!isReplaying && !pinned && canWrite && data && (
               <label className="input-option">
                 <span className="sr-only">분석 입력</span>
                 <select
@@ -328,39 +333,42 @@ function Console({
               </span>
             </div>
           ) : (
-            <RunRail key={run?.id ?? "idle"} run={run} loading={false} />
+            <RunRail run={run} replay={replay} />
           )}
-          <div className="console-grid">
+          <div className="console-grid" data-replaying={isReplaying || undefined}>
             <div className="primary-column">
-              {selected ? (
-                <Results key={selected.id} api={api} analysis={selected} />
-              ) : (
+              {run && showingStage && (
+                <StageSpotlight
+                  key={run.id}
+                  run={run}
+                  analysis={selected}
+                  replayIndex={replay.index}
+                />
+              )}
+              {selected && (
+                <div className="run-outcome" hidden={showingStage}>
+                  <Results key={selected.id} api={api} analysis={selected} />
+                </div>
+              )}
+              {!selected && !showingStage && (
                 <section className="work-card empty-results" role="status">
                   <span className="empty-symbol">
-                    <Icon
-                      name={busy ? "activity" : run?.status === "FAILED" ? "alert" : "shield"}
-                    />
+                    <Icon name={run?.status === "FAILED" ? "alert" : "shield"} />
                   </span>
                   <h2>
-                    {busy
-                      ? "분석이 진행 중입니다"
-                      : run?.status === "FAILED"
-                        ? "분석이 중단되었습니다"
-                        : "첫 분석을 시작하세요"}
+                    {run?.status === "FAILED" ? "분석이 중단되었습니다" : "첫 분석을 시작하세요"}
                   </h2>
                   <p>
-                    {busy
-                      ? "선택한 실행의 판정이 준비되면 이곳에 표시됩니다."
-                      : run?.status === "FAILED"
-                        ? "실행 단계와 오류를 확인한 후 다시 요청할 수 있습니다."
-                        : available
-                          ? "패키지를 수집하고 공식 기준과 대조하면 이곳에 결과가 표시됩니다."
-                          : "SSH 연결을 설정하거나 패키지 기록을 등록하세요."}
+                    {run?.status === "FAILED"
+                      ? "실행 단계와 오류를 확인한 후 다시 요청할 수 있습니다."
+                      : available
+                        ? "패키지를 수집하고 공식 기준과 대조하면 이곳에 결과가 표시됩니다."
+                        : "SSH 연결을 설정하거나 패키지 기록을 등록하세요."}
                   </p>
                 </section>
               )}
             </div>
-            <aside className="workspace-aside">
+            <aside className="workspace-aside" hidden={isReplaying}>
               <Sources
                 key={run?.id ?? selected?.id ?? "idle"}
                 api={api}

@@ -16,6 +16,7 @@ type IconName =
   | "database"
   | "check"
   | "play"
+  | "pause"
   | "download"
   | "chevron"
   | "activity"
@@ -49,6 +50,7 @@ const paths: Record<IconName, ReactNode> = {
   ),
   check: <path d="m4.8 12.5 4.5 4.5L19.3 7" />,
   play: <path d="m7.8 4.6 11.3 7.4-11.3 7.4z" fill="currentColor" strokeWidth="1.4" />,
+  pause: <path d="M9 5v14m6-14v14" strokeWidth="2.5" />,
   download: (
     <>
       <path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4" />

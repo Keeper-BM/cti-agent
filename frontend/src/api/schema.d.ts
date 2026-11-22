@@ -2924,6 +2924,10 @@ export interface components {
             /** Explanations */
             explanations: components["schemas"]["ReportExplanation"][];
             verification?: components["schemas"]["VerificationEvidence"] | null;
+            /** Priority Finding Id */
+            priority_finding_id?: string | null;
+            /** Ai Summary Note */
+            ai_summary_note?: string | null;
         };
         /** ReportDetail */
         ReportDetail: {
@@ -3041,6 +3045,11 @@ export interface components {
              * @default false
              */
             include_ai_explanations: boolean;
+            /**
+             * Generate Ai Summary
+             * @default false
+             */
+            generate_ai_summary: boolean;
         };
         /** ReportResponse */
         ReportResponse: {
@@ -3306,6 +3315,8 @@ export interface components {
             purpose: string;
             /** Url */
             url: string;
+            /** Scope Key */
+            scope_key?: string | null;
             latest_job: components["schemas"]["JobResponse"] | null;
             latest_snapshot: components["schemas"]["SnapshotResponse"] | null;
         };
@@ -8433,6 +8444,7 @@ export interface operations {
                 asset_id?: string | null;
                 /** @description 이 분석 하나를 대상으로 한 질문 */
                 analysis_id?: string | null;
+                answered?: boolean;
                 limit?: number;
                 offset?: number;
             };
@@ -9165,7 +9177,10 @@ export interface operations {
     };
     get_source_status_api_v1_sources_status_get: {
         parameters: {
-            query?: never;
+            query?: {
+                ubuntu_release?: ("22.04" | "24.04") | null;
+                ubuntu_package?: ("apache2" | "mysql-8.0") | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;

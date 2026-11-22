@@ -119,6 +119,8 @@ def test_retrieval_pinned_facts_chunks_restart_and_invalid_answers(
     with TestClient(create_app()) as fresh:
         assert fresh.get("/api/v1/questions/" + first["id"], headers=headers).json() == saved
         assert fresh.get("/api/v1/questions?limit=1&offset=1", headers=headers).json()["total"] == 3
+        answered = fresh.get("/api/v1/questions?answered=true", headers=headers).json()
+        assert answered["total"] == 1 and answered["items"][0]["id"] == first["id"]
 
 
 def test_no_evidence_needs_no_key_and_recovery_frees_slot(client, headers, engine, source_wire):

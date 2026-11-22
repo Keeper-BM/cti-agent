@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Icon } from "../../shared/components/Icon";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { ReportContent } from "./api";
 import { VerificationBody } from "../verifications/VerificationPanel";
@@ -129,10 +130,61 @@ export function ReportPreview({ content }: { content: ReportContent }) {
     `${f.cve_id ?? ""} ${f.package_name ?? ""}`.toLowerCase().includes(search.trim().toLowerCase()),
   );
   const finding = content.findings.find((f) => f.finding_id === findingId);
+  const priority =
+    content.findings.find((f) => f.finding_id === content.priority_finding_id) ??
+    content.findings.find((f) => f.verdict === "AFFECTED") ??
+    content.findings.find((f) => f.verdict === "NEEDS_REVIEW" && f.cve_id);
+  const firstAction = priority?.remediation?.steps[0];
+  const aiSection = useRef<HTMLElement>(null);
+
   return (
     <div className="report-preview" aria-label="저장된 보고서 미리보기">
       {content.is_synthetic && (
         <div className="report-synthetic">가상 입력 보고서 · 실제 서버의 보안 상태가 아닙니다.</div>
+      )}
+      {priority?.verdict && (
+        <section className="report-lead" aria-label="우선 대응">
+          <div className="report-lead-head">
+            <div>
+              <p
+                className={
+                  priority.verdict === "AFFECTED" ? "lead-label" : "lead-label lead-review"
+                }
+              >
+                <Icon name="alert" /> {verdicts[priority.verdict]}
+              </p>
+              <div className="lead-heading">
+                <h3>{priority.cve_id}</h3>
+                <span className="package-name">{priority.package_name ?? "패키지 미확인"}</span>
+              </div>
+            </div>
+            {(content.explanations.length > 0 || content.ai_summary_note) && (
+              <button
+                className="text-tool"
+                type="button"
+                onClick={() => {
+                  aiSection.current?.focus({ preventScroll: true });
+                  aiSection.current?.scrollIntoView({ block: "start" });
+                }}
+              >
+                <Icon name="insights" />{" "}
+                {content.explanations.length ? "AI 요약 보기" : "AI 요약 상태 보기"}
+              </button>
+            )}
+          </div>
+          {priority.reasons?.length ? (
+            <p className="reason-line">{priority.reasons.at(-1)}</p>
+          ) : null}
+          {firstAction && (
+            <div className="first-action">
+              <Icon name="shield" />
+              <div>
+                <h4>{firstAction.title}</h4>
+                <p>{firstAction.description}</p>
+              </div>
+            </div>
+          )}
+        </section>
       )}
       <section className="report-section">
         <h3>분석 요약</h3>
@@ -371,18 +423,29 @@ export function ReportPreview({ content }: { content: ReportContent }) {
           </div>
         )}
       </section>
-      <section className="report-section">
-        <h3>AI Summary · {content.explanations.length}건</h3>
-        <p>
-          {content.include_ai_explanations
-            ? "자료 고정 시점의 최신 저장 요약입니다. 보고서 생성 시 추가 요약은 생성하지 않습니다."
-            : "AI Summary 미포함 보고서입니다."}
-        </p>
-        {content.include_ai_explanations && !content.explanations.length && (
-          <p>자료 고정 시점에 생성 완료된 AI Summary가 없습니다.</p>
+      <section className="report-section report-summary-section" ref={aiSection} tabIndex={-1}>
+        <h3>
+          {content.explanations.length
+            ? "AI Summary · " + content.explanations.length + "건"
+            : "AI Summary"}
+        </h3>
+        {content.ai_summary_note ? (
+          <p>{content.ai_summary_note}</p>
+        ) : (
+          !content.explanations.length && (
+            <p>
+              {content.include_ai_explanations
+                ? "이 보고서에 저장된 AI 요약이 없습니다."
+                : "AI 요약 미포함 보고서입니다."}
+            </p>
+          )
         )}
         {content.explanations.slice(aiPage * 5, (aiPage + 1) * 5).map((e) => (
-          <details className="report-ai" key={e.id}>
+          <details
+            className="report-ai"
+            key={e.id}
+            open={content.explanations.length === 1 || undefined}
+          >
             <summary>
               {e.result.facts.package_name} · {e.result.facts.cve_id} · {reportTime(e.completed_at)}
             </summary>

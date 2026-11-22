@@ -15,7 +15,11 @@ export const createReport = (
   api.request<Report>("/reports", {
     method: "POST",
     headers: { "Idempotency-Key": key },
-    body: JSON.stringify({ analysis_id: analysisId, include_ai_explanations: includeAI }),
+    body: JSON.stringify({
+      analysis_id: analysisId,
+      include_ai_explanations: includeAI,
+      generate_ai_summary: includeAI,
+    }),
   });
 export const listReports = (api: HttpClient, assetId: string, page: number, signal?: AbortSignal) =>
   api.request<ReportList>(

@@ -95,6 +95,7 @@ def listing(
     db: Database,
     asset_id: UUID | None = None,
     analysis_id: UUID | None = Query(None, description="이 분석 하나를 대상으로 한 질문"),
+    answered: bool = False,
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ):
@@ -116,6 +117,8 @@ def listing(
                 QuestionRun.analysis_ids[1].as_string().is_(None),
             ]
         )
+    if answered:
+        filters.append(QuestionRun.result["status"].as_string() == "ANSWERED")
     rows = db.scalars(
         select(QuestionRun)
         .options(defer(QuestionRun.input_payload), defer(QuestionRun.result))

@@ -189,18 +189,15 @@ def freeze_report(db, analysis, report_id, frozen_at, include_ai: bool) -> Repor
     ]
     if analysis.is_synthetic:
         warnings.insert(0, "가상 입력 보고서입니다. 실제 서버의 보안 상태가 아닙니다.")
-    if include_ai:
-        warnings.append(
-            f"자료 고정 시점의 결과별 최신 AI Summary {len(explanations)}건을 포함했습니다. "
-            "나머지 결과에는 생성 완료된 요약이 없습니다."
-        )
-        if explanations:
-            warnings.append(
-                "AI Summary의 검증 범위는 인용·기준값입니다. "
-                "생성 문장의 사실성은 별도 검토 대상입니다."
-            )
-    else:
-        warnings.append("AI Summary 미포함. 보고서 생성 시 추가 요약은 생성하지 않습니다.")
+    priority = next(
+        (
+            finding
+            for verdict in ("AFFECTED", "NEEDS_REVIEW")
+            for finding in findings
+            if finding.verdict == verdict and finding.cve_id
+        ),
+        None,
+    )
     return ReportContent(
         report_id=report_id,
         template_version=TEMPLATE_VERSION,
@@ -229,4 +226,5 @@ def freeze_report(db, analysis, report_id, frozen_at, include_ai: bool) -> Repor
         documents=[DocumentInfo.model_validate(d) for d in documents],
         explanations=explanations,
         verification=verification,
+        priority_finding_id=priority.finding_id if priority else None,
     )

@@ -37,7 +37,10 @@ export function SourcesPage() {
   const [snapshot, setSnapshot] = useState("");
   const [selected, setSelected] = useState<RecordData | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
-  const statusLoad = useCallback((signal: AbortSignal) => getStatus(api!, signal), [api]);
+  const statusLoad = useCallback(
+    (signal: AbortSignal) => getStatus(api!, release, pkg, signal),
+    [api, release, pkg],
+  );
   const status = usePollingQuery(api ? statusLoad : null);
   const revision = status.data?.items
     .map((i) => `${i.latest_job?.id}:${i.latest_job?.status}`)
@@ -96,7 +99,9 @@ export function SourcesPage() {
       </div>
       <div className="source-cards">
         {(Object.keys(names) as Source[]).map((id) => {
-          const item = status.data?.items.find((s) => s.source_id === id);
+          const item = status.data?.items.find(
+            (s) => s.source_id === id && (id !== "ubuntu" || s.scope_key === release + ":" + pkg),
+          );
           const busy = item?.latest_job && ["QUEUED", "RUNNING"].includes(item.latest_job.status);
           const payload: SyncInput =
             id === "ubuntu"
@@ -113,7 +118,11 @@ export function SourcesPage() {
                 <span
                   className={`badge ${busy ? "queued" : item?.latest_job?.status === "FAILED" ? "failed" : ""}`}
                 >
-                  {item?.latest_job ? jobNames[item.latest_job.status] : "수집 전"}
+                  {item?.latest_job
+                    ? jobNames[item.latest_job.status]
+                    : item
+                      ? "수집 전"
+                      : "확인 중"}
                 </span>
               </div>
               <p>{item?.purpose ?? "공식 자료 연결"}</p>

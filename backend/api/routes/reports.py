@@ -46,7 +46,8 @@ def create_report(
         if (
             report is None
             or report.analysis_id != str(payload.analysis_id)
-            or (report.include_ai_explanations != payload.include_ai_explanations)
+            or report.include_ai_explanations != payload.include_ai_explanations
+            or report.input_payload.get("generate_ai_summary", False) != payload.generate_ai_summary
         ):
             raise AppError(
                 "IDEMPOTENCY_CONFLICT", "같은 요청 키가 다른 작업에 사용되었습니다.", 409
@@ -58,7 +59,13 @@ def create_report(
     if not analysis.completed_at or db.get(Job, analysis.job_id).status != "SUCCEEDED":
         raise AppError("ANALYSIS_NOT_COMPLETED", "완료된 분석만 보고서로 만들 수 있습니다.", 409)
     try:
-        report = queue_report(db, analysis, payload.include_ai_explanations, idempotency_key)
+        report = queue_report(
+            db,
+            analysis,
+            payload.include_ai_explanations,
+            idempotency_key,
+            generate_ai_summary=payload.generate_ai_summary,
+        )
         db.commit()
     except IntegrityError:
         db.rollback()

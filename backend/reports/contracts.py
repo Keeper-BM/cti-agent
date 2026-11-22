@@ -7,12 +7,13 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict
 
 from backend.api.schemas.sources import DocumentInfo, SnapshotResponse
 from backend.assessment.contracts import AssessmentFinding
-from backend.llm.contracts import ExplanationResult
+from backend.llm.contracts import ExplanationContext, ExplanationResult
 from backend.models.contracts import OperatingSystem
 from backend.models.enums import CollectionStatus, OriginStatus
 from backend.verification.contracts import VerificationEvidence
 
-TEMPLATE_VERSION = "assessment-report/1.2"
+TEMPLATE_VERSION = "assessment-report/1.3"
+SUPPORTED_TEMPLATE_VERSIONS = {"assessment-report/1.2", TEMPLATE_VERSION}
 MAX_REPORT_BYTES = 16 * 1024 * 1024
 
 VERDICT_LABELS = {
@@ -112,3 +113,18 @@ class ReportContent(BaseModel):
     documents: list[DocumentInfo]
     explanations: list[ReportExplanation]
     verification: VerificationEvidence | None = None
+    priority_finding_id: UUID | None = None
+    ai_summary_note: str | None = None
+
+
+class AutomaticSummaryInput(BaseModel):
+    finding_id: UUID
+    model: str
+    prompt_version: str
+    context: ExplanationContext
+
+
+class ReportInput(BaseModel):
+    report: ReportContent
+    generate_ai_summary: bool
+    summary: AutomaticSummaryInput | None = None

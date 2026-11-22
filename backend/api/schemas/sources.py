@@ -8,11 +8,14 @@ from backend.api.schemas.common import TimestampResponse
 from backend.api.schemas.jobs import JobResponse
 from backend.sources.contracts import CVE_PATTERN, SecurityRecord, SourceId
 
+UbuntuRelease = Literal["22.04", "24.04"]
+UbuntuPackage = Literal["apache2", "mysql-8.0"]
+
 
 class SourceSyncRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    release: Literal["22.04", "24.04"] = "22.04"
-    package: Literal["apache2", "mysql-8.0"] = "apache2"
+    release: UbuntuRelease = "22.04"
+    package: UbuntuPackage = "apache2"
     cve_id: str | None = Field(default=None, pattern=CVE_PATTERN)
     url: str | None = Field(default=None, max_length=450)
 
@@ -38,6 +41,7 @@ class SourceStatus(BaseModel):
     name: str
     purpose: str
     url: str
+    scope_key: str | None = None
     latest_job: JobResponse | None
     latest_snapshot: SnapshotResponse | None
 

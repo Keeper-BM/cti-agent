@@ -11,6 +11,7 @@ from backend.core.errors import AppError
 from backend.models.tables import CollectionRun, Job, ReportRun, utcnow
 from backend.reports.contracts import TEMPLATE_VERSION
 from backend.reports.snapshot import digest, freeze_report
+from backend.reports.summary import pin_report_input
 
 
 def queue_collection(db, asset, profile, key, actor=None):
@@ -34,10 +35,10 @@ def queue_collection(db, asset, profile, key, actor=None):
     return run
 
 
-def queue_report(db, analysis, include_ai, key, actor=None):
+def queue_report(db, analysis, include_ai, key, actor=None, *, generate_ai_summary=False):
     report_id, frozen_at = uuid4(), utcnow()
     content = freeze_report(db, analysis, report_id, frozen_at, include_ai)
-    pinned = content.model_dump(mode="json")
+    pinned = pin_report_input(db, content, generate_ai_summary).model_dump(mode="json")
     job = Job(kind="REPORT", asset_id=analysis.asset_id, idempotency_key=key, requested_by=actor)
     db.add(job)
     db.flush()

@@ -21,11 +21,15 @@ llm_wire = explanation_tests.llm_wire
 report_finding = explanation_tests.finding
 
 
-def enqueue(client, headers, finding, include=False, key=None):
+def enqueue(client, headers, finding, include=False, key=None, generate=False):
     response = client.post(
         "/api/v1/reports",
         headers={**headers, "Idempotency-Key": key or str(uuid4())},
-        json={"analysis_id": finding["analysis_id"], "include_ai_explanations": include},
+        json={
+            "analysis_id": finding["analysis_id"],
+            "include_ai_explanations": include,
+            "generate_ai_summary": generate,
+        },
     )
     assert response.status_code == 202, response.text
     return response.json()
@@ -258,3 +262,46 @@ def test_summary_counts_packages_separately_from_unique_cves(
     assert summary["finding_count"] == 3 and summary["package_count"] == 3
     assert summary["cve_count"] == 1
     assert summary["verdict_counts"]["NEEDS_REVIEW"] == 2
+
+
+def test_automatic_summary_uses_pinned_representative_and_reuses_saved(
+    client, headers, engine, report_finding, llm_wire
+):
+    pending = enqueue(client, headers, report_finding, include=True, generate=True, key="report-ai")
+    same = enqueue(client, headers, report_finding, include=True, generate=True, key="report-ai")
+    assert same["id"] == pending["id"]
+    assert not llm_wire["calls"]
+    with Session(engine) as db, db.begin():
+        row = db.get(FindingRecord, report_finding["finding_id"])
+        row.payload = {**row.payload, "reasons": ["AFTER SUBMISSION"]}
+    run_once(engine)
+    generated = detail(client, headers, pending)
+    assert generated["job"]["status"] == "SUCCEEDED" and generated["explanation_count"] == 1
+    assert generated["content"]["priority_finding_id"] == report_finding["finding_id"]
+    assert generated["content"]["explanations"][0]["finding_id"] == report_finding["finding_id"]
+    assert len(llm_wire["calls"]) == 1 and "AFTER SUBMISSION" not in str(llm_wire["calls"][0])
+    markdown = client.get(f"/api/v1/reports/{pending['id']}/markdown", headers=headers).text
+    assert markdown.index("## 우선 대응") < markdown.index("## 분석 요약")
+    assert "인용:" in markdown
+
+    stored = explanation_tests.enqueue(client, headers, report_finding)
+    run_once(engine)
+    reused = enqueue(client, headers, report_finding, include=True, generate=True)
+    run_once(engine)
+    assert detail(client, headers, reused)["content"]["explanations"][0]["id"] == stored["id"]
+    assert len(llm_wire["calls"]) == 2
+
+
+def test_school_ai_failure_saves_report_without_inventing_a_summary(
+    client, headers, engine, report_finding, llm_wire
+):
+    llm_wire["status"] = 429
+    queued = enqueue(client, headers, report_finding, include=True, generate=True)
+    run_once(engine)
+    result = detail(client, headers, queued)
+    assert result["job"]["status"] == "SUCCEEDED"
+    assert result["explanation_count"] == 0 and result["content"]["explanations"] == []
+    assert "LLM_RATE_LIMIT" in result["content"]["ai_summary_note"]
+    downloaded = client.get(f"/api/v1/reports/{queued['id']}/markdown", headers=headers)
+    assert downloaded.status_code == 200
+    assert "LLM\\_RATE\\_LIMIT" in downloaded.text

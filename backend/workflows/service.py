@@ -320,7 +320,9 @@ def advance(db, run):
             )
             return
         if run.stage == "analysis":
-            report = queue_report(db, result, True, f"wf-{run.id}-report", run.requested_by)
+            report = queue_report(
+                db, result, True, f"wf-{run.id}-report", run.requested_by, generate_ai_summary=True
+            )
             run.report_id = report.id
             step(run, "report")
         else:

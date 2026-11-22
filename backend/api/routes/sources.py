@@ -18,6 +18,8 @@ from backend.api.schemas.sources import (
     SnapshotList,
     SourceStatusList,
     SourceSyncRequest,
+    UbuntuPackage,
+    UbuntuRelease,
 )
 from backend.core.config import get_settings
 from backend.core.errors import AppError
@@ -30,19 +32,32 @@ router = APIRouter(prefix="/sources", tags=["sources"])
 
 
 @router.get("/status", response_model=SourceStatusList)
-def get_source_status(db: Database):
+def get_source_status(
+    db: Database,
+    ubuntu_release: UbuntuRelease | None = None,
+    ubuntu_package: UbuntuPackage | None = None,
+):
+    if bool(ubuntu_release) != bool(ubuntu_package):
+        raise AppError("INVALID_SYNC_INPUT", "Ubuntu 릴리스와 패키지를 함께 선택하세요.", 422)
     items = []
     for source_id, (name, purpose, url) in SOURCE_INFO.items():
+        run_conditions = [SourceRun.source_id == source_id]
+        snapshot_conditions = [SecuritySnapshot.source_id == source_id]
+        scope = None
+        if source_id == "ubuntu" and ubuntu_release and ubuntu_package:
+            scope = f"{ubuntu_release}:{ubuntu_package}"
+            run_conditions.append(SourceRun.scope_key == scope)
+            snapshot_conditions.append(SecuritySnapshot.scope_key == scope)
         job = db.scalar(
             select(Job)
             .join(SourceRun, Job.id == SourceRun.job_id)
-            .where(SourceRun.source_id == source_id)
+            .where(*run_conditions)
             .order_by(Job.created_at.desc(), Job.id.desc())
             .limit(1)
         )
         snapshot = db.scalar(
             select(SecuritySnapshot)
-            .where(SecuritySnapshot.source_id == source_id)
+            .where(*snapshot_conditions)
             .order_by(SecuritySnapshot.captured_at.desc(), SecuritySnapshot.id.desc())
             .limit(1)
         )
@@ -52,6 +67,7 @@ def get_source_status(db: Database):
                 "name": name,
                 "purpose": purpose,
                 "url": url,
+                "scope_key": scope,
                 "latest_job": job,
                 "latest_snapshot": snapshot,
             }

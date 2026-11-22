@@ -134,6 +134,11 @@ function Console({
   const showingStage = busy || isReplaying;
   const report = showingStage || sending ? null : selected?.report_id;
   const legacy = !!selected && !run;
+  const recovery =
+    run?.status === "FAILED"
+      ? (data?.history.find((item) => item.id !== selected?.id && item.report_id) ??
+        data?.history.find((item) => item.id !== selected?.id))
+      : undefined;
   const release = selected
     ? selected.os_release
     : (data?.inventory?.os_release ?? assetInfo?.expected_release);
@@ -196,6 +201,7 @@ function Console({
                   </>
                 )}
                 {selected?.is_synthetic && <span>가상 입력</span>}
+                <span className="scope-tag">Apache2 · MySQL 분석</span>
               </div>
             </div>
           </div>
@@ -313,7 +319,23 @@ function Console({
           </div>
         )}
       </section>
-      <Notice error={error || query.error || run?.error || ""} />
+      <Notice error={error || query.error} />
+      {run?.status === "FAILED" && (
+        <section className="work-card workflow-recovery" aria-label="분석 실행 오류">
+          <div>
+            <strong role="alert">
+              <Icon name="alert" /> {run.error || "분석이 중단되었습니다."}
+            </strong>
+            {recovery && <p>저장된 최근 완료 기록을 열어 판정과 근거를 확인할 수 있습니다.</p>}
+          </div>
+          {recovery && (
+            <a className="button-link primary-link" href={workspaceLink(id, recovery.id)}>
+              마지막 정상 분석 보기
+              <Icon name="arrow" />
+            </a>
+          )}
+        </section>
+      )}
       {!data && query.error && (
         <div className="asset-actions">
           <button className="button-link secondary-link" onClick={query.refresh}>

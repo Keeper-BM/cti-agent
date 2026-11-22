@@ -12,6 +12,11 @@ from backend.llm.validation import validate_output
 from backend.models.tables import ExplanationRun, Job, utcnow
 
 
+def generate_explanation(settings, context: ExplanationContext):
+    reply = SchoolLLM(settings).generate(messages(context))
+    return reply, validate_output(reply.content, context)
+
+
 def explain_job(engine: Engine, job_id: str) -> dict:
     settings = get_settings()
     with Session(engine) as db:
@@ -36,8 +41,7 @@ def explain_job(engine: Engine, job_id: str) -> dict:
             )
         run_id = run.id
     # Network work occurs without holding a database transaction or write lock.
-    reply = SchoolLLM(settings).generate(messages(context))
-    output = validate_output(reply.content, context)
+    reply, output = generate_explanation(settings, context)
     with Session(engine) as db, db.begin():
         run = db.get(ExplanationRun, run_id)
         job = db.get(Job, job_id)

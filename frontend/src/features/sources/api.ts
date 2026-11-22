@@ -17,8 +17,20 @@ export const names: Record<Source, string> = {
   apache: "Apache HTTP Server",
   oracle: "Oracle / MySQL",
 };
-export const getStatus = (api: HttpClient, signal?: AbortSignal) =>
-  api.request<StatusList>("/sources/status", { signal });
+export const getStatus = (
+  api: HttpClient,
+  ubuntuRelease: string,
+  ubuntuPackage: string,
+  signal?: AbortSignal,
+) =>
+  api.request<StatusList>(
+    "/sources/status?" +
+      new URLSearchParams({
+        ubuntu_release: ubuntuRelease,
+        ubuntu_package: ubuntuPackage,
+      }),
+    { signal },
+  );
 export const syncSource = (api: HttpClient, source: Source, body: SyncInput) =>
   api.request<Job>(`/sources/${source}/sync`, {
     method: "POST",

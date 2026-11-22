@@ -1974,3 +1974,126 @@ details[open] > summary > svg,
     display: none;
   }
 }
+
+.scope-tag {
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-weight: 600;
+}
+.workflow-recovery {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 15px 20px;
+  border-left: 3px solid #c46961;
+}
+.workflow-recovery strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--error);
+  font-size: 15px;
+}
+.workflow-recovery svg {
+  width: 16px;
+  height: 16px;
+}
+.workflow-recovery p {
+  color: var(--muted);
+  margin-top: 4px;
+}
+.asset-layout .table-wrap {
+  position: relative;
+}
+.asset-row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+}
+.asset-row-actions a {
+  white-space: nowrap;
+}
+.asset-table .asset-name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.report-lead {
+  margin: 18px 24px 2px;
+  padding: 16px 19px;
+  border: 1px solid #e7dff4;
+  border-radius: 11px;
+  background: #fcfbff;
+}
+.report-lead-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+}
+.report-lead h3 {
+  font-size: clamp(20px, 2vw, 26px);
+}
+.report-lead .lead-review {
+  color: #855416;
+}
+.report-lead .first-action {
+  margin: 10px 0 0;
+}
+.report-lead .first-action h4 {
+  margin-bottom: 2px;
+}
+.report-summary-section {
+  scroll-margin-top: 14px;
+}
+@media (max-width: 640px) {
+  .asset-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .asset-table :is(th, td) {
+    padding: 10px 8px;
+  }
+  .asset-table :is(th, td).asset-extra {
+    display: none;
+  }
+  .asset-table th:nth-child(6) {
+    width: 67px;
+  }
+  .asset-table th:last-child {
+    width: 90px;
+  }
+  .asset-row-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .asset-open-link {
+    font-size: 12px;
+  }
+  .report-lead {
+    margin: 12px 13px 2px;
+    padding: 12px;
+  }
+}
+
+.ai-service-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 24px 10px;
+  padding: 11px 13px;
+  border: 1px solid #e4dced;
+  border-radius: 8px;
+  color: var(--text);
+  background: #f7f3fb;
+}
+.ai-service-note a {
+  font-weight: 650;
+  color: var(--accent-dark);
+}

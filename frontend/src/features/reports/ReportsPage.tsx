@@ -188,7 +188,7 @@ function ReportLibrary() {
               <span>
                 AI Summary 포함
                 <small>
-                  각 결과의 최신 저장 요약을 포함합니다. 추가 생성 요청은 발생하지 않습니다.
+                  저장된 요약을 포함하고, 대표 판정에 요약이 없으면 학교 AI로 생성합니다.
                 </small>
               </span>
             </label>
@@ -248,9 +248,13 @@ function ReportLibrary() {
                 </strong>
                 <small>
                   {r.id.slice(0, 8)} · 분석 {r.analysis_id.slice(0, 8)} · 결과 {r.finding_count}건 ·{" "}
-                  {r.include_ai_explanations
-                    ? `AI Summary ${r.explanation_count}건`
-                    : "AI Summary 미포함"}
+                  {!r.include_ai_explanations
+                    ? "AI 요약 미포함"
+                    : r.explanation_count > 0
+                      ? "AI Summary " + r.explanation_count + "건"
+                      : r.job.status === "SUCCEEDED"
+                        ? "저장된 AI 요약 없음"
+                        : "AI 요약 요청"}
                   {r.is_synthetic ? " · 가상" : ""}
                 </small>
               </span>

@@ -53,6 +53,24 @@ def render_markdown(report: ReportContent) -> str:
 
     if report.is_synthetic:
         lines.extend(["> **가상 입력 보고서 — 실제 서버의 보안 상태가 아닙니다.**", ""])
+    priority = next(
+        (
+            finding
+            for finding in report.findings
+            if finding.finding_id == report.priority_finding_id
+        ),
+        None,
+    )
+    if priority:
+        lines.extend(["## 우선 대응", ""])
+        paragraph(
+            f"{VERDICT_LABELS[priority.verdict]} · {priority.cve_id} · {priority.package_name}"
+        )
+        if priority.reasons:
+            paragraph(priority.reasons[-1])
+        if priority.remediation and priority.remediation.steps:
+            action = priority.remediation.steps[0]
+            paragraph(f"{action.title} · {action.description}")
     table(
         ["항목", "내용"],
         [
@@ -209,7 +227,9 @@ def render_markdown(report: ReportContent) -> str:
                 ]
             )
     lines.extend(["## AI Summary", ""])
-    if not report.explanations:
+    if report.ai_summary_note:
+        paragraph(report.ai_summary_note)
+    elif not report.explanations:
         paragraph(
             "AI Summary 미포함"
             if not report.include_ai_explanations

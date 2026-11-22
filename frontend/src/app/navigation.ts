@@ -4,7 +4,8 @@ export const routes = [
   {
     id: "workspace",
     title: "분석 실행",
-    description: "선택한 서버의 패키지를 공식 보안 자료와 대조하고 대응 보고서를 만듭니다.",
+    description:
+      "Ubuntu 22.04·24.04의 Apache2와 MySQL을 공식 보안 자료와 대조하고 대응 보고서를 만듭니다.",
   },
   {
     id: "assets",

@@ -197,10 +197,10 @@ export function AssetsPage() {
                 <thead>
                   <tr>
                     <th>자산 이름</th>
-                    <th>IP / 호스트명</th>
-                    <th>예상 Ubuntu</th>
-                    <th>SSH 연결 설정</th>
-                    <th>마지막 분석</th>
+                    <th className="asset-extra">IP / 호스트명</th>
+                    <th className="asset-extra">예상 Ubuntu</th>
+                    <th className="asset-extra">SSH 연결 설정</th>
+                    <th className="asset-extra">마지막 분석</th>
                     <th>상태</th>
                     <th>
                       <span className="sr-only">관리</span>
@@ -228,16 +228,16 @@ export function AssetsPage() {
                           {asset.owner_display_name || "담당자 미지정"}
                         </small>
                       </td>
-                      <td className="mono">{asset.host || "미등록"}</td>
-                      <td>{asset.expected_release || "미확정"}</td>
-                      <td>
+                      <td className="mono asset-extra">{asset.host || "미등록"}</td>
+                      <td className="asset-extra">{asset.expected_release || "미확정"}</td>
+                      <td className="asset-extra">
                         <span
                           className={`profile-flag ${asset.ssh_configured ? "configured" : ""}`}
                         >
                           {asset.ssh_configured ? "설정됨" : "미설정"}
                         </span>
                       </td>
-                      <td>
+                      <td className="asset-extra">
                         {asset.last_analysis_at ? formatKst(asset.last_analysis_at) : "분석 전"}
                       </td>
                       <td>
@@ -247,26 +247,30 @@ export function AssetsPage() {
                         </span>
                       </td>
                       <td>
-                        <button
-                          className="text-button"
-                          disabled={!canWrite || action.pending}
-                          aria-label={`${asset.asset_name} ${asset.is_active ? "비활성화" : "활성화"}`}
-                          onClick={async () => {
-                            if (
-                              api &&
-                              (await action.run(
-                                () => setAssetActive(api, asset.id, !asset.is_active),
-                                "자산 상태를 변경했습니다.",
-                              ))
-                            )
-                              query.refresh();
-                          }}
-                        >
-                          {asset.is_active ? "비활성화" : "활성화"}
-                        </button>
-                        <a className="asset-open-link" href={`#/workspace?asset=${asset.id}`}>
-                          분석 열기 <Icon name="arrow" />
-                        </a>
+                        <div className="asset-row-actions">
+                          <a className="asset-open-link" href={`#/workspace?asset=${asset.id}`}>
+                            분석 열기 <Icon name="arrow" />
+                          </a>
+                          {canWrite && (
+                            <button
+                              className="text-button"
+                              disabled={!canWrite || action.pending}
+                              aria-label={`${asset.asset_name} ${asset.is_active ? "비활성화" : "활성화"}`}
+                              onClick={async () => {
+                                if (
+                                  api &&
+                                  (await action.run(
+                                    () => setAssetActive(api, asset.id, !asset.is_active),
+                                    "자산 상태를 변경했습니다.",
+                                  ))
+                                )
+                                  query.refresh();
+                              }}
+                            >
+                              {asset.is_active ? "비활성화" : "활성화"}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

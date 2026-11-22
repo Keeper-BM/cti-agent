@@ -192,3 +192,20 @@ def test_committed_snapshot_and_job_survive_worker_restart(client, headers, engi
     with Session(engine) as db:
         assert db.scalar(select(Job)).status == "SUCCEEDED"
         assert db.scalar(select(func.count()).select_from(SecuritySnapshot)) == 1
+
+
+def test_ubuntu_status_matches_requested_scope(client, headers, engine, source_wire):
+    original = execute(
+        client, headers, engine, "ubuntu", {"release": "22.04", "package": "apache2"}
+    )
+    options = {"release": "22.04", "package": "mysql-8.0"}
+    execute(client, headers, engine, "ubuntu", options)
+    path = "/api/v1/sources/status"
+    response = client.get(
+        path, headers=headers, params={"ubuntu_release": "22.04", "ubuntu_package": "apache2"}
+    )
+    assert response.status_code == 200
+    ubuntu = next(item for item in response.json()["items"] if item["source_id"] == "ubuntu")
+    assert ubuntu["scope_key"] == "22.04:apache2"
+    assert ubuntu["latest_snapshot"]["id"] == original
+    assert ubuntu["latest_job"]["id"] == ubuntu["latest_snapshot"]["job_id"]

@@ -6,9 +6,15 @@ from sqlalchemy.orm import Session
 
 from backend.core.errors import AppError
 from backend.models.tables import Job, ReportRun, utcnow
-from backend.reports.contracts import MAX_REPORT_BYTES, TEMPLATE_VERSION, ReportContent
+from backend.reports.contracts import (
+    MAX_REPORT_BYTES,
+    SUPPORTED_TEMPLATE_VERSIONS,
+    ReportContent,
+    ReportInput,
+)
 from backend.reports.markdown import render_markdown
 from backend.reports.snapshot import digest
+from backend.reports.summary import append_automatic_summary
 
 
 def report_job(engine: Engine, job_id: str) -> dict:
@@ -18,7 +24,7 @@ def report_job(engine: Engine, job_id: str) -> dict:
             raise AppError("REPORT_NOT_FOUND", "보고서 입력을 찾을 수 없습니다.", 500)
         if report.completed_at:
             return db.get(Job, job_id).result
-        if report.template_version != TEMPLATE_VERSION:
+        if report.template_version not in SUPPORTED_TEMPLATE_VERSIONS:
             raise AppError(
                 "REPORT_TEMPLATE_CHANGED", "보고서 양식이 변경되었습니다. 새로 요청하세요.", 409
             )
@@ -26,8 +32,16 @@ def report_job(engine: Engine, job_id: str) -> dict:
             raise AppError(
                 "REPORT_INPUT_CHANGED", "고정한 보고서 입력의 무결성을 확인하지 못했습니다.", 409
             )
-        content = ReportContent.model_validate(report.input_payload)
+        payload = report.input_payload
         report_id = report.id
+    if "report" in payload:
+        inputs = ReportInput.model_validate(payload)
+        content = inputs.report
+        if inputs.summary:
+            append_automatic_summary(content, inputs.summary)
+    else:
+        # Reports queued before automatic summaries stored the content directly.
+        content = ReportContent.model_validate(payload)
     content.generated_at = utcnow()
     markdown = render_markdown(content)
     data = markdown.encode("utf-8")
@@ -41,6 +55,7 @@ def report_job(engine: Engine, job_id: str) -> dict:
         if job.status != "RUNNING":
             raise AppError("REPORT_INTERRUPTED", "보고서 작업이 중단되어 저장하지 않았습니다.", 409)
         report.content = content.model_dump(mode="json")
+        report.explanation_count = len(content.explanations)
         report.markdown = markdown
         report.markdown_sha256 = hashlib.sha256(data).hexdigest()
         report.completed_at = content.generated_at

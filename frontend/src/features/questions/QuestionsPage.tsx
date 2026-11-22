@@ -25,7 +25,8 @@ export function QuestionsPage() {
   const [assetPage, setAssetPage] = useState(0);
   const [analysisPage, setAnalysisPage] = useState(0);
   const [scope, setScope] = useState<Analysis[]>([]);
-  const [initial] = useState(() => routeParam("analysis"));
+  const initial = routeParam("analysis");
+  const savedOnly = routeParam("saved") === "1";
   const seedLoad = useCallback(
     (signal: AbortSignal) => getAnalysis(api!, initial, signal),
     [api, initial],
@@ -41,25 +42,30 @@ export function QuestionsPage() {
     (signal: AbortSignal) => listAssets(api!, assetPage * 20, signal),
     [api, assetPage],
   );
-  const assets = usePollingQuery(api && !initial ? assetsLoad : null, null);
+  const assets = usePollingQuery(api && !initial && !savedOnly ? assetsLoad : null, null);
   const analysesLoad = useCallback(
     (signal: AbortSignal) => listAnalyses(api!, assetId, analysisPage, signal),
     [api, assetId, analysisPage],
   );
   const analyses = usePollingQuery(api && assetId && !initial ? analysesLoad : null, null);
   const historyLoad = useCallback(
-    (signal: AbortSignal) => listQuestions(api!, page, initial, signal),
-    [api, page, initial],
+    (signal: AbortSignal) => listQuestions(api!, page, initial, savedOnly, signal),
+    [api, page, initial, savedOnly],
   );
   const history = usePollingQuery(api ? historyLoad : null);
+  const viewedId = selectedId || (savedOnly ? (history.data?.items[0]?.id ?? "") : "");
   const detailLoad = useCallback(
-    (signal: AbortSignal) => getQuestion(api!, selectedId, signal),
-    [api, selectedId],
+    (signal: AbortSignal) => getQuestion(api!, viewedId, signal),
+    [api, viewedId],
   );
-  const detail = usePollingQuery(api && selectedId ? detailLoad : null, null);
+  const detail = usePollingQuery(api && viewedId ? detailLoad : null, null);
+  const viewed = detail.data?.id === viewedId ? detail.data : null;
   const configLoad = useCallback((signal: AbortSignal) => getLLMStatus(api!, signal), [api]);
-  const config = usePollingQuery(api ? configLoad : null, null);
-  const status = detail.data?.job.status;
+  const config = usePollingQuery(api && !savedOnly ? configLoad : null, null);
+  const status = viewed?.job.status;
+  const lastJob = history.data?.items[0]?.job;
+  const authorizationFailed =
+    viewed?.job.error_code === "LLM_AUTH_FAILED" || lastJob?.error_code === "LLM_AUTH_FAILED";
   const refreshDetail = detail.refresh;
   useEffect(() => {
     if (status !== "QUEUED" && status !== "RUNNING") return;
@@ -96,167 +102,211 @@ export function QuestionsPage() {
         }
         success={action.notice}
       />
-      <section className="panel report-create">
-        <div className="panel-heading">
-          <div>
-            <h2>AI Q&amp;A</h2>
-            {initial && seed.data ? (
-              <p>
-                {seed.data.asset_name} ·{" "}
-                {reportTime(seed.data.completed_at ?? seed.data.created_at)} · 분석{" "}
-                {seed.data.id.slice(0, 8)}
-              </p>
-            ) : (
-              !initial && <p>완료된 분석을 최대 5개까지 함께 선택할 수 있습니다.</p>
-            )}
-          </div>
+      {savedOnly && (
+        <div className="reader-navigation">
+          <a href={initial ? "#/questions?analysis=" + initial : "#/questions"}>질문 화면으로</a>
           {initial && seed.data && (
-            <a className="asset-open-link" href={workspaceLink(seed.data.asset_id, initial)}>
-              분석 결과 보기
-            </a>
+            <a href={workspaceLink(seed.data.asset_id, initial)}>이 분석의 결과</a>
           )}
         </div>
-        {!initial && (
-          <>
-            <div className="report-form">
-              <label>
-                대상 자산
-                <select
-                  value={assetId}
-                  disabled={!api || action.pending}
-                  onChange={(e) => {
-                    setAssetId(e.target.value);
-                    setAnalysisPage(0);
-                  }}
-                >
-                  <option value="">자산 선택</option>
-                  {assets.data?.items.map((a) => (
-                    <option key={a.id} value={a.id} disabled={!a.is_active}>
-                      {a.asset_name}
-                      {a.is_active ? "" : " (비활성)"}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                분석 범위 추가
-                <select
-                  value=""
-                  disabled={!assetId || scope.length >= 5 || action.pending}
-                  onChange={(e) => {
-                    const a = analyses.data?.items.find((i) => i.id === e.target.value);
-                    if (a) setScope([...scope, a]);
-                  }}
-                >
-                  <option value="">완료된 분석 선택</option>
-                  {analyses.data?.items
-                    .filter(
-                      (a) => a.job.status === "SUCCEEDED" && !scope.some((s) => s.id === a.id),
-                    )
-                    .map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {reportTime(a.created_at)} · {a.id.slice(0, 8)}
-                        {a.is_synthetic ? " · 가상 입력" : ""}
+      )}
+      {!savedOnly && (
+        <section className="panel report-create">
+          <div className="panel-heading">
+            <div>
+              <h2>AI Q&amp;A</h2>
+              {initial && seed.data ? (
+                <p>
+                  {seed.data.asset_name} ·{" "}
+                  {reportTime(seed.data.completed_at ?? seed.data.created_at)} · 분석{" "}
+                  {seed.data.id.slice(0, 8)}
+                </p>
+              ) : (
+                !initial && <p>완료된 분석을 최대 5개까지 함께 선택할 수 있습니다.</p>
+              )}
+            </div>
+            {initial && seed.data && (
+              <a className="asset-open-link" href={workspaceLink(seed.data.asset_id, initial)}>
+                분석 결과 보기
+              </a>
+            )}
+          </div>
+          {!initial && (
+            <>
+              <div className="report-form">
+                <label>
+                  대상 자산
+                  <select
+                    value={assetId}
+                    disabled={!api || action.pending}
+                    onChange={(e) => {
+                      setAssetId(e.target.value);
+                      setAnalysisPage(0);
+                    }}
+                  >
+                    <option value="">자산 선택</option>
+                    {assets.data?.items.map((a) => (
+                      <option key={a.id} value={a.id} disabled={!a.is_active}>
+                        {a.asset_name}
+                        {a.is_active ? "" : " (비활성)"}
                       </option>
                     ))}
-                </select>
-              </label>
-            </div>
-            <ReportPages
-              page={assetPage}
-              total={assets.data?.total ?? 0}
-              size={20}
-              setPage={(p) => {
-                setAssetPage(p);
-                setAssetId("");
-                setAnalysisPage(0);
-              }}
-              label="자산"
-            />
-            {!!assetId && (
-              <ReportPages
-                page={analysisPage}
-                total={analyses.data?.total ?? 0}
-                size={10}
-                setPage={setAnalysisPage}
-                label="분석"
-              />
-            )}
-            <ul className="question-scope">
-              {scope.map((a) => (
-                <li key={a.id}>
-                  <span>
-                    {a.asset_name} · {reportTime(a.created_at)}
-                    {a.is_synthetic ? " · 가상 입력" : ""}
-                  </span>
-                  <button
-                    className="secondary"
-                    disabled={action.pending}
-                    onClick={() => setScope(scope.filter((s) => s.id !== a.id))}
-                    aria-label={`${a.asset_name} 분석 제외`}
+                  </select>
+                </label>
+                <label>
+                  분석 범위 추가
+                  <select
+                    value=""
+                    disabled={!assetId || scope.length >= 5 || action.pending}
+                    onChange={(e) => {
+                      const a = analyses.data?.items.find((i) => i.id === e.target.value);
+                      if (a) setScope([...scope, a]);
+                    }}
                   >
-                    제외
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {!scope.length && (
-              <p className="empty-description">
-                질의 대상 분석을 선택하세요. 완료된 분석이 없으면 취약점 분석 실행이 필요합니다.
+                    <option value="">완료된 분석 선택</option>
+                    {analyses.data?.items
+                      .filter(
+                        (a) => a.job.status === "SUCCEEDED" && !scope.some((s) => s.id === a.id),
+                      )
+                      .map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {reportTime(a.created_at)} · {a.id.slice(0, 8)}
+                          {a.is_synthetic ? " · 가상 입력" : ""}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              </div>
+              <ReportPages
+                page={assetPage}
+                total={assets.data?.total ?? 0}
+                size={20}
+                setPage={(p) => {
+                  setAssetPage(p);
+                  setAssetId("");
+                  setAnalysisPage(0);
+                }}
+                label="자산"
+              />
+              {!!assetId && (
+                <ReportPages
+                  page={analysisPage}
+                  total={analyses.data?.total ?? 0}
+                  size={10}
+                  setPage={setAnalysisPage}
+                  label="분석"
+                />
+              )}
+              <ul className="question-scope">
+                {scope.map((a) => (
+                  <li key={a.id}>
+                    <span>
+                      {a.asset_name} · {reportTime(a.created_at)}
+                      {a.is_synthetic ? " · 가상 입력" : ""}
+                    </span>
+                    <button
+                      className="secondary"
+                      disabled={action.pending}
+                      onClick={() => setScope(scope.filter((s) => s.id !== a.id))}
+                      aria-label={`${a.asset_name} 분석 제외`}
+                    >
+                      제외
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {!scope.length && (
+                <p className="empty-description">
+                  질의 대상 분석을 선택하세요. 완료된 분석이 없으면 취약점 분석 실행이 필요합니다.
+                </p>
+              )}
+            </>
+          )}
+          {authorizationFailed && (
+            <div className="ai-service-note" role="status">
+              학교 AI가 마지막 요청을 인증하지 못했습니다. 저장한 답변을 열 수 있습니다.
+              <a href="#/questions?saved=1">저장된 답변 보기</a>
+            </div>
+          )}
+          <form
+            className="question-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submit();
+            }}
+          >
+            <label>
+              질의 내용
+              <textarea
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                rows={3}
+                minLength={5}
+                maxLength={2000}
+                required
+                disabled={!api || action.pending}
+                placeholder="예: 선택한 CVE의 판정 근거와 권고 조치는 무엇인가요?"
+              />
+            </label>
+            {config.data && !config.data.configured && (
+              <p className="ai-warning">
+                {config.data.message} 기존 답변은 계속 확인할 수 있습니다.
               </p>
             )}
-          </>
-        )}
-        <form
-          className="question-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit();
-          }}
-        >
-          <label>
-            질의 내용
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              rows={3}
-              minLength={5}
-              maxLength={2000}
-              required
-              disabled={!api || action.pending}
-              placeholder="예: 선택한 CVE의 판정 근거와 권고 조치는 무엇인가요?"
-            />
-          </label>
-          {config.data && !config.data.configured && (
-            <p className="ai-warning">{config.data.message} 기존 답변은 계속 확인할 수 있습니다.</p>
+            <button
+              className="primary"
+              disabled={
+                !api ||
+                !canWrite ||
+                !selectedScope.length ||
+                question.trim().length < 5 ||
+                action.pending ||
+                !config.data?.configured
+              }
+            >
+              {action.pending ? "접수 중…" : "질의 실행"}
+            </button>
+          </form>
+        </section>
+      )}
+      {viewed && (
+        <section className="panel question-answer">
+          <h2>{viewed.question}</h2>
+          {viewed.result ? (
+            <Answer key={viewed.id} question={viewed} result={viewed.result} />
+          ) : (
+            <div className="ai-progress" role={status === "FAILED" ? "alert" : "status"}>
+              <p>{states[viewed.job.status]}</p>
+              <p>
+                {String(
+                  viewed.job.result?.message ??
+                    (status === "FAILED"
+                      ? "답변을 생성하지 못했습니다."
+                      : "답변 생성 중입니다. 진행 상태는 작업 내역에서 확인할 수 있습니다."),
+                )}
+              </p>
+              {viewed.job.error_code && <small>{viewed.job.error_code}</small>}
+            </div>
           )}
-          <button
-            className="primary"
-            disabled={
-              !api ||
-              !canWrite ||
-              !selectedScope.length ||
-              question.trim().length < 5 ||
-              action.pending ||
-              !config.data?.configured
-            }
-          >
-            {action.pending ? "접수 중…" : "질의 실행"}
-          </button>
-        </form>
-      </section>
+        </section>
+      )}
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <h2>{initial ? "이 분석의 질문" : "질의 이력"}</h2>
+            <h2>{savedOnly ? "저장된 AI 답변" : initial ? "이 분석의 질문" : "질의 이력"}</h2>
             <p>저장된 답변·분석 결과·참조 근거</p>
           </div>
+          {!savedOnly && !authorizationFailed && (
+            <a className="asset-open-link" href="#/questions?saved=1">
+              저장된 답변 보기
+            </a>
+          )}
         </div>
         <div className="ai-history-list">
           {history.data?.items.map((q) => (
             <button
               key={q.id}
-              className={`ai-history-item ${selectedId === q.id ? "selected" : ""}`}
+              className={`ai-history-item ${viewedId === q.id ? "selected" : ""}`}
               onClick={() => choose(q.id)}
             >
               <span>
@@ -271,34 +321,22 @@ export function QuestionsPage() {
             </button>
           ))}
         </div>
-        {history.data?.total === 0 && <p className="empty-description">저장된 질의가 없습니다.</p>}
+        {history.data?.total === 0 && (
+          <p className="empty-description">
+            {savedOnly ? "저장된 답변이 없습니다." : "저장된 질의가 없습니다."}
+          </p>
+        )}
         <ReportPages
           page={page}
           total={history.data?.total ?? 0}
           size={10}
-          setPage={setPage}
+          setPage={(value) => {
+            setSelectedId("");
+            setPage(value);
+          }}
           label="질의 이력"
         />
       </section>
-      {detail.data && (
-        <section className="panel question-answer">
-          <h2>{detail.data.question}</h2>
-          {detail.data.result ? (
-            <Answer key={detail.data.id} question={detail.data} result={detail.data.result} />
-          ) : (
-            <div className="ai-progress" role="status">
-              <p>{states[detail.data.job.status]}</p>
-              <p>
-                {String(
-                  detail.data.job.result?.message ??
-                    "답변 생성 중입니다. 진행 상태는 작업 내역에서 확인할 수 있습니다.",
-                )}
-              </p>
-              {detail.data.job.error_code && <small>{detail.data.job.error_code}</small>}
-            </div>
-          )}
-        </section>
-      )}
     </>
   );
 }
@@ -311,6 +349,8 @@ function Answer({ question, result }: { question: Question; result: QuestionResu
       <p className="ai-saved-meta">
         {reportTime(question.completed_at ?? question.created_at)} ·{" "}
         {question.model === "none" ? "근거 부족 확인" : question.model}
+        {" · 분석 "}
+        {question.analysis_ids.map((id) => id.slice(0, 8)).join(", ")}
       </p>
       {result.status === "INSUFFICIENT_EVIDENCE" && (
         <p className="ai-warning">선택한 자료만으로 답변할 근거가 부족합니다.</p>
@@ -356,7 +396,7 @@ function Answer({ question, result }: { question: Question; result: QuestionResu
                   <td>
                     {f.asset_ref}
                     <br />
-                    <a href={`#/reports?analysis=${f.analysis_id}`}>분석 보고서</a>
+                    <a href={`#/findings?analysis=${f.analysis_id}`}>분석 근거 보기</a>
                   </td>
                   <td>
                     {f.cve_id}

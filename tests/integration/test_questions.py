@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from backend.api.main import create_app
 from backend.core.config import get_settings
-from backend.llm.client import SchoolLLM
-from backend.llm.contracts import SCHOOL_BASE_URL
+from backend.llm.client import BazeLLM
+from backend.llm.contracts import BAZE_BASE_URL
 from backend.models.tables import AnalysisRun, Job, QuestionRun, TextChunk
 from backend.worker.runner import recover_interrupted_jobs, run_once
 from tests.integration import test_assessments as assessments
@@ -22,9 +22,9 @@ accounts = auth_tests.accounts
 
 @pytest.fixture
 def wire(monkeypatch):
-    monkeypatch.setenv("LLM_BASE_URL", SCHOOL_BASE_URL)
-    monkeypatch.setenv("LLM_MODEL", "Qwen/test-model")
-    monkeypatch.setenv("LLM_API_KEY", "test-only-question-key")
+    monkeypatch.setenv("LLM_BASE_URL", BAZE_BASE_URL)
+    monkeypatch.setenv("LLM_MODEL", "gpt-6-luna")
+    monkeypatch.setenv("LLM_API_KEY", "baze_test-only-question-key")
     get_settings.cache_clear()
     state = {"calls": [], "status": 200, "bad": False, "version_first": False}
 
@@ -50,15 +50,15 @@ def wire(monkeypatch):
         return httpx.Response(
             state["status"],
             json={
-                "model": "Qwen/test-model",
+                "model": "gpt-6-luna",
                 "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(output)}}],
                 "usage": {"total_tokens": 60},
             },
         )
 
     monkeypatch.setattr(
-        "backend.retrieval.service.SchoolLLM",
-        lambda settings: SchoolLLM(settings, transport=httpx.MockTransport(respond)),
+        "backend.retrieval.service.BazeLLM",
+        lambda settings: BazeLLM(settings, transport=httpx.MockTransport(respond)),
     )
     return state
 
@@ -101,8 +101,15 @@ def test_retrieval_pinned_facts_chunks_restart_and_invalid_answers(
     saved = client.get("/api/v1/questions/" + first["id"], headers=headers).json()
     assert saved["job"]["status"] == "SUCCEEDED", saved
     assert saved["result"]["status"] == "ANSWERED" and saved["result"]["facts"] == frozen["facts"]
-    assert "input_payload" not in saved and "test-only-question-key" not in json.dumps(saved)
-    assert "asset_ids" not in wire["calls"][0]
+    assert "input_payload" not in saved and "baze_test-only-question-key" not in json.dumps(saved)
+    sent = json.dumps(wire["calls"][0])
+    assert baseline["id"] not in sent and frozen["asset_ids"][0] not in sent
+    assert all(fact["finding_id"] not in sent for fact in frozen["facts"])
+    assert all(
+        citation["document_id"] not in sent
+        for citation in frozen["citations"]
+        if citation["document_id"]
+    )
     wire["bad"] = True
     second = ask(client, headers, [baseline["id"]]).json()
     run_once(engine)

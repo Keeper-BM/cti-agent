@@ -187,9 +187,7 @@ function ReportLibrary() {
               />
               <span>
                 AI Summary 포함
-                <small>
-                  저장된 요약을 포함하고, 대표 판정에 요약이 없으면 학교 AI로 생성합니다.
-                </small>
+                <small>저장된 요약을 포함하고, 대표 판정에 요약이 없으면 BAZE로 생성합니다.</small>
               </span>
             </label>
             <button

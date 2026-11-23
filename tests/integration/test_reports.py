@@ -105,8 +105,8 @@ def test_ai_selection_and_all_facts_are_frozen_before_worker(
     assert all("CHANGED AFTER REQUEST" not in f["reasons"] for f in saved["content"]["findings"])
     assert len(llm_wire["calls"]) == 2
     raw = client.get(f"/api/v1/reports/{report['id']}/markdown", headers=headers).text
-    assert "AI 생성" in raw and "인용:" in raw and "Qwen/test" in raw
-    assert "test-llm-private-key" not in raw
+    assert "AI 생성" in raw and "인용:" in raw and "gpt\\-6\\-luna" in raw
+    assert "baze_test-only-llm-private-key" not in raw
     assert first_ai["id"].replace("-", "\\-") in raw
 
 

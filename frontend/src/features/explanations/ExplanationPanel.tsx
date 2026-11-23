@@ -87,7 +87,7 @@ export function ExplanationPanel({ api, findingId }: { api: HttpClient; findingI
         </button>
       </div>
       <p className="ai-transmission">
-        학교 API 전송 항목: 패키지·버전·판단·공식 근거 발췌. 자산 이름·주소·담당자는 전송 대상에서
+        BAZE 전송 항목: 패키지·버전·판단·공식 근거 발췌. 자산 이름·주소·담당자는 전송 대상에서
         제외됩니다.
       </p>
       <Notice

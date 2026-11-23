@@ -10,7 +10,7 @@ Ubuntu 서버의 패키지와 공식 보안 자료를 대조하고, 판단 근�
 - Ubuntu·NVD·CISA KEV·Apache·Oracle의 공식 자료 수집과 원문·해시 보존
 - Ubuntu 패키지 버전 비교, CVSS·KEV, 판단 제한, 근거별 대응 안내
 - 같은 보안 자료 기준으로 이전·이후 패키지와 판단 비교
-- 한 CVE의 학교 API 설명, 선택한 분석의 근거 검색·질문·인용·답변 이력
+- 한 CVE의 BAZE API 설명, 선택한 분석의 근거 검색·질문·인용·답변 이력
 - 분석·설명·검증 근거를 고정한 보고서와 Markdown 다운로드
 - 계정 로그인, 관리자·담당자·조회자 역할, 자산 접근 권한과 감사 기록
 - 단일 Worker, 작업 상태·오류, SQLite 백업·검증·별도 파일 복원
@@ -38,7 +38,7 @@ uv run python scripts/dev.py
 
 기본 검색은 TF-IDF입니다. 선택 기능인 BGE-M3 검색과 Windows NVIDIA CUDA·macOS 실행 방법은 [BGE 검색 설정](docs/dense-retrieval.md)을 참고하세요.
 
-Docker가 있는 Linux에서는 `docker compose up --build -d`로 PostgreSQL·API·Worker·웹을 시작합니다. 기본 웹 주소는 `http://127.0.0.1:8080`입니다. SQLite와 Compose 데이터는 서로 독립적입니다. 학교 API나 SSH 설정이 없어도 파일 입력·분석·이력·보고서는 사용할 수 있습니다.
+Docker가 있는 Linux에서는 `docker compose up --build -d`로 PostgreSQL·API·Worker·웹을 시작합니다. 기본 웹 주소는 `http://127.0.0.1:8080`입니다. SQLite와 Compose 데이터는 서로 독립적입니다. BAZE API나 SSH 설정이 없어도 파일 입력·분석·이력·보고서는 사용할 수 있습니다.
 
 ## 시연 순서
 
@@ -52,7 +52,7 @@ Docker가 있는 Linux에서는 `docker compose up --build -d`로 PostgreSQL·AP
 6. 같은 분석의 **전후 비교**, **AI 설명**, **취약점 인사이트**에서 근거 확인
 7. **대응 보고서** 생성 → Markdown 다운로드
 
-`FIXED`는 그 CVE의 패키지 수정 조건을 충족했다는 뜻입니다. `NEEDS_REVIEW`는 취약 확정과 다릅니다. JSON·CSV의 출처 주장으로 확정 판정을 만들지 않으며, 자료 부재·부분 수집·설정 미확인을 구분합니다. 학교 API가 실패해도 기존 분석·근거·답변·보고서는 유지합니다.
+`FIXED`는 그 CVE의 패키지 수정 조건을 충족했다는 뜻입니다. `NEEDS_REVIEW`는 취약 확정과 다릅니다. JSON·CSV의 출처 주장으로 확정 판정을 만들지 않으며, 자료 부재·부분 수집·설정 미확인을 구분합니다. BAZE API가 실패해도 기존 분석·근거·답변·보고서는 유지합니다.
 
 ## 검증 명령
 

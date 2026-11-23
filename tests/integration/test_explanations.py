@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 
 from backend.api.main import create_app
 from backend.core.config import get_settings
-from backend.llm.client import SchoolLLM
+from backend.llm.client import BazeLLM
 from backend.llm.context import context_digest
-from backend.llm.contracts import SCHOOL_BASE_URL, ExplanationContext
+from backend.llm.contracts import BAZE_BASE_URL, ExplanationContext
 from backend.llm.service import explain_job
 from backend.models.tables import AnalysisRun, ExplanationRun, FindingRecord, Job
 from backend.worker.runner import recover_interrupted_jobs, run_once
@@ -25,9 +25,9 @@ source_wire = source_tests.source_wire
 
 @pytest.fixture
 def llm_wire(monkeypatch):
-    monkeypatch.setenv("LLM_BASE_URL", SCHOOL_BASE_URL)
-    monkeypatch.setenv("LLM_MODEL", "Qwen/test-model")
-    monkeypatch.setenv("LLM_API_KEY", "test-llm-private-key")
+    monkeypatch.setenv("LLM_BASE_URL", BAZE_BASE_URL)
+    monkeypatch.setenv("LLM_MODEL", "gpt-6-luna")
+    monkeypatch.setenv("LLM_API_KEY", "baze_test-only-llm-private-key")
     get_settings.cache_clear()
     state = {"calls": [], "status": 200, "bad_citation": False}
 
@@ -41,15 +41,15 @@ def llm_wire(monkeypatch):
         return httpx.Response(
             state["status"],
             json={
-                "model": "Qwen/test-model",
+                "model": "gpt-6-luna",
                 "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(output)}}],
                 "usage": {"total_tokens": 70},
             },
         )
 
     monkeypatch.setattr(
-        "backend.llm.service.SchoolLLM",
-        lambda settings: SchoolLLM(settings, transport=httpx.MockTransport(respond)),
+        "backend.llm.service.BazeLLM",
+        lambda settings: BazeLLM(settings, transport=httpx.MockTransport(respond)),
     )
     return state
 
@@ -75,6 +75,7 @@ def enqueue(client, headers, finding, key=None):
 def test_generation_history_restart_inputs_and_secrets(client, headers, engine, finding, llm_wire):
     queued = enqueue(client, headers, finding, "explanation-one")
     assert queued["job"]["status"] == "QUEUED" and queued["result"] is None
+    assert queued["provider"] == "baze"
     assert llm_wire["calls"] == []
     assert enqueue(client, headers, finding, "explanation-one")["id"] == queued["id"]
     duplicate = client.post(
@@ -85,9 +86,10 @@ def test_generation_history_restart_inputs_and_secrets(client, headers, engine, 
     assert duplicate.status_code == 409 and duplicate.json()["error"]["code"] == "LLM_BUSY"
     with Session(engine) as db:
         run = db.get(ExplanationRun, queued["id"])
+        assert run.base_url == BAZE_BASE_URL
         ctx = ExplanationContext.model_validate(run.input_payload)
         assert context_digest(ctx) == run.context_sha256
-        assert "test-llm-private-key" not in json.dumps(run.input_payload)
+        assert "baze_test-only-llm-private-key" not in json.dumps(run.input_payload)
         assert {str(c.snapshot_id) for c in ctx.citations if c.snapshot_id} <= set(
             db.get(AnalysisRun, finding["analysis_id"]).source_snapshot_ids
         )
@@ -97,7 +99,7 @@ def test_generation_history_restart_inputs_and_secrets(client, headers, engine, 
     assert detail["job"]["status"] == "SUCCEEDED"
     assert detail["result"]["facts"]["verdict"] == "NEEDS_REVIEW"
     assert detail["completed_at"].endswith("Z") and detail["usage"] == {"total_tokens": 70}
-    assert "test-llm-private-key" not in json.dumps(detail)
+    assert "baze_test-only-llm-private-key" not in json.dumps(detail)
     assert "input_payload" not in detail
     assert (
         client.get(f"/api/v1/findings/{finding['finding_id']}", headers=headers).json() == original
@@ -202,7 +204,7 @@ def test_changed_config_fails_without_request_and_committed_job_survives_restart
     run_once(engine)
     failed = client.get(f"/api/v1/explanations/{queued['id']}", headers=headers).json()
     assert failed["job"]["error_code"] == "LLM_CONFIG_CHANGED" and not llm_wire["calls"]
-    monkeypatch.setenv("LLM_MODEL", "Qwen/test-model")
+    monkeypatch.setenv("LLM_MODEL", "gpt-6-luna")
     get_settings.cache_clear()
     new = enqueue(client, headers, finding)
     with Session(engine) as db, db.begin():

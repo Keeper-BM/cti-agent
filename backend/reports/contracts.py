@@ -122,6 +122,7 @@ class AutomaticSummaryInput(BaseModel):
     model: str
     prompt_version: str
     context: ExplanationContext
+    base_url: str | None = None
 
 
 class ReportInput(BaseModel):

@@ -12666,7 +12666,7 @@
           "provider": {
             "type": "string",
             "title": "Provider",
-            "default": "학교 LLM API"
+            "default": "BAZE"
           },
           "model": {
             "anyOf": [

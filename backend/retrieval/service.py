@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from backend.auth.access import authorize_job
 from backend.core.config import get_settings
 from backend.core.errors import AppError
-from backend.llm.client import SchoolLLM
+from backend.llm.client import BazeLLM
 from backend.llm.contracts import CitedText
 from backend.llm.validation import no_constant, unique_keys
 from backend.models.tables import AssetGrant, Job, QuestionAsset, QuestionRun, User, utcnow
@@ -67,7 +67,9 @@ def validate(content, context):
         if (
             not re.search("[가-힣]", text)
             or re.search(
-                r"https?://|www\.|<|>|`|dcu_llm_|Bearer\s|\d+\.\d+|\[\s*[EA]\d+\s*\]", text, re.I
+                r"https?://|www\.|<|>|`|(?:baze_|dcu_llm_)|Bearer\s|\d+\.\d+|\[\s*[EA]\d+\s*\]",
+                text,
+                re.I,
             )
             or any(unicodedata.category(ch) in {"Cf", "Cc"} and ch not in "\n\t" for ch in text)
         ):
@@ -160,12 +162,44 @@ def answer_job(engine, job_id):
                 "설명 모델이 바뀌었습니다. 질문을 다시 요청하세요.",
                 409,
             )
-        wire = context.model_dump(exclude={"asset_ids", "analysis_ids"}, mode="json")
+        # Send citation labels and excerpts, keeping database references in the local result.
+        wire = {
+            "question": context.question,
+            "facts_digest": context.facts_digest,
+            "summaries": [
+                {
+                    field: summary[field]
+                    for field in (
+                        "asset_ref",
+                        "analysis_completed",
+                        "os_release",
+                        "counts",
+                        "is_synthetic",
+                    )
+                }
+                for summary in context.summaries
+            ],
+            "facts": [
+                fact.model_dump(exclude={"analysis_id", "finding_id"}) for fact in context.facts
+            ],
+            "citations": [
+                {
+                    "id": citation.id,
+                    "source_id": citation.source_id,
+                    "excerpt": (
+                        "같은 ID의 저장 분석 요약과 패키지 판정을 참조하세요."
+                        if citation.source_id == "assessment"
+                        else citation.excerpt
+                    ),
+                }
+                for citation in context.citations
+            ],
+        }
         messages = [
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": json.dumps(wire, ensure_ascii=False)},
         ]
-        provider = SchoolLLM(settings)
+        provider = BazeLLM(settings)
         usage = {}
         for attempt in range(2):
             # Repair rejected output once; network and rate-limit failures are not retried.

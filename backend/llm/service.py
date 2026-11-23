@@ -4,16 +4,16 @@ from sqlalchemy.orm import Session
 
 from backend.core.config import get_settings
 from backend.core.errors import AppError
-from backend.llm.client import SchoolLLM, require_configuration
+from backend.llm.client import BazeLLM, require_configuration
 from backend.llm.context import context_digest
-from backend.llm.contracts import PROMPT_VERSION, SCHOOL_BASE_URL, ExplanationContext
+from backend.llm.contracts import BAZE_BASE_URL, PROMPT_VERSION, ExplanationContext
 from backend.llm.prompt import messages
 from backend.llm.validation import validate_output
 from backend.models.tables import ExplanationRun, Job, utcnow
 
 
 def generate_explanation(settings, context: ExplanationContext):
-    reply = SchoolLLM(settings).generate(messages(context))
+    reply = BazeLLM(settings).generate(messages(context))
     return reply, validate_output(reply.content, context)
 
 
@@ -29,7 +29,7 @@ def explain_job(engine: Engine, job_id: str) -> dict:
         if (
             run.model != settings.llm_model
             or run.prompt_version != PROMPT_VERSION
-            or run.base_url != SCHOOL_BASE_URL
+            or run.base_url != BAZE_BASE_URL
         ):
             raise AppError(
                 "LLM_CONFIG_CHANGED", "모델·설명 규칙이 변경되었습니다. 새로 요청하세요.", 409

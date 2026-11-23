@@ -36,6 +36,6 @@ class ExplanationList(BaseModel):
 
 class LLMStatus(BaseModel):
     configured: bool
-    provider: str = "학교 LLM API"
+    provider: str = "BAZE"
     model: str | None
     message: str

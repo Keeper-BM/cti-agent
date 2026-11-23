@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 
 from backend.llm.contracts import Citation, CitedText, StrictModel
 
-PROMPT_VERSION = "scoped-question/1.1"
+# Require resubmission of unfinished questions created with the former gateway.
+PROMPT_VERSION = "scoped-question/1.2"
 
 
 class QuestionFact(BaseModel):

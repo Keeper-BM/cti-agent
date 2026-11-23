@@ -17,7 +17,7 @@ from backend.core.config import get_settings
 from backend.core.errors import AppError
 from backend.llm.client import configuration_issue, require_configuration
 from backend.llm.context import context_digest, prepare_context
-from backend.llm.contracts import PROMPT_VERSION, SCHOOL_BASE_URL
+from backend.llm.contracts import BAZE_BASE_URL, PROMPT_VERSION
 from backend.models.tables import Asset, ExplanationRun, FindingRecord, Job
 
 router = APIRouter(prefix="/explanations", tags=["explanations"])
@@ -37,7 +37,7 @@ def status():
     return {
         "configured": issue is None,
         "model": settings.llm_model if issue is None else None,
-        "message": issue or "설정 완료. 설명 생성 요청 시 학교 API에 연결합니다.",
+        "message": issue or "설정 완료. 새 AI 요청은 BAZE로 전송됩니다.",
     }
 
 
@@ -83,8 +83,8 @@ def create_explanation(
             job_id=job.id,
             finding_id=finding.id,
             analysis_id=finding.analysis_id,
-            provider="dcu",
-            base_url=SCHOOL_BASE_URL,
+            provider="baze",
+            base_url=BAZE_BASE_URL,
             model=settings.llm_model,
             prompt_version=PROMPT_VERSION,
             context_sha256=context_digest(context),

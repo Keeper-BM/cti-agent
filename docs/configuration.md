@@ -40,9 +40,9 @@ BGE 검색을 쓰는 경우 실행기의 `--retrieval-deps dense` 또는 `--retr
 | `WEB_PORT`                 | `8080`                     | Compose 웹의 호스트 포트                               |
 | `WORKER_POLL_SECONDS`      | `2`                        | 대기 작업이 없을 때 재조회 간격; 0.1~60초              |
 | `SUPPORTED_UBUNTU_RELEASE` | 빈 값                      | 향후 판정 범위 설정용; 현재 동작에 적용되지 않음       |
-| `LLM_BASE_URL`             | 빈 값                      | 학교 API 주소; https://code.cu.ac.kr/llm/v1만 허용     |
-| `LLM_MODEL`                | 빈 값                      | 학교 API에 요청할 모델 ID                              |
-| `LLM_API_KEY`              | 빈 값                      | 학교 API 키. 백엔드 설정에서만 사용                    |
+| `LLM_BASE_URL`             | 빈 값                      | 허용된 BAZE 주소 `https://factchat-cloud.mindlogic.ai/v1/gateway`     |
+| `LLM_MODEL`                | 빈 값                      | BAZE 모델 ID `gpt-6-luna`                              |
+| `LLM_API_KEY`              | 빈 값                      | BAZE에서 발급한 서버용 API 키                    |
 | `LLM_TIMEOUT_SECONDS`      | `45`                       | 총 요청 제한 시간, 5~60초                              |
 | `LLM_MAX_TOKENS`           | `2200`                     | 최대 출력 토큰, 512~4096                               |
 | `NVD_API_KEY`              | 빈 값                      | 선택 사항. NVD CVE API 인증; Worker에만 전송           |

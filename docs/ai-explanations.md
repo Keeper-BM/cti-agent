@@ -1,10 +1,10 @@
 # CVE AI Summary
 
-취약점 분석 상세에서 학교 LLM API로 한국어 설명을 생성하고 이력으로 저장합니다. 설명은 한 자산의 한 분석·패키지·CVE 결과에 묶입니다. 모델이 자산의 판정을 새로 계산하지 않습니다. 완료 분석 여러 건의 질문·희소 TF-IDF 검색은 별도 취약점 인사이트에서 제공합니다.
+취약점 분석 상세에서 BAZE API로 한국어 설명을 생성하고 이력으로 저장합니다. 설명은 한 자산의 한 분석·패키지·CVE 결과에 묶입니다. 모델이 자산의 판정을 새로 계산하지 않습니다. 완료 분석 여러 건의 질문·희소 TF-IDF 검색은 별도 취약점 인사이트에서 제공합니다.
 
 ## 사용 방법
 
-1. `.env`에 학교 API 주소·키·모델을 설정하고 API와 Worker를 재시작합니다.
+1. `.env`에 BAZE 주소·키·모델을 설정하고 API와 Worker를 재시작합니다.
 2. **취약점 분석**에서 완료된 분석을 선택하고 CVE의 **근거 보기**를 누릅니다.
 3. **AI Summary → 요약 생성**을 누릅니다. 대기·생성 중 상태를 거쳐 완료되면 자동 표시됩니다.
 4. **취약점 개요**, **패키지 분석 결과**, **권고 조치**를 확인합니다.
@@ -16,18 +16,18 @@
 ## 설정
 
 ```dotenv
-LLM_BASE_URL=https://code.cu.ac.kr/llm/v1
-LLM_MODEL=Qwen/Qwen3.8-Flash-Next-FP8
-LLM_API_KEY=<학교에서 발급한 키를 로컬에 입력>
+LLM_BASE_URL=https://factchat-cloud.mindlogic.ai/v1/gateway
+LLM_MODEL=gpt-6-luna
+LLM_API_KEY=
 LLM_TIMEOUT_SECONDS=45
 LLM_MAX_TOKENS=2200
 ```
 
-키는 브라우저·코드·로그·DB에 넣지 않습니다. 백엔드 `SecretStr` 설정에서 읽고 학교 요청의 Authorization 헤더에만 사용합니다. `.env`는 Git에서 제외됩니다. 이미 설정한 키를 채팅에 다시 올릴 필요는 없습니다.
+BAZE에서 발급한 키는 서버의 `LLM_API_KEY`에 설정합니다. 서버는 백엔드 `SecretStr` 설정을 읽어 BAZE 요청의 Authorization 헤더에 사용합니다.
 
-현재는 학교 주소만 허용합니다. 다른 호스트나 경로로 변경하면 생성 요청이 거부됩니다. API·Worker 시작 시 외부 연결은 없으며 설정 누락이 기존 분석·근거 조회를 막지 않습니다. `GET /explanations/status`는 로컬 설정 여부만 반환하며 인증 유효성·모델 가동 상태를 미리 보장하지 않습니다. Compose의 API·Worker에도 같은 환경변수가 전달됩니다.
+새 AI 요청에는 등록된 BAZE 주소와 BAZE 키가 필요합니다. 기존 DCU Code 답변과 요약은 이력에서 볼 수 있습니다. API·Worker 시작 시 외부 연결은 없으며 설정 누락이 기존 분석·근거 조회를 막지 않습니다. `GET /explanations/status`는 로컬 설정 여부만 반환하며 인증 유효성·모델 가동 상태를 미리 보장하지 않습니다. Compose의 API·Worker에도 같은 환경변수가 전달됩니다.
 
-[학교 API 안내](https://bootcamp.cu.ac.kr/notices/b1869f20-a5f7-47a3-8d96-9c00900abdcd)의 chat completions 방식을 사용합니다. 생성 요청은 JSON 출력 형식과 비스트리밍 응답을 요청합니다. Qwen 모델의 `enable_thinking: false` 옵션으로 최종 설명을 직접 요청하며, 내부 추론 응답은 저장하지 않습니다. [Qwen 공식 모델 문서](https://huggingface.co/Qwen/Qwen3.8-Flash-Next-FP8).
+생성 요청은 JSON 출력 형식의 단일 최종 응답을 사용합니다. 모델의 답변과 인용이 검증을 통과하면 저장합니다. [BAZE Chat Completions 문서](https://docs.mindlogic.ai/docs/general/api-gateway/reference/chat-completions)
 
 ## 무엇을 전달하는가
 
@@ -76,7 +76,7 @@ LLM_MAX_TOKENS=2200
 | GET    | `/explanations?finding_id=UUID` | 해당 결과의 생성 이력. `limit` 1~50, 기본 10; `offset` 0 이상  |
 | GET    | `/explanations/{id}`            | 작업 상태·검증된 설명·인용·모델·생성 시각 조회                 |
 
-`capabilities.features.ai_explanations=true`는 구현 여부입니다. 실제 사용 가능 여부는 설정과 학교 API 상태에 따라 다릅니다. `rag`와 선택 분석 질문 `/questions`도 구현했으며 구체적인 범위는 인사이트 안내를 따릅니다.
+`capabilities.features.ai_explanations=true`는 구현 여부입니다. 실제 사용 가능 여부는 설정과 BAZE API 상태에 따라 다릅니다. `rag`와 선택 분석 질문 `/questions`도 구현했으며 구체적인 범위는 인사이트 안내를 따릅니다.
 
 [실제 검증 화면](screenshots-ai-explanation.jpg), [검증 기록](verification.md).
 

@@ -1,4 +1,4 @@
-"""Bounded school API calls. Never log request/response bodies or credentials."""
+"""Bounded BAZE Gateway calls. Never log request/response bodies or credentials."""
 
 import asyncio
 import json
@@ -7,7 +7,7 @@ import re
 import httpx
 
 from backend.core.errors import AppError
-from backend.llm.contracts import SCHOOL_BASE_URL, ProviderReply
+from backend.llm.contracts import BAZE_BASE_URL, ProviderReply
 
 MAX_RESPONSE_BYTES = 256 * 1024
 
@@ -18,14 +18,14 @@ def configuration_issue(settings) -> str | None:
         or not settings.llm_model
         or not settings.llm_api_key.get_secret_value()
     ):
-        return "학교 LLM 주소·모델·API 키를 서버 .env에 설정하세요."
-    if settings.llm_base_url.rstrip("/") != SCHOOL_BASE_URL:
-        return "현재 설명 기능은 등록된 학교 LLM 주소만 지원합니다."
+        return "BAZE 주소·모델·API 키를 서버 .env에 설정하세요."
+    if settings.llm_base_url.rstrip("/") != BAZE_BASE_URL:
+        return "AI 생성은 등록된 BAZE 게이트웨이 주소를 사용합니다."
     if not re.fullmatch(r"[A-Za-z0-9_./:-]{1,200}", settings.llm_model):
         return "LLM_MODEL 형식을 확인하세요."
     key = settings.llm_api_key.get_secret_value()
-    if len(key) > 500 or not key.isascii() or any(c.isspace() or ord(c) < 33 for c in key):
-        return "LLM_API_KEY 형식을 확인하세요."
+    if re.fullmatch(r"baze_[A-Za-z0-9_-]{1,495}", key) is None:
+        return "BAZE에서 발급한 API 키를 LLM_API_KEY에 설정하세요."
     return None
 
 
@@ -34,7 +34,7 @@ def require_configuration(settings):
         raise AppError("LLM_NOT_CONFIGURED", issue, 409)
 
 
-class SchoolLLM:
+class BazeLLM:
     def __init__(self, settings, *, transport=None):
         self.settings = settings
         self.transport = transport
@@ -50,10 +50,9 @@ class SchoolLLM:
             "model": settings.llm_model,
             "messages": messages,
             "stream": False,
-            "temperature": 0.3,
-            "max_tokens": settings.llm_max_tokens,
+            "max_completion_tokens": settings.llm_max_tokens,
             "response_format": {"type": "json_object"},
-            "chat_template_kwargs": {"enable_thinking": False},
+            "reasoning_effort": "low",
         }
         try:
             async with asyncio.timeout(settings.llm_timeout_seconds):
@@ -65,23 +64,25 @@ class SchoolLLM:
                 ) as client:
                     async with client.stream(
                         "POST",
-                        SCHOOL_BASE_URL + "/chat/completions",
+                        BAZE_BASE_URL + "/chat/completions/",
                         json=payload,
                         headers={"Authorization": "Bearer " + key, "Accept": "application/json"},
                     ) as response:
                         if response.status_code in {401, 403}:
                             raise AppError(
-                                "LLM_AUTH_FAILED", "학교 API 키 또는 사용 권한을 확인하세요.", 502
+                                "LLM_AUTH_FAILED",
+                                "BAZE API 키 또는 모델 사용 권한을 확인하세요.",
+                                502,
                             )
                         if response.status_code == 429:
                             raise AppError(
                                 "LLM_RATE_LIMIT",
-                                "학교 API 사용 한도에 도달했습니다. 잠시 후 다시 시도하세요.",
+                                "BAZE API 사용 한도에 도달했습니다. 잠시 후 다시 시도하세요.",
                                 502,
                             )
                         if response.status_code != 200:
                             raise AppError(
-                                "LLM_HTTP_ERROR", "학교 API가 요청을 처리하지 못했습니다.", 502
+                                "LLM_HTTP_ERROR", "BAZE API가 요청을 처리하지 못했습니다.", 502
                             )
                         raw = bytearray()
                         async for chunk in response.aiter_bytes():
@@ -98,7 +99,7 @@ class SchoolLLM:
             ) from None
         except httpx.HTTPError:
             raise AppError(
-                "LLM_CONNECTION_FAILED", "학교 LLM API에 연결하지 못했습니다.", 502
+                "LLM_CONNECTION_FAILED", "BAZE API에 연결하지 못했습니다.", 502
             ) from None
         try:
             if key.encode("ascii") in raw:

@@ -61,7 +61,9 @@ def validate_output(content: str, context: ExplanationContext) -> ExplanationRes
         if (
             not re.search(r"[가-힣]", text)
             or re.search(
-                r"https?://|www\.|<|>|`|dcu_llm_|Bearer\s|\d+\.\d+|\[\s*[EA]\d+\s*\]", text, re.I
+                r"https?://|www\.|<|>|`|(?:baze_|dcu_llm_)|Bearer\s|\d+\.\d+|\[\s*[EA]\d+\s*\]",
+                text,
+                re.I,
             )
             or any(unicodedata.category(c) in {"Cf", "Cc"} and c not in "\n\t" for c in text)
         ):

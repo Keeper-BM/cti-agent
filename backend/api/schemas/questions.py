@@ -18,7 +18,7 @@ class QuestionRequest(Contract):
     @classmethod
     def strip_question(cls, value: object) -> object:
         if isinstance(value, str) and re.search(
-            r"dcu_llm_|-----BEGIN.*PRIVATE KEY|Bearer\s+[A-Za-z0-9]", value, re.I
+            r"(?:baze_|dcu_llm_)|-----BEGIN.*PRIVATE KEY|Bearer\s+[A-Za-z0-9]", value, re.I
         ):
             raise ValueError("질문에 API 키나 인증 정보를 입력하지 마세요.")
         return value.strip() if isinstance(value, str) else value

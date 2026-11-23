@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 PROMPT_VERSION = "cve-explanation/1.0"
-SCHOOL_BASE_URL = "https://code.cu.ac.kr/llm/v1"
+BAZE_BASE_URL = "https://factchat-cloud.mindlogic.ai/v1/gateway"
 
 
 class StrictModel(BaseModel):

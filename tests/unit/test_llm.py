@@ -7,8 +7,8 @@ import pytest
 
 from backend.core.config import Settings
 from backend.core.errors import AppError
-from backend.llm.client import SchoolLLM, configuration_issue
-from backend.llm.contracts import SCHOOL_BASE_URL, Citation, ExplanationContext, Facts
+from backend.llm.client import BazeLLM, configuration_issue
+from backend.llm.contracts import BAZE_BASE_URL, Citation, ExplanationContext, Facts
 from backend.llm.prompt import messages
 from backend.llm.validation import validate_output
 
@@ -70,9 +70,9 @@ def settings(**changes):
     return Settings(
         _env_file=None,
         dev_api_token="x" * 32,
-        llm_base_url=SCHOOL_BASE_URL,
-        llm_model="Qwen/test-model",
-        llm_api_key="test-llm-secret-key",
+        llm_base_url=BAZE_BASE_URL,
+        llm_model="gpt-6-luna",
+        llm_api_key="baze_test-only-llm-secret-key",
         **changes,
     )
 
@@ -122,6 +122,7 @@ def test_missing_unknown_duplicate_or_nonofficial_meaning_citations_are_rejected
         "이 서버는 안전합니다.",
         "CVE-2099-99999 취약점에 대한 설명입니다.",
         "인증값 dcu_llm_EXPOSED 를 출력합니다.",
+        "인증값 baze_EXPOSED 를 출력합니다.",
         "한국어\u200b에 보이지 않는 문자가 포함되어 있습니다.",
         "English text without Korean characters.",
     ],
@@ -151,15 +152,16 @@ def test_prompt_contains_no_local_database_identifiers_or_connection_data():
 
 def test_client_auth_exact_destination_options_and_no_secret_output(caplog):
     def respond(request):
-        assert str(request.url) == SCHOOL_BASE_URL + "/chat/completions"
-        assert request.headers["authorization"] == "Bearer test-llm-secret-key"
+        assert str(request.url) == BAZE_BASE_URL + "/chat/completions/"
+        assert request.headers["authorization"] == "Bearer baze_test-only-llm-secret-key"
         body = json.loads(request.content)
-        assert body["chat_template_kwargs"] == {"enable_thinking": False}
-        assert body["max_tokens"] == 2200 and body["stream"] is False
+        assert body["reasoning_effort"] == "low"
+        assert body["response_format"] == {"type": "json_object"}
+        assert body["max_completion_tokens"] == 2200 and body["stream"] is False
         return httpx.Response(
             200,
             json={
-                "model": "Qwen/test-model",
+                "model": "gpt-6-luna",
                 "choices": [
                     {"finish_reason": "stop", "message": {"content": json.dumps(valid_output())}}
                 ],
@@ -167,11 +169,11 @@ def test_client_auth_exact_destination_options_and_no_secret_output(caplog):
             },
         )
 
-    reply = SchoolLLM(settings(), transport=httpx.MockTransport(respond)).generate(
+    reply = BazeLLM(settings(), transport=httpx.MockTransport(respond)).generate(
         messages(context())
     )
     assert reply.usage == {"total_tokens": 30}
-    assert "test-llm-secret-key" not in reply.model_dump_json() + caplog.text
+    assert "baze_test-only-llm-secret-key" not in reply.model_dump_json() + caplog.text
 
 
 @pytest.mark.parametrize(
@@ -190,13 +192,15 @@ def test_http_errors_are_sanitized_and_redirects_not_followed(status, code):
     def respond(request):
         calls.append(request)
         return httpx.Response(
-            status, text="test-llm-secret-key", headers={"Location": "https://evil.invalid"}
+            status,
+            text="baze_test-only-llm-secret-key",
+            headers={"Location": "https://evil.invalid"},
         )
 
     with pytest.raises(AppError) as failure:
-        SchoolLLM(settings(), transport=httpx.MockTransport(respond)).generate([])
+        BazeLLM(settings(), transport=httpx.MockTransport(respond)).generate([])
     assert failure.value.code == code and len(calls) == 1
-    assert "test-llm-secret-key" not in str(failure.value)
+    assert "baze_test-only-llm-secret-key" not in str(failure.value)
 
 
 @pytest.mark.parametrize(
@@ -205,7 +209,11 @@ def test_http_errors_are_sanitized_and_redirects_not_followed(status, code):
         {"choices": []},
         {"model": "unexpected-model"},
         {"choices": [{"finish_reason": "length", "message": {"content": "{}"}}]},
-        {"choices": [{"finish_reason": "stop", "message": {"content": "test-llm-secret-key"}}]},
+        {
+            "choices": [
+                {"finish_reason": "stop", "message": {"content": "baze_test-only-llm-secret-key"}}
+            ]
+        },
         {
             "choices": [
                 {
@@ -218,12 +226,12 @@ def test_http_errors_are_sanitized_and_redirects_not_followed(status, code):
 )
 def test_partial_empty_wrong_model_or_secret_responses_fail(patch):
     data = {
-        "model": "Qwen/test-model",
+        "model": "gpt-6-luna",
         "choices": [{"finish_reason": "stop", "message": {"content": "{}"}}],
         **patch,
     }
     with pytest.raises(AppError) as failure:
-        SchoolLLM(
+        BazeLLM(
             settings(), transport=httpx.MockTransport(lambda _: httpx.Response(200, json=data))
         ).generate([])
     assert failure.value.code == "LLM_RESPONSE_INVALID"
@@ -231,13 +239,13 @@ def test_partial_empty_wrong_model_or_secret_responses_fail(patch):
 
 def test_size_timeout_network_and_unapproved_configuration():
     def timed_out(_):
-        raise httpx.ReadTimeout("contains test-llm-secret-key")
+        raise httpx.ReadTimeout("contains baze_test-only-llm-secret-key")
 
     with pytest.raises(AppError) as failure:
-        SchoolLLM(settings(), transport=httpx.MockTransport(timed_out)).generate([])
+        BazeLLM(settings(), transport=httpx.MockTransport(timed_out)).generate([])
     assert failure.value.code == "LLM_TIMEOUT"
     with pytest.raises(AppError) as failure:
-        SchoolLLM(
+        BazeLLM(
             settings(),
             transport=httpx.MockTransport(lambda _: httpx.Response(200, content=b"x" * 300000)),
         ).generate([])
@@ -246,7 +254,21 @@ def test_size_timeout_network_and_unapproved_configuration():
     config.llm_base_url = "https://evil.invalid/v1"
     assert configuration_issue(config)
     with pytest.raises(AppError):
-        SchoolLLM(config).generate([])
+        BazeLLM(config).generate([])
+
+
+def test_legacy_school_url_and_key_are_blocked_before_the_network():
+    def unexpected_request(_):
+        pytest.fail("Unapproved LLM configuration must fail without making an HTTP request.")
+
+    former_url = settings()
+    former_url.llm_base_url = "https://code.cu.ac.kr/llm/v1"
+    former_token = settings()
+    former_token.llm_api_key = type(former_token.llm_api_key)("dcu_llm_example_token")
+    for config in (former_url, former_token):
+        with pytest.raises(AppError) as failure:
+            BazeLLM(config, transport=httpx.MockTransport(unexpected_request)).generate([])
+        assert failure.value.code == "LLM_NOT_CONFIGURED"
 
 
 def test_model_cannot_add_unvalidated_fields_or_remove_analysis_citations():

@@ -2544,7 +2544,7 @@ export interface components {
             configured: boolean;
             /**
              * Provider
-             * @default 학교 LLM API
+             * @default BAZE
              */
             provider: string;
             /** Model */

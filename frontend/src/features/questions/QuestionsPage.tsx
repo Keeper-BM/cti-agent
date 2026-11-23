@@ -224,7 +224,7 @@ export function QuestionsPage() {
           )}
           {authorizationFailed && (
             <div className="ai-service-note" role="status">
-              학교 AI가 마지막 요청을 인증하지 못했습니다. 저장한 답변을 열 수 있습니다.
+              마지막 AI 요청을 인증하지 못했습니다. 저장한 답변을 열 수 있습니다.
               <a href="#/questions?saved=1">저장된 답변 보기</a>
             </div>
           )}

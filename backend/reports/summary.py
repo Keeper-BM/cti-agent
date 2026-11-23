@@ -6,7 +6,7 @@ from backend.core.config import get_settings
 from backend.core.errors import AppError
 from backend.llm.client import configuration_issue
 from backend.llm.context import context_digest, prepare_context
-from backend.llm.contracts import PROMPT_VERSION
+from backend.llm.contracts import BAZE_BASE_URL, PROMPT_VERSION
 from backend.llm.service import generate_explanation
 from backend.models.tables import Asset, FindingRecord, utcnow
 from backend.reports.contracts import (
@@ -34,7 +34,7 @@ def pin_report_input(db, report: ReportContent, generate_ai_summary: bool) -> Re
         report.ai_summary_note = "비활성 자산의 저장 자료로 보고서를 만들었습니다."
         return inputs
     if configuration_issue(settings):
-        report.ai_summary_note = "학교 AI 연결 설정을 확인한 뒤 요약을 생성할 수 있습니다."
+        report.ai_summary_note = "BAZE 연결 설정을 확인한 뒤 요약을 생성할 수 있습니다."
         return inputs
 
     try:
@@ -43,15 +43,25 @@ def pin_report_input(db, report: ReportContent, generate_ai_summary: bool) -> Re
         report.ai_summary_note = "대표 판정에 AI 요약을 생성할 공식 근거가 충분하지 않습니다."
         return inputs
     inputs.summary = AutomaticSummaryInput(
-        finding_id=target, model=settings.llm_model, prompt_version=PROMPT_VERSION, context=context
+        finding_id=target,
+        model=settings.llm_model,
+        prompt_version=PROMPT_VERSION,
+        context=context,
+        base_url=BAZE_BASE_URL,
     )
     return inputs
 
 
 def append_automatic_summary(report: ReportContent, inputs: AutomaticSummaryInput) -> None:
     settings = get_settings()
-    if inputs.model != settings.llm_model or inputs.prompt_version != PROMPT_VERSION:
-        report.ai_summary_note = "요청 후 학교 AI 설정이 바뀌어 새 요약을 생성하지 못했습니다."
+    if (
+        inputs.base_url != BAZE_BASE_URL
+        or inputs.model != settings.llm_model
+        or inputs.prompt_version != PROMPT_VERSION
+    ):
+        report.ai_summary_note = (
+            "요청 이후 AI 공급자나 생성 설정이 변경됐습니다. 새 보고서를 생성하세요."
+        )
         return
 
     try:

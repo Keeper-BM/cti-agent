@@ -33,6 +33,7 @@ def test_feature_boundaries_require_auth_and_do_not_enqueue_work(
         {"analysis_ids": [FIXTURE_ID], "question": "근거를 알려줘", "command": "whoami"},
         {"analysis_ids": [FIXTURE_ID, FIXTURE_ID], "question": "근거를 알려줘"},
         {"analysis_ids": [FIXTURE_ID], "question": "dcu_llm_secret-key"},
+        {"analysis_ids": [FIXTURE_ID], "question": "baze_test-secret-key"},
     ],
 )
 def test_questions_require_asset_scope_and_nonempty_text(client, headers, payload):

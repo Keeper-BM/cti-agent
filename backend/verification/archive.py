@@ -48,19 +48,25 @@ def verify_signature(data, settings, cache_root):
     with tempfile.TemporaryDirectory(prefix="gpg-", dir=cache_root) as directory:
         root = Path(directory).resolve()
         assert root.is_relative_to(Path(cache_root).resolve())
-        signed, plain = root / "InRelease", root / "Release"
+        signed, plain, keyring = root / "InRelease", root / "Release", root / "archive.gpg"
         signed.write_bytes(data)
         base = [binary, "--batch", "--no-tty", "--no-options", "--homedir", arg(root)]
         public = Path(__file__).with_name("ubuntu-archive-2018.asc")
         try:
-            imported = subprocess.run(
-                [*base, "--import", arg(public)], capture_output=True, timeout=15
+            # The public-only keyring can be read directly without a gpg-agent socket.
+            prepared = subprocess.run(
+                [*base, "--output", arg(keyring), "--dearmor", arg(public)],
+                capture_output=True,
+                timeout=15,
             )
-            if imported.returncode:
+            if prepared.returncode:
                 raise ValueError()
             result = subprocess.run(
                 [
                     *base,
+                    "--no-default-keyring",
+                    "--keyring",
+                    arg(keyring),
                     "--no-auto-key-retrieve",
                     "--auto-key-locate",
                     "clear",

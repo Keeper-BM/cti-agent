@@ -132,7 +132,7 @@ function PriorityFinding({ api, analysis }: { api: HttpClient; analysis: Brief }
       <div className="lead-label">
         <Icon name="alert" />
         <span>영향 있음 · {count(analysis.summary.AFFECTED)}건</span>
-        {analysis.summary.AFFECTED > 1 && <span className="lead-selection">우선 대응 항목</span>}
+        {analysis.summary.AFFECTED > 1 && <span className="lead-selection">대표 영향 항목</span>}
       </div>
       {f ? (
         <>
@@ -325,12 +325,16 @@ function Groups({
 export function Results({ api, analysis }: { api: HttpClient; analysis: Brief }) {
   const totals = analysis.summary;
   const grouped = useRef<HTMLElement>(null);
-  const [filter, setFilter] = useState<Verdict>(() =>
-    totals.NEEDS_REVIEW ? "NEEDS_REVIEW" : (verdictOrder.find((v) => totals[v]) ?? "AFFECTED"),
+  const [filter, setFilter] = useState<Verdict>(
+    () => verdictOrder.find((v) => totals[v]) ?? "AFFECTED",
   );
   const [outside, setOutside] = useState(false);
   const metrics = verdictOrder.filter((v) => v !== "NOT_AFFECTED" || (totals[v] ?? 0) > 0);
   const evaluated = verdictOrder.reduce((n, v) => n + (totals[v] ?? 0), 0);
+  const missingEvidence =
+    (totals.NO_MATCHING_RECORD ?? 0) > 0 ||
+    (totals.PARTIAL_COLLECTION ?? 0) > 0 ||
+    (totals.COLLECTION_FAILED ?? 0) > 0;
   return (
     <>
       <div className="result-heading">
@@ -357,52 +361,69 @@ export function Results({ api, analysis }: { api: HttpClient; analysis: Brief })
             <strong>
               {evaluated
                 ? "평가 범위에서 영향이 확인된 항목은 0건입니다."
-                : "최종 판정된 패키지·CVE 조합이 없습니다."}
+                : missingEvidence
+                  ? "평가 근거 부족"
+                  : "평가 대상 없음"}
             </strong>
+            {!evaluated && (
+              <p>
+                {missingEvidence
+                  ? "설치 정보나 공식 기준 자료가 부족해 판정을 내리지 못했습니다."
+                  : "지원 범위에 해당하는 설치 패키지·CVE 조합이 없습니다."}
+              </p>
+            )}
             {totals.NEEDS_REVIEW > 0 && (
               <p>추가 확인이 필요한 조합 {count(totals.NEEDS_REVIEW)}건의 근거를 확인하세요.</p>
             )}
           </div>
         </div>
       )}
-      <div className="work-card result-metrics" role="group" aria-label="판정별 패키지·CVE 조합 수">
-        {metrics.map((v) => (
-          <button
-            key={v}
-            className={"metric metric-" + v.toLowerCase()}
-            onClick={() => {
-              setFilter(v);
-              grouped.current?.scrollIntoView({ block: "start" });
-            }}
-            aria-pressed={filter === v}
-          >
-            <span>
-              <i />
-              {labels[v]}
-            </span>
-            <strong>
-              {count(totals[v] ?? 0)}
-              <small>건</small>
-            </strong>
-          </button>
-        ))}
-      </div>
+      {evaluated > 0 && (
+        <div
+          className="work-card result-metrics"
+          role="group"
+          aria-label="판정별 패키지·CVE 조합 수"
+        >
+          {metrics.map((v) => (
+            <button
+              key={v}
+              className={"metric metric-" + v.toLowerCase()}
+              onClick={() => {
+                setFilter(v);
+                grouped.current?.scrollIntoView({ block: "start" });
+              }}
+              aria-pressed={filter === v}
+            >
+              <span>
+                <i />
+                {labels[v]}
+              </span>
+              <strong>
+                {count(totals[v] ?? 0)}
+                <small>건</small>
+              </strong>
+            </button>
+          ))}
+        </div>
+      )}
       <p className="metric-note">평가한 패키지·CVE 조합 {count(evaluated)}건</p>
       <section ref={grouped} className="work-card grouped-findings">
         <div className="card-heading">
-          <h2>CVE별 판정</h2>
-          <label className="filter-select">
-            <span className="sr-only">결과 분류</span>
-            <select value={filter} onChange={(e) => setFilter(e.target.value as Verdict)}>
-              {metrics.map((v) => (
-                <option key={v} value={v}>
-                  {labels[v]}
-                </option>
-              ))}
-            </select>
-          </label>
+          <h2>{evaluated ? "CVE별 판정" : "평가 범위"}</h2>
+          {evaluated > 0 && (
+            <label className="filter-select">
+              <span className="sr-only">결과 분류</span>
+              <select value={filter} onChange={(e) => setFilter(e.target.value as Verdict)}>
+                {metrics.map((v) => (
+                  <option key={v} value={v}>
+                    {labels[v]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
-        <Groups key={filter} api={api} analysis={analysis.id} verdict={filter} />
+        {evaluated > 0 && <Groups key={filter} api={api} analysis={analysis.id} verdict={filter} />}
         {(totals.OUT_OF_SCOPE ?? 0) > 0 && (
           <div className="outside-block">
             <button aria-expanded={outside} onClick={() => setOutside(!outside)}>

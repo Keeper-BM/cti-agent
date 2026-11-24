@@ -11,7 +11,6 @@ from sqlalchemy.orm import load_only
 from backend.api.dependencies import Database
 from backend.api.routes.assets import find_asset
 from backend.api.schemas.workflows import WorkflowRequest, WorkflowResponse, WorkspaceResponse
-from backend.core.audit import audit
 from backend.core.errors import AppError
 from backend.models.tables import (
     AnalysisRun,
@@ -21,23 +20,11 @@ from backend.models.tables import (
     InventoryRecord,
     Job,
     ReportRun,
-    SSHProfile,
-    new_id,
-    utcnow,
 )
-from backend.workflows.queue import queue_collection
+from backend.workflows.queue import latest_profile, queue_workflow
 from backend.workflows.service import iso
 
 router = APIRouter(prefix="/assets/{asset_id}", tags=["workflows"])
-
-
-def latest_profile(db, asset_id):
-    return db.scalar(
-        select(SSHProfile)
-        .where(SSHProfile.asset_id == asset_id)
-        .order_by(SSHProfile.created_at.desc(), SSHProfile.id.desc())
-        .limit(1)
-    )
 
 
 def response(db, run):
@@ -116,35 +103,8 @@ def start_workflow(
         ):
             raise AppError("IDEMPOTENCY_CONFLICT", "이 요청 키는 다른 입력에 사용되었습니다.", 409)
         return response(db, existing)
-    if not asset.is_active:
-        raise AppError("ASSET_INACTIVE", "비활성 자산입니다.", 409)
-    if db.scalar(select(AssetWorkflow.id).where(AssetWorkflow.active_slot == asset.id)):
-        raise AppError("WORKFLOW_BUSY", "이 자산의 자동 분석이 진행 중입니다.", 409)
-    principal = db.info["principal"]
-    run = AssetWorkflow(
-        id=new_id(),
-        asset_id=asset.id,
-        requested_by=principal.user_id,
-        active_slot=asset.id,
-        request_key=idempotency_key,
-        mode=mode,
-        timeline={"inventory": iso(utcnow())},
-    )
     try:
-        if mode == "ssh":
-            profile = latest_profile(db, asset.id)
-            if not profile:
-                raise AppError("SSH_PROFILE_REQUIRED", "먼저 자산의 SSH 연결을 설정하세요.", 409)
-            run.collection_id = queue_collection(db, asset, profile, f"wf-{run.id}-inventory").id
-        else:
-            inventory = db.get(InventoryRecord, str(payload.inventory_id))
-            if not inventory or inventory.asset_id != asset.id:
-                raise AppError(
-                    "INVENTORY_NOT_FOUND", "이 자산의 패키지 기록을 찾을 수 없습니다.", 404
-                )
-            run.inventory_id = inventory.inventory_id
-        db.add(run)
-        audit(db, "workflow.started", asset_id=asset.id, target_id=run.id, details={"mode": mode})
+        run = queue_workflow(db, asset, idempotency_key, payload.inventory_id)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -168,9 +128,10 @@ def workspace(asset_id: UUID, db: Database, analysis_id: UUID | None = None):
     asset = find_asset(asset_id, db)
     profile = latest_profile(db, asset.id)
     state, checked = ("configured" if profile else "unconfigured"), None
+    check_scope = None
     if profile:
         event = db.execute(
-            select(AuditEvent.created_at, AuditEvent.outcome)
+            select(AuditEvent.created_at, AuditEvent.outcome, AuditEvent.details)
             .where(AuditEvent.target_id == profile.id, AuditEvent.action == "ssh_profile.checked")
             .order_by(AuditEvent.created_at.desc())
             .limit(1)
@@ -182,12 +143,21 @@ def workspace(asset_id: UUID, db: Database, analysis_id: UUID | None = None):
             .order_by(Job.finished_at.desc())
             .limit(1)
         ).first()
-        checks = [
-            (e[0], e[1] in {"SUCCESS", "SUCCEEDED", "PARTIAL"}) for e in (event, collected) if e
-        ]
+        checks = []
+        if event:
+            scope = (
+                "PACKAGE_READ" if (event.details or {}).get("scope") == "PACKAGE_READ" else "AUTH"
+            )
+            checks.append((event.created_at, event.outcome == "SUCCESS", scope))
+        if collected:
+            scope = "PACKAGE_READ" if collected.status == "SUCCEEDED" else "AUTH"
+            checks.append(
+                (collected.finished_at, collected.status in {"SUCCEEDED", "PARTIAL"}, scope)
+            )
         if checks:
-            checked, ok = max(checks, key=lambda e: e[0])
+            checked, ok, scope = max(checks, key=lambda check: check[0])
             state = "verified" if ok else "failed"
+            check_scope = scope if ok else None
     inventory = db.scalar(
         select(InventoryRecord)
         .options(
@@ -275,6 +245,7 @@ def workspace(asset_id: UUID, db: Database, analysis_id: UUID | None = None):
         "profile_id": profile.id if profile else None,
         "connection_status": state,
         "connection_checked_at": iso(checked) if checked else None,
+        "connection_check_scope": check_scope,
         "inventory": inventory,
         "latest": latest,
         "history": history,

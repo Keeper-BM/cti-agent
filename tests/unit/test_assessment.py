@@ -4,6 +4,7 @@ from uuid import uuid4
 import pytest
 
 from backend.assessment.engine import UbuntuAssessmentEngine
+from backend.assessment.remediation import response_order
 from backend.models.contracts import (
     AdvisoryPackageRule,
     Coverage,
@@ -14,6 +15,7 @@ from backend.models.contracts import (
     NormalizedAdvisory,
     OperatingSystem,
 )
+from backend.sources.contracts import Metric
 
 NOW = datetime(2026, 11, 10, tzinfo=UTC)
 CVE = "CVE-2099-10001"
@@ -84,6 +86,33 @@ def finding(inventory, feed, **kwargs):
     return next(
         f for f in UbuntuAssessmentEngine().assess(inventory, feed, **kwargs) if f.package_ref
     )
+
+
+def test_response_priority_uses_cvss_before_cve_number():
+    base = finding(*inputs())
+    severe = base.model_copy(
+        update={
+            "verdict": "NEEDS_REVIEW",
+            "cve_id": "CVE-2021-1000",
+            "nvd_metrics": [Metric(version="3.1", score=9.8)],
+        }
+    )
+    low = severe.model_copy(
+        update={
+            "cve_id": "CVE-2026-1000",
+            "nvd_metrics": [Metric(version="3.1", score=3.1)],
+        }
+    )
+    listed = low.model_copy(update={"kev_status": "LISTED"})
+    affected = low.model_copy(update={"verdict": "AFFECTED"})
+    unknown = low.model_copy(update={"cve_id": "CVE-2099-1000", "nvd_metrics": []})
+    assert sorted([low, unknown, severe, affected, listed], key=response_order) == [
+        affected,
+        listed,
+        severe,
+        low,
+        unknown,
+    ]
 
 
 @pytest.mark.parametrize(

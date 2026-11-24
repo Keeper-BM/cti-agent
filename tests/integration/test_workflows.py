@@ -1,10 +1,20 @@
+from datetime import timedelta
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from backend.models.tables import AssetWorkflow, Job, ReportRun
+from backend.collectors.ssh_protocol import COMMANDS
+from backend.models.tables import (
+    AssetWorkflow,
+    InventoryRecord,
+    Job,
+    ReportRun,
+    SecuritySnapshot,
+    utcnow,
+)
 from backend.worker.runner import recover_interrupted_jobs, run_once
+from tests.fixtures.ssh_server import APACHE
 from tests.integration import test_assessments as assessments
 from tests.integration import test_auth as auth
 from tests.integration import test_collections as collections
@@ -51,10 +61,13 @@ def test_registered_ssh_to_report(client, headers, engine, source_wire, lab, mon
     aid = asset["id"]
     probe = client.post(f"/api/v1/assets/{aid}/ssh-profile/{profile['id']}/check", headers=headers)
     assert probe.status_code == 200 and probe.json()["verified"]
-    assert not server.commands
+    assert probe.json()["package_count"] == 2 and probe.json()["os_release"] == "24.04"
+    assert server.commands == list(COMMANDS.values())
+    with Session(engine) as db:
+        assert db.scalar(select(func.count()).select_from(InventoryRecord)) == 0
+    view = client.get(f"/api/v1/assets/{aid}/workspace", headers=headers).json()
     assert (
-        client.get(f"/api/v1/assets/{aid}/workspace", headers=headers).json()["connection_status"]
-        == "verified"
+        view["connection_status"] == "verified" and view["connection_check_scope"] == "PACKAGE_READ"
     )
     queued = start(client, headers, aid, {})
     assert queued.status_code == 202, queued.text
@@ -80,6 +93,21 @@ def test_registered_ssh_to_report(client, headers, engine, source_wire, lab, mon
         assert len(list(db.scalars(select(ReportRun.id)))) == 1
 
 
+def test_ssh_check_does_not_verify_a_partial_package_list(client, headers, engine, lab):
+    server, asset, profile, _ = lab
+    server.outputs["packages"] = (1, APACHE)
+    path = f"/api/v1/assets/{asset['id']}"
+    probe = client.post(f"{path}/ssh-profile/{profile['id']}/check", headers=headers)
+    assert probe.status_code == 502
+    assert probe.json()["error"]["code"] == "SSH_PACKAGE_CHECK_INCOMPLETE"
+    assert server.auth_calls == 1
+    assert server.commands == list(COMMANDS.values())
+    view = client.get(f"{path}/workspace", headers=headers).json()
+    assert view["connection_status"] == "failed" and view["connection_check_scope"] is None
+    with Session(engine) as db:
+        assert db.scalar(select(func.count()).select_from(InventoryRecord)) == 0
+
+
 def test_saved_input_handles_failed_refresh_and_records_previous_snapshot(
     client, headers, engine, source_wire
 ):
@@ -93,13 +121,20 @@ def test_saved_input_handles_failed_refresh_and_records_previous_snapshot(
     assert run["status"] == "FAILED" and run["stage"] == "sources" and not run["report_id"]
     source_wire["fail"] = None
     snap = sources.execute(client, headers, engine, "ubuntu")
-    sources.execute(client, headers, engine, "ubuntu", {"release": "22.04", "package": "mysql-8.0"})
+    mysql = sources.execute(
+        client, headers, engine, "ubuntu", {"release": "22.04", "package": "mysql-8.0"}
+    )
+    stored_at = utcnow() - timedelta(days=90)
+    with Session(engine) as db, db.begin():
+        for snapshot_id in (snap, mysql):
+            db.get(SecuritySnapshot, snapshot_id).captured_at = stored_at
     source_wire["fail"] = "ubuntu"
     assert start(client, headers, aid, body, "retry").status_code == 202
     run, _ = finish(client, headers, engine, aid)
     assert run["status"] == "COMPLETED" and run["mode"] == "saved"
     ubuntu = next(s for s in run["sources"] if s["source"] == "ubuntu")
     assert ubuntu["status"] == "CACHED" and ubuntu["snapshot_id"] == snap
+    assert ubuntu["captured_at"] == stored_at.isoformat().replace("+00:00", "Z")
     report = client.get(f"/api/v1/reports/{run['report_id']}/markdown", headers=headers)
     assert "갱신 실패" in report.text
 

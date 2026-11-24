@@ -26,6 +26,8 @@ from backend.api.routes import (
     reports,
     sources,
     verifications,
+    workflow_batches,
+    workflow_schedules,
     workflows,
 )
 from backend.api.schemas.common import CapabilitiesResponse, ErrorResponse, FeatureFlags
@@ -143,6 +145,8 @@ def create_app() -> FastAPI:
             db.execute(text("SELECT id FROM assets LIMIT 1"))
             db.execute(text("SELECT id FROM jobs LIMIT 1"))
             db.execute(text("SELECT id FROM asset_workflows LIMIT 1"))
+            db.execute(text("SELECT id FROM workflow_batches LIMIT 1"))
+            db.execute(text("SELECT batch_id FROM workflow_batch_assets LIMIT 1"))
             db.execute(text("SELECT inventory_id FROM inventory_snapshots LIMIT 1"))
             db.execute(text("SELECT id FROM security_snapshots LIMIT 1"))
             db.execute(text("SELECT id FROM analyses LIMIT 1"))
@@ -158,6 +162,7 @@ def create_app() -> FastAPI:
             db.execute(text("SELECT id FROM questions LIMIT 1"))
             db.execute(text("SELECT id FROM text_chunks LIMIT 1"))
             db.execute(text("SELECT question_id FROM question_assets LIMIT 1"))
+            db.execute(text("SELECT id FROM workflow_schedules LIMIT 1"))
         except SQLAlchemyError:
             raise AppError(
                 "DATABASE_NOT_READY", "DB 연결과 마이그레이션을 확인하세요.", 503, True
@@ -173,6 +178,8 @@ def create_app() -> FastAPI:
     )
     protected.include_router(assets.router)
     protected.include_router(workflows.router)
+    protected.include_router(workflow_batches.router)
+    protected.include_router(workflow_schedules.router)
     protected.include_router(auth.router)
     protected.include_router(collections.router)
     protected.include_router(verifications.router)

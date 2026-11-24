@@ -17,12 +17,32 @@ class Remediation(BaseModel):
     limitations: list[str]
 
 
+def cvss_score(finding):
+    scores = [m.score for m in finding.nvd_metrics if m.score is not None]
+    return max(scores, default=None)
+
+
+def response_order(finding):
+    """Keep confirmed impact, exploitation and severity ahead of CVE recency."""
+    score = cvss_score(finding)
+    _, year, number = finding.cve_id.split("-")
+    return (
+        finding.verdict != "AFFECTED",
+        finding.kev_status != "LISTED",
+        score is None,
+        -score if score is not None else 0,
+        -int(year),
+        -int(number),
+        finding.package_name or "",
+        str(finding.finding_id),
+    )
+
+
 def guidance(finding):
     if finding.cve_id is None:
         return None
     urls = list(dict.fromkeys(e.url for e in finding.evidence_refs))
-    scores = [m.score for m in finding.nvd_metrics if m.score is not None]
-    score = max(scores) if scores else None
+    score = cvss_score(finding)
     if finding.verdict in {"FIXED", "NOT_AFFECTED"}:
         priority, reason = "ROUTINE", "현재 저장된 패키지 판단 기준으로 정기 확인 대상입니다."
     elif finding.kev_status == "LISTED":

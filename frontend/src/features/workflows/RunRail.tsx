@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Icon } from "../../shared/components/Icon";
-import { count, sourceCounts, type Brief, type Workflow } from "./api";
+import { count, sourceCounts, type Workflow } from "./api";
 
-const steps = [
+export const steps = [
   { key: "inventory", name: "패키지 수집", icon: "package" },
   { key: "sources", name: "보안 자료 갱신", icon: "database" },
   { key: "analysis", name: "취약점 분석", icon: "shield" },
@@ -18,15 +18,7 @@ const subscribeToMotion = (onChange: () => void) => {
   preference.addEventListener("change", onChange);
   return () => preference.removeEventListener("change", onChange);
 };
-const stageClock = new Intl.DateTimeFormat("ko-KR", {
-  timeZone: "Asia/Seoul",
-  hourCycle: "h23",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
-
-function stepName(index: number, run: Workflow | null) {
+export function stepName(index: number, run: Workflow | null) {
   return index === 0 && run?.mode === "saved" ? "기록 불러오기" : steps[index].name;
 }
 
@@ -40,9 +32,10 @@ export function useRunReplay(run: Workflow | null) {
   const current = playback?.runId === readyRunId ? playback : null;
   const index = current?.index ?? null;
   const automatic = !!current?.automatic && !reducedMotion;
+  const advancing = automatic && index !== lastStep;
 
   useEffect(() => {
-    if (!automatic || !current || current.index === lastStep) return;
+    if (!advancing || !current) return;
     const timer = window.setTimeout(() => {
       setPlayback((previous) =>
         previous === current && !getReducedMotion()
@@ -51,12 +44,13 @@ export function useRunReplay(run: Workflow | null) {
       );
     }, stageDuration);
     return () => window.clearTimeout(timer);
-  }, [current, automatic]);
+  }, [current, advancing]);
 
   return {
     canStart: !!readyRunId,
     index,
     automatic,
+    advancing,
     reducedMotion,
     start() {
       if (readyRunId) setPlayback({ runId: readyRunId, index: 0, automatic: !reducedMotion });
@@ -95,7 +89,13 @@ export function RunRail({
   const sourceTotal = run?.sources.length ?? 0;
   const sources = sourceCounts(run?.sources ?? []);
   const processed = sources.UPDATED + sources.CACHED + sources.FAILED;
-  const playbackStatus = replay.automatic ? "기록 재생 중" : "기록 재생 · 수동";
+  const moving = recording ? replay.advancing : run?.status === "RUNNING";
+  const playbackStatus =
+    at === lastStep
+      ? "기록 재생 · 마지막 단계"
+      : replay.advancing
+        ? "기록 재생 중"
+        : "기록 재생 · 수동";
   const status = recording
     ? playbackStatus
     : run?.status === "COMPLETED"
@@ -107,7 +107,11 @@ export function RunRail({
           : "실행 대기";
 
   return (
-    <section className="work-card run-rail" aria-label="자동 분석 진행 단계">
+    <section
+      className="work-card run-rail"
+      aria-label="자동 분석 진행 단계"
+      data-moving={moving || undefined}
+    >
       <div className="rail-heading">
         <div className="rail-title">
           <h2>실행 단계</h2>
@@ -135,7 +139,7 @@ export function RunRail({
                 >
                   재생 종료
                 </button>
-                {!replay.reducedMotion && (
+                {!replay.reducedMotion && at !== lastStep && (
                   <button
                     type="button"
                     className="text-tool rail-secondary"
@@ -197,12 +201,21 @@ export function RunRail({
               !recording &&
               run?.timeline.verification
             ) {
-              detail = "공식 파일 대조 중";
+              detail = run.verification_note ? "파일 대조 결과 수신" : "공식 파일 대조 중";
             } else if (step.key === "inventory" && run?.package_count != null) {
               detail = "패키지 " + count(run.package_count) + "개";
             }
             if (step.key === "sources" && sourceTotal)
-              detail = "조회 " + processed + "/" + sourceTotal + "건 처리";
+              detail =
+                processed === sourceTotal
+                  ? [
+                      "갱신 " + sources.UPDATED,
+                      sources.CACHED > 0 && "저장본 " + sources.CACHED,
+                      sources.FAILED > 0 && "미확보 " + sources.FAILED,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")
+                  : "조회 " + processed + "/" + sourceTotal + "건 처리";
             if (step.key === "analysis" && state === "done") detail = "판정 저장";
             if (step.key === "report" && state === "done") detail = "보고서 저장";
           }
@@ -230,139 +243,6 @@ export function RunRail({
           );
         })}
       </ol>
-    </section>
-  );
-}
-
-export function StageSpotlight({
-  run,
-  analysis,
-  replayIndex,
-}: {
-  run: Workflow;
-  analysis: Brief | null;
-  replayIndex: number | null;
-}) {
-  const recording = replayIndex !== null;
-  const index = replayIndex ?? steps.findIndex((step) => run.stage === step.key);
-  const step = steps[index];
-  const facts: { label: string; value: string; unit?: string; tone?: string }[] = [];
-  let note: string;
-  let caveat: string | undefined;
-  switch (step.key) {
-    case "inventory":
-      if (run.package_count != null)
-        facts.push({ label: "설치 패키지", value: count(run.package_count), unit: "개" });
-      note = recording
-        ? run.mode === "saved"
-          ? "이 자산에 저장된 패키지 목록을 분석 대상으로 불러왔습니다."
-          : "SSH로 가져온 설치 패키지와 버전을 저장했습니다."
-        : run.timeline.verification
-          ? "설치 파일을 Ubuntu 공식 배포본과 대조하고 있습니다."
-          : run.mode === "saved"
-            ? "저장된 설치 패키지와 버전을 불러오고 있습니다."
-            : "SSH로 설치 패키지와 버전을 가져오고 있습니다.";
-      break;
-    case "sources": {
-      const sourceTotal = run.sources.length;
-      const sources = sourceCounts(run.sources);
-      if (sourceTotal)
-        facts.push(
-          {
-            label: "공식 출처",
-            value: count(new Set(run.sources.map((s) => s.source)).size),
-            unit: "개",
-          },
-          {
-            label: "처리 완료 / 전체 요청",
-            value:
-              count(sources.UPDATED + sources.CACHED + sources.FAILED) + " / " + count(sourceTotal),
-            unit: "건",
-          },
-        );
-      caveat = [
-        sources.CACHED ? "저장본 사용 " + count(sources.CACHED) + "건" : "",
-        sources.FAILED ? "조회 실패 " + count(sources.FAILED) + "건" : "",
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      note = recording
-        ? "조회 결과에서 이 분석에 사용한 보안 자료와 기준 시각을 저장했습니다."
-        : "설치 패키지에 해당하는 공식 보안 자료를 조회하고 있습니다.";
-      break;
-    }
-    case "analysis":
-      if (recording && analysis && analysis.id === run.analysis_id) {
-        facts.push(
-          {
-            label: "영향 있음",
-            value: count(analysis.summary.AFFECTED ?? 0),
-            unit: "건",
-            tone: "affected",
-          },
-          {
-            label: "추가 확인 필요",
-            value: count(analysis.summary.NEEDS_REVIEW ?? 0),
-            unit: "건",
-            tone: "review",
-          },
-        );
-        caveat = "패키지·CVE 조합 기준";
-      }
-      note = recording
-        ? "공식 기준과 대조해 패키지·CVE 조합별 판정을 저장했습니다."
-        : "설치 버전과 확인된 적용 조건을 공식 수정 기준과 대조하고 있습니다.";
-      break;
-    case "report":
-      if (recording && run.report_id) facts.push({ label: "다운로드 형식", value: "Markdown" });
-      note = recording
-        ? "분석 결과와 권고 조치, 공식 근거를 대응 보고서로 저장했습니다."
-        : "이번 분석의 판정과 대응 근거를 보고서로 정리하고 있습니다.";
-      break;
-  }
-  const started = run.timeline[step.key];
-  return (
-    <section
-      className="work-card stage-spotlight"
-      aria-label={recording ? "저장된 실행 단계" : "현재 실행 단계"}
-    >
-      <div className="stage-content" key={step.key}>
-        <span className="stage-symbol">
-          <Icon name={step.icon} />
-        </span>
-        <div className="stage-copy">
-          <div className="stage-meta">
-            <span>
-              {index + 1} / {steps.length}단계
-            </span>
-            {started && (
-              <span>
-                시작 시각 <time dateTime={started}>{stageClock.format(new Date(started))}</time>
-              </span>
-            )}
-          </div>
-          <h2>{stepName(index, run)}</h2>
-          <p>{note}</p>
-        </div>
-        {(facts.length > 0 || caveat) && (
-          <div className="stage-readout">
-            {facts.length > 0 && (
-              <dl className="stage-facts">
-                {facts.map(({ label, value, unit, tone }) => (
-                  <div key={label} className={tone && "stage-fact-" + tone}>
-                    <dt>{label}</dt>
-                    <dd>
-                      {value}
-                      {unit && <small>{unit}</small>}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-            {caveat && <p className="stage-caveat">{caveat}</p>}
-          </div>
-        )}
-      </div>
     </section>
   );
 }

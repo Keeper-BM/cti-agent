@@ -32,16 +32,28 @@ export function CollectionPanel({
   api,
   asset,
   onCollected,
+  onProfileSaved,
+  onSetupClose,
 }: {
   api: HttpClient;
   asset: Asset;
   onCollected: (assetId: string, inventoryId: string) => void;
+  onProfileSaved: () => void;
+  onSetupClose?: () => void;
 }) {
   const { isAdmin, canWrite } = useSession();
+  const setup = !!onSetupClose;
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState("");
   const [requested, setRequested] = useState<Collection | null>(null);
   const [editing, setEditing] = useState(false);
+  const [connectionCheck, setConnectionCheck] = useState<{
+    profileId: string;
+    packageCount: number;
+    osRelease: string;
+  } | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const checkRef = useRef<HTMLButtonElement>(null);
   const requestKey = useRef(crypto.randomUUID());
   const notified = useRef("");
   const observedRun = useRef("");
@@ -57,7 +69,7 @@ export function CollectionPanel({
     (signal: AbortSignal) => listCollections(api, asset.id, page, signal),
     [api, asset.id, page],
   );
-  const history = usePollingQuery(historyLoad);
+  const history = usePollingQuery(setup ? null : historyLoad);
   const newestLoad = useCallback(
     (signal: AbortSignal) => listCollections(api, asset.id, 0, signal),
     [api, asset.id],
@@ -76,10 +88,21 @@ export function CollectionPanel({
     running(selectedRun) ? 5000 : null,
   );
   const savedProfile = profile.data?.profile;
+  const verified = connectionCheck?.profileId === savedProfile?.id ? connectionCheck : null;
+  const connectionError = settings.error || profile.error;
   const busy = action.pending || running(requested) || running(latest);
   const current =
     latest && (!requested || latest.created_at >= requested.created_at) ? latest : requested;
   const completed = current?.inventory_id ? current : null;
+  useEffect(() => {
+    if (setup) {
+      titleRef.current?.focus({ preventScroll: true });
+      titleRef.current?.scrollIntoView({ block: "start" });
+    }
+  }, [setup]);
+  useEffect(() => {
+    if (setup && savedProfile?.id) checkRef.current?.focus({ preventScroll: true });
+  }, [setup, savedProfile?.id]);
   useEffect(() => {
     requestKey.current = crypto.randomUUID();
   }, [savedProfile?.id]);
@@ -119,44 +142,86 @@ export function CollectionPanel({
     if (ok) requestKey.current = crypto.randomUUID();
   }
 
+  async function verifyConnection() {
+    if (!savedProfile) return;
+    setConnectionCheck(null);
+    await action.run(async () => {
+      const check = await checkProfile(api, asset.id, savedProfile.id);
+      setConnectionCheck({
+        profileId: savedProfile.id,
+        packageCount: check.package_count,
+        osRelease: check.os_release,
+      });
+    }, "서버 호스트 키, SSH 계정 인증, 패키지 목록 조회를 확인했습니다.");
+  }
+
+  function refreshConnection() {
+    settings.refresh();
+    profile.refresh();
+  }
+
   return (
-    <section className="panel collection-panel" aria-labelledby="collection-title">
+    <section
+      className={setup ? "collection-panel collection-setup" : "panel collection-panel"}
+      aria-labelledby="collection-title"
+    >
       <div className="panel-heading">
         <div>
-          <h2 id="collection-title">SSH 패키지 수집</h2>
-          <p>Ubuntu 22.04·24.04 서버에 SSH로 접속해 설치 패키지를 조회합니다.</p>
+          <h2 id="collection-title" ref={titleRef} tabIndex={-1}>
+            {setup ? "SSH 연결 설정" : "SSH 패키지 수집"}
+          </h2>
+          {setup ? (
+            <p>
+              <strong>{asset.asset_name}</strong>
+              {!savedProfile && " · 연결 정보를 저장한 뒤 패키지 목록을 읽을 수 있는지 확인하세요."}
+            </p>
+          ) : (
+            <p>Ubuntu 22.04·24.04 서버에 SSH로 접속해 설치 패키지를 조회합니다.</p>
+          )}
         </div>
-        <button
-          className="primary"
-          onClick={collect}
-          disabled={
-            !savedProfile ||
-            !asset.is_active ||
-            (isAdmin && !settings.data?.enabled) ||
-            !canWrite ||
-            profile.loading ||
-            busy ||
-            editing
-          }
-        >
-          {busy ? "수집 처리 중…" : "패키지 수집 실행"}
-        </button>
+        {setup ? (
+          <button className="secondary" onClick={onSetupClose}>
+            {savedProfile ? "자산 목록으로" : "나중에 설정"}
+          </button>
+        ) : (
+          <button
+            className="primary"
+            onClick={collect}
+            disabled={
+              !savedProfile ||
+              !asset.is_active ||
+              (isAdmin && !settings.data?.enabled) ||
+              !canWrite ||
+              profile.loading ||
+              busy ||
+              editing
+            }
+          >
+            {busy ? "수집 처리 중…" : "패키지 수집 실행"}
+          </button>
+        )}
       </div>
       <div className="collection-content">
         <Notice
-          error={
-            action.error ||
-            settings.error ||
-            profile.error ||
-            history.error ||
-            newest.error ||
-            detail.error
-          }
+          error={action.error || connectionError || history.error || newest.error || detail.error}
           success={action.notice}
         />
-        <p className="inventory-note">
-          조회한 정보를 새 기록으로 저장합니다. 수집 후 취약점 분석 화면에서 분석할 수 있습니다.
-        </p>
+        {verified && (
+          <p className="inventory-note">
+            Ubuntu {verified.osRelease} · 패키지 {verified.packageCount.toLocaleString("ko-KR")}개
+            조회
+          </p>
+        )}
+        {setup && !connectionError && (!profile.data || (isAdmin && !settings.data)) && (
+          <p className="inventory-note" role="status">
+            SSH 연결 정보를 불러오는 중…
+          </p>
+        )}
+        {!setup && (
+          <p className="inventory-note">
+            조회한 정보를 새 기록으로 저장합니다. 수집 후 취약점 분석 화면에서 분석할 수 있습니다.
+          </p>
+        )}
         {!asset.is_active && (
           <p className="inventory-warning">비활성 자산입니다. 수집하려면 자산을 활성화하세요.</p>
         )}
@@ -169,6 +234,11 @@ export function CollectionPanel({
             </p>
           </div>
         )}
+        {setup && (connectionError || settings.data?.enabled === false) && (
+          <button className="secondary" onClick={refreshConnection}>
+            연결 정보 다시 불러오기
+          </button>
+        )}
         {savedProfile && (
           <div className="collection-connection">
             <div>
@@ -177,28 +247,33 @@ export function CollectionPanel({
               </strong>
               <span>인증키 {savedProfile.key_alias} · 저장된 연결 설정</span>
             </div>
-            <button
-              className="secondary"
-              disabled={!asset.is_active || !canWrite || busy}
-              onClick={() =>
-                action.run(
-                  () => checkProfile(api, asset.id, savedProfile.id),
-                  "등록한 호스트 키와 SSH 계정 인증을 확인했습니다.",
-                )
-              }
-            >
-              SSH 연결 확인
-            </button>
-            <a className="button-link" href={`#/workspace?asset=${asset.id}`}>
-              분석 화면
-            </a>
-            <button
-              className="secondary"
-              disabled={busy || !asset.is_active || !isAdmin}
-              onClick={() => setEditing(!editing)}
-            >
-              {editing ? "편집 닫기" : "연결 설정 변경"}
-            </button>
+            <div className="collection-connection-actions">
+              <button
+                ref={checkRef}
+                className={setup && !verified ? "primary" : "secondary"}
+                disabled={!asset.is_active || !canWrite || busy || (setup && editing)}
+                onClick={verifyConnection}
+              >
+                {setup && action.pending ? "패키지 조회 확인 중…" : "SSH 연결 확인"}
+              </button>
+              {(!setup || (verified && !editing)) && (
+                <a
+                  className={setup ? "button-link primary-link" : "button-link"}
+                  href={`#/workspace?asset=${asset.id}`}
+                >
+                  분석 화면
+                </a>
+              )}
+              {(!setup || isAdmin) && (
+                <button
+                  className="secondary"
+                  disabled={busy || !asset.is_active || !isAdmin}
+                  onClick={() => setEditing(!editing)}
+                >
+                  {editing ? "편집 닫기" : "연결 설정 변경"}
+                </button>
+              )}
+            </div>
           </div>
         )}
         {isAdmin && profile.data && settings.data && (!savedProfile || editing) && (
@@ -208,31 +283,34 @@ export function CollectionPanel({
             asset={asset}
             profile={savedProfile ?? null}
             settings={settings.data}
+            setup={setup}
             onSaved={() => {
               setEditing(false);
               profile.refresh();
+              onProfileSaved();
             }}
           />
         )}
-        {!isAdmin && !savedProfile && (
+        {!isAdmin && profile.data && !savedProfile && (
           <p className="inventory-note">
             관리자가 이 자산의 SSH 연결을 설정하면 수집할 수 있습니다.
           </p>
         )}
-        <div className="collection-toolbar">
-          <span>수집 이력 {history.data?.total ?? "—"}건</span>
-          <button
-            className="text-button"
-            onClick={() => {
-              settings.refresh();
-              profile.refresh();
-              history.refresh();
-              detail.refresh();
-            }}
-          >
-            연결 설정·이력 새로고침
-          </button>
-        </div>
+        {!setup && (
+          <div className="collection-toolbar">
+            <span>수집 이력 {history.data?.total ?? "—"}건</span>
+            <button
+              className="text-button"
+              onClick={() => {
+                refreshConnection();
+                history.refresh();
+                detail.refresh();
+              }}
+            >
+              연결 설정·이력 새로고침
+            </button>
+          </div>
+        )}
         {!!history.data?.total && (
           <div className="ai-history-list">
             {history.data.items.map((item) => (
@@ -294,12 +372,14 @@ function ProfileForm({
   asset,
   profile,
   settings,
+  setup,
   onSaved,
 }: {
   api: HttpClient;
   asset: Asset;
   profile: SSHProfile | null;
   settings: SSHSettings;
+  setup: boolean;
   onSaved: () => void;
 }) {
   const action = useAction();
@@ -319,10 +399,12 @@ function ProfileForm({
   }
   return (
     <form className="asset-form collection-form" onSubmit={save}>
-      <div className="form-heading">
-        <strong>SSH 연결 설정</strong>
-        <span>저장 후 수집 버튼을 눌러 접속합니다.</span>
-      </div>
+      {!setup && (
+        <div className="form-heading">
+          <strong>SSH 연결 설정</strong>
+          <span>저장 후 SSH 연결을 확인할 수 있습니다.</span>
+        </div>
+      )}
       <label>
         서버 IP
         <input
@@ -388,7 +470,7 @@ function ProfileForm({
       </div>
       <div className="form-submit">
         <button
-          className="secondary"
+          className={setup ? "primary" : "secondary"}
           disabled={!asset.is_active || !settings.enabled || action.pending}
           type="submit"
         >

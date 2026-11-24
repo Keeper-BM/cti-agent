@@ -6,6 +6,7 @@ import { useSession } from "./session";
 
 const icons = {
   workspace: "workflow",
+  schedules: "jobs",
   assets: "assets",
   sources: "database",
   findings: "findings",
@@ -17,12 +18,13 @@ const icons = {
   audit: "jobs",
 } as const;
 const groups = [
-  { name: "워크스페이스", ids: ["assets", "workspace", "findings", "reports"] },
+  { name: "워크스페이스", ids: ["assets", "workspace", "schedules", "findings", "reports"] },
   { name: "자료 및 도구", ids: ["sources", "questions"] },
   { name: "운영", ids: ["jobs", "example", "accounts", "audit"] },
 ];
+const mobileLinks: string[] = ["assets", "workspace", "findings", "reports"];
 export function WorkspaceLayout({ route, children }: { route: Route; children: ReactNode }) {
-  const { api, disconnect, user, isAdmin, mode } = useSession();
+  const { api, capabilities, disconnect, user, isAdmin, mode } = useSession();
   const group = groups.find((g) => g.ids.includes(route.id));
   const roleLabel = isAdmin ? "관리자" : user?.role === "VIEWER" ? "조회자" : "자산 담당자";
   function link(item: Route) {
@@ -38,7 +40,11 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
       </a>
     );
   }
-  const visible = routes.filter((r) => r.id !== "audit" || isAdmin);
+  const visible = routes.filter(
+    (r) =>
+      (r.id !== "audit" || isAdmin) &&
+      (r.id !== "schedules" || capabilities?.features.workflow_schedules),
+  );
   return (
     <div className="shell design-shell">
       <aside className="sidebar">
@@ -94,7 +100,7 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
           </div>
         </header>
         <nav className="mobile-nav" aria-label="모바일 메뉴">
-          {groups[0].ids.flatMap((id) => visible.filter((r) => r.id === id)).map(link)}
+          {mobileLinks.flatMap((id) => visible.filter((r) => r.id === id)).map(link)}
           <details
             key={route.id}
             className="mobile-more"
@@ -107,7 +113,7 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
           >
             <summary
               aria-label="추가 메뉴"
-              className={groups[0].ids.includes(route.id) ? "" : "active"}
+              className={mobileLinks.includes(route.id) ? "" : "active"}
             >
               더보기
               <Icon name="chevron" />
@@ -119,8 +125,8 @@ export function WorkspaceLayout({ route, children }: { route: Route; children: R
               }}
             >
               {groups
-                .slice(1)
                 .flatMap((g) => g.ids)
+                .filter((id) => !mobileLinks.includes(id))
                 .flatMap((id) => visible.filter((r) => r.id === id))
                 .map(link)}
             </div>

@@ -13,6 +13,11 @@ export const routes = [
     description: "서버를 등록하고 연결 설정과 패키지 수집 기록을 관리합니다.",
   },
   {
+    id: "schedules",
+    title: "분석 예약",
+    description: "등록한 자산을 정기 분석하고 지난 점검 이후 달라진 판정을 확인합니다.",
+  },
+  {
     id: "findings",
     title: "분석 이력",
     description: "자산별로 저장된 판정과 당시 사용한 근거를 확인합니다.",

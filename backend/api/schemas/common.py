@@ -19,6 +19,9 @@ class TimestampResponse(BaseModel):
         "ingested_at",
         "captured_at",
         "completed_at",
+        "next_run_at",
+        "scheduled_for",
+        "previous_completed_at",
         check_fields=False,
     )
     @classmethod
@@ -55,6 +58,7 @@ class FeatureFlags(BaseModel):
     audit: bool = True
     comparisons: bool = True
     remediation: bool = True
+    workflow_schedules: bool = True
 
 
 class CapabilitiesResponse(BaseModel):

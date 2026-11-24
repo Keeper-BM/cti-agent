@@ -113,9 +113,13 @@ def recover_interrupted_jobs(engine: Engine) -> None:
 
 
 def run_once(engine: Engine) -> bool:
+    from backend.workflows.batch import advance_batches
+    from backend.workflows.schedules import advance_schedules
     from backend.workflows.service import advance_workflows
 
     advance_workflows(engine)
+    advance_batches(engine)
+    advance_schedules(engine)
     with Session(engine) as db, db.begin():
         job = db.scalar(
             select(Job)

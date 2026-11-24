@@ -425,6 +425,11 @@ h1 {
 .text-button:hover:not(:disabled) {
   color: var(--accent);
 }
+.asset-setup-link {
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 650;
+}
 .inline-link {
   display: inline-flex;
   align-items: center;
@@ -1145,6 +1150,34 @@ summary {
 .collection-content {
   padding: 0 23px 22px;
 }
+.collection-setup {
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent-soft), white 55%);
+}
+.collection-setup .panel-heading {
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.collection-setup h2 {
+  scroll-margin-top: 18px;
+}
+.collection-setup .collection-form {
+  margin-top: 0;
+  background: white;
+}
+.collection-setup .form-submit {
+  grid-column: 1 / -1;
+}
+.collection-setup-loading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 20px 23px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
 .collection-panel h2,
 .collection-connection strong {
   overflow-wrap: anywhere;
@@ -1161,6 +1194,15 @@ summary {
 }
 .collection-connection > div {
   min-width: 0;
+}
+.collection-connection-actions {
+  display: contents;
+}
+.collection-setup .collection-connection-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .collection-connection span {
   display: block;

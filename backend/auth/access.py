@@ -24,6 +24,8 @@ from backend.models.tables import (
     SSHProfile,
     User,
     VerificationRun,
+    WorkflowBatch,
+    WorkflowBatchAsset,
 )
 
 
@@ -65,6 +67,9 @@ def scope_queries(execute):
         QuestionRun.__table__.c.asset_id.in_(assets),
         QuestionRun.__table__.c.id.not_in(denied_questions),
     )
+    denied_batches = select(WorkflowBatchAsset.__table__.c.batch_id).where(
+        WorkflowBatchAsset.__table__.c.asset_id.not_in(assets)
+    )
     statement = execute.statement.options(
         with_loader_criteria(Asset, Asset.id.in_(assets), include_aliases=True)
     )
@@ -92,6 +97,12 @@ def scope_queries(execute):
         )
     )
     statement = statement.options(
+        with_loader_criteria(WorkflowBatch, WorkflowBatch.id.not_in(denied_batches)),
+        with_loader_criteria(
+            WorkflowBatchAsset,
+            WorkflowBatchAsset.batch_id.not_in(denied_batches),
+            include_aliases=True,
+        ),
         with_loader_criteria(
             QuestionRun,
             and_(QuestionRun.asset_id.in_(assets), QuestionRun.id.not_in(denied_questions)),

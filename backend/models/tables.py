@@ -115,6 +115,67 @@ class AssetWorkflow(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class WorkflowBatch(Base):
+    __tablename__ = "workflow_batches"
+    __table_args__ = (Index("ix_workflow_batch_created", "created_at"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    requested_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    request_key: Mapped[str] = mapped_column(String(100), unique=True)
+    parent_id: Mapped[str | None] = mapped_column(ForeignKey("workflow_batches.id"), unique=True)
+    status: Mapped[str] = mapped_column(String(16), default="RUNNING")
+    report_summary: Mapped[dict | None] = mapped_column(JSON)
+    markdown: Mapped[str | None] = mapped_column(Text, deferred=True)
+    report_error: Mapped[str | None] = mapped_column(String(600))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class WorkflowBatchAsset(Base):
+    __tablename__ = "workflow_batch_assets"
+
+    batch_id: Mapped[str] = mapped_column(ForeignKey("workflow_batches.id"), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), primary_key=True, index=True)
+    asset_name: Mapped[str] = mapped_column(String(100))
+    workflow_id: Mapped[str | None] = mapped_column(ForeignKey("asset_workflows.id"), index=True)
+    start_error: Mapped[str | None] = mapped_column(String(600))
+    carried: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class WorkflowSchedule(Base):
+    __tablename__ = "workflow_schedules"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    requested_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
+    name: Mapped[str] = mapped_column(String(80))
+    local_time: Mapped[str] = mapped_column(String(5))
+    weekday: Mapped[int | None] = mapped_column(Integer)
+    next_run_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class WorkflowScheduleAsset(Base):
+    __tablename__ = "workflow_schedule_assets"
+
+    schedule_id: Mapped[str] = mapped_column(ForeignKey("workflow_schedules.id"), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("assets.id"), primary_key=True)
+
+
+class WorkflowScheduleRun(Base):
+    __tablename__ = "workflow_schedule_runs"
+    __table_args__ = (
+        UniqueConstraint("schedule_id", "scheduled_for", name="uq_workflow_schedule_slot"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    schedule_id: Mapped[str] = mapped_column(ForeignKey("workflow_schedules.id"))
+    scheduled_for: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    batch_id: Mapped[str | None] = mapped_column(ForeignKey("workflow_batches.id"), unique=True)
+    error: Mapped[str | None] = mapped_column(String(600))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class SecuritySnapshot(Base):
     __tablename__ = "security_snapshots"
     __table_args__ = (

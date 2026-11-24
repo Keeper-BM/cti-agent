@@ -38,6 +38,14 @@ def time(value) -> str:
     return value.astimezone(KST).strftime("%Y-%m-%d %H:%M:%S KST") if value else "미제공"
 
 
+def append_table(lines, headers, rows):
+    lines.append("| " + " | ".join(text(h) for h in headers) + " |")
+    lines.append("| " + " | ".join("---" for _ in headers) + " |")
+    for row in rows:
+        lines.append("| " + " | ".join(text(cell) for cell in row) + " |")
+    lines.append("")
+
+
 def render_markdown(report: ReportContent) -> str:
     lines = ["# CTI Agent 대응 보고서", ""]
 
@@ -45,11 +53,7 @@ def render_markdown(report: ReportContent) -> str:
         lines.extend([text(value), ""])
 
     def table(headers, rows):
-        lines.append("| " + " | ".join(text(h) for h in headers) + " |")
-        lines.append("| " + " | ".join("---" for _ in headers) + " |")
-        for row in rows:
-            lines.append("| " + " | ".join(text(cell) for cell in row) + " |")
-        lines.append("")
+        append_table(lines, headers, rows)
 
     if report.is_synthetic:
         lines.extend(["> **가상 입력 보고서 — 실제 서버의 보안 상태가 아닙니다.**", ""])

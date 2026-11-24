@@ -10,6 +10,7 @@ from sqlalchemy.orm import defer
 
 from backend.api.schemas.sources import DocumentInfo, SnapshotResponse
 from backend.assessment.contracts import AssessmentFinding
+from backend.assessment.remediation import response_order
 from backend.core.errors import AppError
 from backend.llm.contracts import ExplanationResult
 from backend.models.contracts import InventorySnapshot
@@ -189,14 +190,14 @@ def freeze_report(db, analysis, report_id, frozen_at, include_ai: bool) -> Repor
     ]
     if analysis.is_synthetic:
         warnings.insert(0, "가상 입력 보고서입니다. 실제 서버의 보안 상태가 아닙니다.")
-    priority = next(
+    priority = min(
         (
             finding
-            for verdict in ("AFFECTED", "NEEDS_REVIEW")
             for finding in findings
-            if finding.verdict == verdict and finding.cve_id
+            if finding.verdict in {"AFFECTED", "NEEDS_REVIEW"} and finding.cve_id
         ),
-        None,
+        key=response_order,
+        default=None,
     )
     return ReportContent(
         report_id=report_id,

@@ -43,10 +43,11 @@ export const shortTime = (value: string) =>
     timeZone: "Asia/Seoul",
   }).format(new Date(value));
 
-export function workspaceLink(asset: string, analysis?: string) {
-  const query = new URLSearchParams({ asset });
+export function workspaceLink(asset = "", analysis?: string) {
+  const query = new URLSearchParams();
+  if (asset) query.set("asset", asset);
   if (analysis) query.set("analysis", analysis);
-  return "#/workspace?" + query;
+  return query.size ? "#/workspace?" + query : "#/workspace";
 }
 
 export function reportLink(id: string) {
@@ -56,7 +57,7 @@ export function reportLink(id: string) {
 export const sourceStates = {
   UPDATED: "갱신",
   CACHED: "저장본 사용",
-  FAILED: "실패",
+  FAILED: "자료 미확보",
   RUNNING: "조회 중",
   QUEUED: "대기",
 } as const;

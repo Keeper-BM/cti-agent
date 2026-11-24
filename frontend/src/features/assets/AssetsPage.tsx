@@ -7,7 +7,7 @@ import { formatKst } from "../../shared/format";
 import { useAction } from "../../shared/hooks/useAction";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
 import { createAsset, editAsset, getAsset, listAssets, setAssetActive } from "./api";
-import { routeParam } from "../workflows/api";
+import { routeParam, workspaceLink } from "../workflows/api";
 import type { Asset, AssetCreate } from "./api";
 import { InventoryPanel } from "../inventories/InventoryPanel";
 import { CollectionPanel } from "../collections/CollectionPanel";
@@ -19,7 +19,7 @@ export function AssetsPage() {
   const [page, setPage] = useState(0);
   const [showForm, setShowForm] = useState(() => isAdmin && routeParam("new") === "1");
   const [selectedId, setSelectedId] = useState<string | null>(() => routeParam("asset") || null);
-  const [setup, setSetup] = useState(() => routeParam("setup") === "ssh");
+  const [setup, setSetup] = useState(() => routeParam("setup") === "ssh" && !!routeParam("asset"));
   const [detailOpen, setDetailOpen] = useState(false);
   const [collected, setCollected] = useState<{ assetId: string; inventoryId: string } | null>(null);
   const onCollected = useCallback((assetId: string, inventoryId: string) => {
@@ -27,6 +27,7 @@ export function AssetsPage() {
   }, []);
   const detailRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const load = useCallback(
     (signal: AbortSignal) => listAssets(api!, page * 20, signal),
     [api, page],
@@ -43,13 +44,6 @@ export function AssetsPage() {
   const extra = usePollingQuery(api && selectedId && !onPage ? selectedLoad : null, null);
   const selected = onPage ?? (extra.data?.id === selectedId ? extra.data : null);
   useEffect(() => {
-    if (setup && selected) {
-      document.getElementById("collection-title")?.scrollIntoView({ block: "start" });
-      setSetup(false);
-    }
-  }, [setup, selected]);
-
-  useEffect(() => {
     if (selectedId && detailOpen) detailRef.current?.focus({ preventScroll: true });
   }, [selectedId, detailOpen]);
 
@@ -58,11 +52,27 @@ export function AssetsPage() {
     if (triggerRef.current?.isConnected) triggerRef.current.focus({ preventScroll: true });
   }
 
+  function openSetup(assetId: string) {
+    setShowForm(false);
+    setDetailOpen(false);
+    setSelectedId(assetId);
+    setSetup(true);
+  }
+
+  function closeSetup() {
+    if (routeParam("setup") === "ssh") {
+      window.location.replace("#/assets");
+      return;
+    }
+    setSetup(false);
+    setSelectedId(null);
+    titleRef.current?.focus();
+  }
+
   async function submitAsset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!api) return;
-    const form = event.currentTarget;
-    const data = new FormData(form);
+    if (!api || action.pending) return;
+    const data = new FormData(event.currentTarget);
     const payload: AssetCreate = {
       asset_name: String(data.get("asset_name")).trim(),
       host: String(data.get("host")).trim() || null,
@@ -76,16 +86,24 @@ export function AssetsPage() {
     if (
       await action.run(async () => {
         const added = await createAsset(api, payload);
-        setSelectedId(added.id);
-        setSetup(true);
-      }, "자산을 등록했습니다. SSH 연결 설정을 저장한 뒤 연결을 확인하세요.")
+        openSetup(added.id);
+      }, "자산을 등록했습니다.")
     ) {
-      form.reset();
-      setShowForm(false);
       setPage(0);
       query.refresh();
     }
   }
+
+  const collectionPanel = selected && api && (
+    <CollectionPanel
+      key={`ssh-${selected.id}`}
+      api={api}
+      asset={selected}
+      onCollected={onCollected}
+      onProfileSaved={query.refresh}
+      onSetupClose={setup ? closeSetup : undefined}
+    />
+  );
 
   return (
     <>
@@ -107,7 +125,9 @@ export function AssetsPage() {
         <div className="panel-heading">
           <div>
             <div className="section-title">
-              <h2 id="assets-title">관리 자산</h2>
+              <h2 id="assets-title" ref={titleRef} tabIndex={-1}>
+                관리 자산
+              </h2>
               <span
                 className="count"
                 aria-label={total === undefined ? "자산 수 확인 전" : `전체 ${total}개`}
@@ -118,6 +138,11 @@ export function AssetsPage() {
             <p>등록된 자산의 주소와 관리 상태를 확인합니다.</p>
           </div>
           <div className="toolbar-actions">
+            {canWrite && !!total && (
+              <a className="button-link secondary-link" href={workspaceLink()}>
+                <Icon name="workflow" /> 분석 대상 선택
+              </a>
+            )}
             <button
               className="icon-button"
               disabled={!api || query.loading}
@@ -130,7 +155,13 @@ export function AssetsPage() {
             <button
               className="primary"
               disabled={!api || !isAdmin || action.pending}
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => {
+                if (setup) {
+                  setSetup(false);
+                  setSelectedId(null);
+                }
+                setShowForm(!showForm);
+              }}
               aria-expanded={showForm}
             >
               {showForm ? (
@@ -147,7 +178,7 @@ export function AssetsPage() {
           <form id="asset-registration" className="asset-form" onSubmit={submitAsset}>
             <div className="form-heading">
               <strong>새 자산 등록</strong>
-              <span>주소는 등록 정보로만 저장됩니다.</span>
+              <span>저장하면 SSH 연결 설정이 바로 열립니다.</span>
             </div>
             <label>
               자산 이름 <span className="required">필수</span>
@@ -185,11 +216,26 @@ export function AssetsPage() {
                 취소
               </button>
               <button className="primary" disabled={action.pending} type="submit">
-                {action.pending ? "저장 중…" : "자산 저장"}
+                {action.pending ? "저장 중…" : "저장하고 SSH 설정"}
               </button>
             </div>
           </form>
         )}
+        {setup &&
+          (collectionPanel || (
+            <div className="collection-setup-loading">
+              {extra.error ? (
+                <button className="secondary" onClick={extra.refresh}>
+                  자산 다시 불러오기
+                </button>
+              ) : (
+                <p role="status">SSH 연결 설정을 불러오는 중…</p>
+              )}
+              <button className="text-button" onClick={closeSetup}>
+                자산 목록으로
+              </button>
+            </div>
+          ))}
         {assets.length ? (
           <div className={`asset-layout ${selected ? "has-detail" : ""}`}>
             <div className="table-wrap">
@@ -201,7 +247,7 @@ export function AssetsPage() {
                     <th className="asset-extra">예상 Ubuntu</th>
                     <th className="asset-extra">SSH 연결 설정</th>
                     <th className="asset-extra">마지막 분석</th>
-                    <th>상태</th>
+                    <th className="asset-status-col">상태</th>
                     <th>
                       <span className="sr-only">관리</span>
                     </th>
@@ -217,6 +263,7 @@ export function AssetsPage() {
                           aria-label={`${asset.asset_name} 상세 ${selectedId === asset.id && detailOpen ? "닫기" : "보기"}`}
                           onClick={(event) => {
                             triggerRef.current = event.currentTarget;
+                            setSetup(false);
                             setDetailOpen(selectedId !== asset.id || !detailOpen);
                             setSelectedId(asset.id);
                           }}
@@ -248,6 +295,16 @@ export function AssetsPage() {
                       </td>
                       <td>
                         <div className="asset-row-actions">
+                          {isAdmin && asset.is_active && (
+                            <button
+                              type="button"
+                              className="text-button asset-setup-link"
+                              aria-label={`${asset.asset_name} ${asset.ssh_configured ? "SSH 연결 관리" : "SSH 연결 설정"}`}
+                              onClick={() => openSetup(asset.id)}
+                            >
+                              {asset.ssh_configured ? "SSH 연결 관리" : "SSH 연결 설정"}
+                            </button>
+                          )}
                           <a className="asset-open-link" href={`#/workspace?asset=${asset.id}`}>
                             분석 열기 <Icon name="arrow" />
                           </a>
@@ -379,6 +436,7 @@ export function AssetsPage() {
               <button
                 disabled={page === 0}
                 onClick={() => {
+                  setSetup(false);
                   setSelectedId(null);
                   setPage(page - 1);
                 }}
@@ -391,6 +449,7 @@ export function AssetsPage() {
               <button
                 disabled={(page + 1) * 20 >= total!}
                 onClick={() => {
+                  setSetup(false);
                   setSelectedId(null);
                   setPage(page + 1);
                 }}
@@ -401,17 +460,12 @@ export function AssetsPage() {
           </div>
         )}
       </section>
-      {selected && api && (
+      {!setup && selected && api && (
         <>
           {canWrite && (
             <AssetEditor key={`edit-${selected.id}`} asset={selected} onSaved={query.refresh} />
           )}
-          <CollectionPanel
-            key={`ssh-${selected.id}`}
-            api={api}
-            asset={selected}
-            onCollected={onCollected}
-          />
+          {collectionPanel}
           <InventoryPanel
             key={selected.id}
             asset={selected}

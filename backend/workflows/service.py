@@ -2,6 +2,7 @@
 
 import logging
 from datetime import UTC
+from hashlib import sha256
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, load_only
@@ -26,6 +27,7 @@ from backend.models.tables import (
     SourceRecord,
     SourceRun,
     VerificationRun,
+    WorkflowBatchAsset,
     utcnow,
 )
 from backend.sources.http import oracle_url
@@ -93,15 +95,28 @@ def finish(db, run, message=None):
 
 
 def queue_source(db, run, source, scope, parameters):
-    job = Job(
-        kind="SOURCE_SYNC",
-        asset_id=run.asset_id,
-        requested_by=run.requested_by,
-        idempotency_key=f"wf-{run.id}-source-{len(run.sources)}",
+    batch_id = db.scalar(
+        select(WorkflowBatchAsset.batch_id).where(
+            WorkflowBatchAsset.workflow_id == run.id, WorkflowBatchAsset.carried.is_(False)
+        )
     )
-    db.add(job)
-    db.flush()
-    db.add(SourceRun(job_id=job.id, source_id=source, scope_key=scope, parameters=parameters))
+    key = f"wf-{run.id}-source-{len(run.sources)}"
+    job = None
+    if batch_id:
+        # Keep shared jobs independent of a single workflow's cancellation.
+        scope_hash = sha256(f"{source}\0{scope}".encode()).hexdigest()[:40]
+        key = f"batch-{batch_id}-source-{scope_hash}"
+        job = db.scalar(select(Job).where(Job.idempotency_key == key))
+    if job is None:
+        job = Job(
+            kind="SOURCE_SYNC",
+            asset_id=run.asset_id,
+            requested_by=run.requested_by,
+            idempotency_key=key,
+        )
+        db.add(job)
+        db.flush()
+        db.add(SourceRun(job_id=job.id, source_id=source, scope_key=scope, parameters=parameters))
     run.sources = [
         *run.sources,
         {"source": source, "scope": scope, "job_id": job.id, "status": "QUEUED"},
@@ -189,14 +204,17 @@ def settle_sources(db, run):
         snapshot = db.scalar(select(SecuritySnapshot).where(SecuritySnapshot.job_id == job.id))
         state = "UPDATED"
         if snapshot is None:
+            saved = select(SecuritySnapshot).where(
+                SecuritySnapshot.source_id == item["source"],
+                SecuritySnapshot.scope_key == item["scope"],
+            )
+            if job.idempotency_key.startswith("batch-") and job.finished_at:
+                # Assets that reach this stage later use the same fallback cutoff.
+                saved = saved.where(SecuritySnapshot.captured_at <= job.finished_at)
             snapshot = db.scalar(
-                select(SecuritySnapshot)
-                .where(
-                    SecuritySnapshot.source_id == item["source"],
-                    SecuritySnapshot.scope_key == item["scope"],
-                )
-                .order_by(SecuritySnapshot.captured_at.desc(), SecuritySnapshot.id.desc())
-                .limit(1)
+                saved.order_by(
+                    SecuritySnapshot.captured_at.desc(), SecuritySnapshot.id.desc()
+                ).limit(1)
             )
             state = "CACHED" if snapshot else "FAILED"
             detail = f"{iso(snapshot.captured_at)} 저장본 사용" if snapshot else "이전 저장본 없음"

@@ -6,12 +6,61 @@ from sqlalchemy import select
 
 from backend.collectors.ssh_config import check_target, key_path
 from backend.collectors.ssh_protocol import COLLECTOR_VERSION
+from backend.core.audit import audit
 from backend.core.config import get_settings
 from backend.core.errors import AppError
-from backend.models.tables import CollectionRun, Job, ReportRun, utcnow
+from backend.models.tables import (
+    AssetWorkflow,
+    CollectionRun,
+    InventoryRecord,
+    Job,
+    ReportRun,
+    SSHProfile,
+    new_id,
+    utcnow,
+)
 from backend.reports.contracts import TEMPLATE_VERSION
 from backend.reports.snapshot import digest, freeze_report
 from backend.reports.summary import pin_report_input
+
+
+def latest_profile(db, asset_id):
+    return db.scalar(
+        select(SSHProfile)
+        .where(SSHProfile.asset_id == asset_id)
+        .order_by(SSHProfile.created_at.desc(), SSHProfile.id.desc())
+        .limit(1)
+    )
+
+
+def queue_workflow(db, asset, key, inventory_id=None):
+    if not asset.is_active:
+        raise AppError("ASSET_INACTIVE", "비활성 자산입니다.", 409)
+    if db.scalar(select(AssetWorkflow.id).where(AssetWorkflow.active_slot == asset.id)):
+        raise AppError("WORKFLOW_BUSY", "이 자산의 자동 분석이 진행 중입니다.", 409)
+    run = AssetWorkflow(
+        id=new_id(),
+        asset_id=asset.id,
+        requested_by=db.info["principal"].user_id,
+        active_slot=asset.id,
+        request_key=key,
+        mode="saved" if inventory_id else "ssh",
+        timeline={"inventory": utcnow().isoformat()},
+    )
+    if inventory_id:
+        inventory = db.get(InventoryRecord, str(inventory_id))
+        if not inventory or inventory.asset_id != asset.id:
+            raise AppError("INVENTORY_NOT_FOUND", "이 자산의 패키지 기록을 찾을 수 없습니다.", 404)
+        run.inventory_id = inventory.inventory_id
+    else:
+        profile = latest_profile(db, asset.id)
+        if not profile:
+            raise AppError("SSH_PROFILE_REQUIRED", "먼저 자산의 SSH 연결을 설정하세요.", 409)
+        run.collection_id = queue_collection(db, asset, profile, f"wf-{run.id}-inventory").id
+    db.add(run)
+    db.flush()
+    audit(db, "workflow.started", asset_id=asset.id, target_id=run.id, details={"mode": run.mode})
+    return run
 
 
 def queue_collection(db, asset, profile, key, actor=None):

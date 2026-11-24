@@ -21,7 +21,8 @@ from backend.api.schemas.collections import (
 from backend.api.schemas.workflows import ConnectionCheck
 from backend.auth.access import check_admin
 from backend.collectors.ssh_config import allowed_targets, check_target, key_aliases, key_path
-from backend.collectors.ssh_transport import run_ssh_commands
+from backend.collectors.ssh_protocol import make_inventory
+from backend.collectors.ssh_transport import collect_ssh
 from backend.core.audit import audit
 from backend.core.config import get_settings
 from backend.core.errors import AppError
@@ -100,8 +101,15 @@ def check_profile(asset_id: UUID, profile_id: UUID, db: Database):
     if not asset.is_active:
         raise AppError("ASSET_INACTIVE", "비활성 자산입니다.", 409)
     try:
-        # The pinned transport authenticates and closes without running a command.
-        run_ssh_commands(profile, get_settings(), {})
+        results = collect_ssh(profile, get_settings())
+        inventory, _ = make_inventory(asset_id, str(profile_id), results, profile.host_fingerprint)
+        if not inventory.coverage.package_list_complete:
+            raise AppError(
+                "SSH_PACKAGE_CHECK_INCOMPLETE",
+                "SSH 인증은 성공했지만 패키지 목록 전체를 읽지 못했습니다. "
+                "수집 계정과 SSH 설정을 확인하세요.",
+                502,
+            )
     except AppError as exc:
         audit(
             db,
@@ -113,9 +121,20 @@ def check_profile(asset_id: UUID, profile_id: UUID, db: Database):
         )
         db.commit()
         raise
-    audit(db, "ssh_profile.checked", asset_id=asset.id, target_id=profile.id)
+    audit(
+        db,
+        "ssh_profile.checked",
+        asset_id=asset.id,
+        target_id=profile.id,
+        details={"scope": "PACKAGE_READ"},
+    )
     db.commit()
-    return {"verified": True, "checked_at": utcnow()}
+    return {
+        "verified": True,
+        "checked_at": utcnow(),
+        "package_count": len(inventory.packages),
+        "os_release": inventory.os.version_id,
+    }
 
 
 @router.post("/assets/{asset_id}/collections", response_model=CollectionResponse, status_code=202)

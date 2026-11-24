@@ -6,6 +6,7 @@ import { Notice } from "../../shared/components/Notice";
 import { useAction } from "../../shared/hooks/useAction";
 import { usePollingQuery } from "../../shared/hooks/usePollingQuery";
 import { getAsset, listAssets } from "../assets/api";
+import { batchLink } from "../batches/api";
 import { routeParam } from "../workflows/api";
 import type { Asset } from "../assets/api";
 import { listInventories } from "../inventories/api";
@@ -102,6 +103,33 @@ function Pages({
 }
 
 export function FindingsPage() {
+  const { api } = useSession();
+  const finding = routeParam("finding");
+  const batch = routeParam("batch");
+  useEffect(() => {
+    if (api && finding) window.scrollTo(0, 0);
+  }, [api, finding]);
+  if (api && finding) {
+    const back = batch ? batchLink(batch, routeParam("cve")) : "#/findings";
+    return (
+      <>
+        <div className="reader-navigation">
+          <a href={back}>← {batch ? "통합 보고서로" : "분석 이력으로"}</a>
+        </div>
+        <FindingEvidence
+          api={api}
+          id={finding}
+          close={() => {
+            window.location.hash = back;
+          }}
+        />
+      </>
+    );
+  }
+  return <FindingsHistory />;
+}
+
+function FindingsHistory() {
   const { api } = useSession();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [initial] = useState(() => routeParam("analysis"));
@@ -697,7 +725,7 @@ function FindingEvidence({ api, id, close }: { api: HttpClient; id: string; clos
         </button>
       </div>
       <Notice error={query.error} />
-      {!f && <p className="analysis-message">근거를 불러오고 있습니다.</p>}
+      {!f && !query.error && <p className="analysis-message">근거를 불러오고 있습니다.</p>}
       {f && (
         <div className="analysis-detail">
           <div className="analysis-decision">

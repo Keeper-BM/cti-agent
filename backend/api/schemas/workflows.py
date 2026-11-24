@@ -74,6 +74,7 @@ class WorkspaceResponse(BaseModel):
     profile_id: UUID | None
     connection_status: Literal["unconfigured", "configured", "verified", "failed"]
     connection_checked_at: datetime | None
+    connection_check_scope: Literal["AUTH", "PACKAGE_READ"] | None = None
     inventory: InventoryBrief | None
     latest: WorkflowResponse | None
     history: list[AnalysisBrief]
@@ -83,3 +84,5 @@ class WorkspaceResponse(BaseModel):
 class ConnectionCheck(TimestampResponse):
     verified: bool
     checked_at: datetime
+    package_count: int
+    os_release: str

@@ -2,6 +2,7 @@ import copy
 import hashlib
 import io
 import tarfile
+from pathlib import Path
 from types import SimpleNamespace
 
 import httpx
@@ -10,9 +11,35 @@ import zstandard
 
 from backend.core.config import Settings
 from backend.core.errors import AppError
-from backend.verification.archive import ArchiveClient
+from backend.verification.archive import FINGERPRINT, ArchiveClient, verify_signature
 from backend.verification.compare import compare_package
 from backend.verification.deb import inspect_deb
+
+
+@pytest.mark.parametrize("signer", [FINGERPRINT, "A" * 40])
+def test_archive_signature_uses_public_keyring_and_pins_signer(monkeypatch, tmp_path, signer):
+    monkeypatch.setattr("backend.verification.archive.gpg_executable", lambda _: "gpg")
+
+    def run(command, **_):
+        output = Path(command[command.index("--output") + 1])
+        if "--dearmor" in command:
+            assert "--import" not in command
+            output.write_bytes(b"public test keyring")
+            return SimpleNamespace(returncode=0)
+        assert "--no-default-keyring" in command and "--no-auto-key-retrieve" in command
+        keyring = Path(command[command.index("--keyring") + 1])
+        assert keyring.parent == output.parent
+        assert keyring.read_bytes() == b"public test keyring"
+        output.write_text("signed fixture metadata", encoding="utf-8")
+        return SimpleNamespace(returncode=0, stdout=f"[GNUPG:] VALIDSIG {signer} 0\n".encode())
+
+    monkeypatch.setattr("backend.verification.archive.subprocess.run", run)
+    if signer == FINGERPRINT:
+        assert verify_signature(b"fixture", None, tmp_path) == "signed fixture metadata"
+    else:
+        with pytest.raises(AppError) as error:
+            verify_signature(b"fixture", None, tmp_path)
+        assert error.value.code == "ARCHIVE_SIGNATURE_INVALID"
 
 
 def tar_blob(entries, zstd=False):

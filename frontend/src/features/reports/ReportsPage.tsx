@@ -9,6 +9,8 @@ import { listAssets } from "../assets/api";
 import { getAnalysis, listAnalyses } from "../findings/api";
 import { createReport, downloadReport, getReport, listReports } from "./api";
 import { ReportPages, ReportPreview, reportTime } from "./ReportPreview";
+import { BatchHistory, BatchReportReader } from "../batches/BatchReports";
+import { saveMarkdown } from "./download";
 
 const states: Record<string, string> = {
   QUEUED: "생성 대기",
@@ -18,7 +20,9 @@ const states: Record<string, string> = {
 };
 
 export function ReportsPage() {
+  const batch = routeParam("batch");
   const report = routeParam("report");
+  if (batch) return <BatchReportReader id={batch} />;
   return report ? <ReportReader id={report} /> : <ReportLibrary />;
 }
 
@@ -97,6 +101,7 @@ function ReportLibrary() {
         }
         success={action.notice}
       />
+      <BatchHistory />
       <div className="report-asset-filter">
         {" "}
         <label>
@@ -291,13 +296,7 @@ function ReportReader({ id }: { id: string }) {
     if (!api || !detail.data) return;
     const id = detail.data.id;
     await downloadAction.run(async () => {
-      const text = await downloadReport(api, id);
-      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `cti-report-${id}.md`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      saveMarkdown(await downloadReport(api, id), `cti-report-${id}.md`);
     }, "Markdown 보고서 다운로드 완료");
   }
   return (

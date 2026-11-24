@@ -32,7 +32,13 @@ export const listFindings = (
   signal?: AbortSignal,
 ) => api.request<FindingList>(`/findings?${new URLSearchParams(filters)}`, { signal });
 export const getFinding = (api: HttpClient, id: string, signal?: AbortSignal) =>
-  api.request<FindingDetail>(`/findings/${id}`, { signal });
+  api.request<FindingDetail>(`/findings/${encodeURIComponent(id)}`, { signal });
+
+export function findingLink(id: string, batch: string, cve?: string) {
+  const query = new URLSearchParams({ finding: id, batch });
+  if (cve) query.set("cve", cve);
+  return "#/findings?" + query;
+}
 
 export type FindingGroup = components["schemas"]["FindingGroup"];
 export type Verdict = components["schemas"]["Verdict"];
